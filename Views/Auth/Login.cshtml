@@ -1,0 +1,21 @@
+﻿@model Mini_Social_Media.Models.InputModel.LoginInputModel;
+
+@Html.ValidationSummary(false, "", new { @class = "text-danger" })
+<form asp-action="Login" method="post">
+    <div>
+        <label asp-for="UserNameOrEmail"></label>
+        <input asp-for="UserNameOrEmail" />
+        <span asp-validation-for="UserNameOrEmail" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="Password"></label>
+        <input asp-for="Password" type="password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <div>
+        <button type="submit" class="btn btn-primary">Login</button>
+    </div>
+</form>
+<div>
+    <a asp-action="Register" class="btn btn-secondary" >Register</a>
+</div>

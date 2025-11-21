@@ -12,8 +12,8 @@ namespace Mini_Social_Media.Data {
         public DbSet<Hashtag> Hashtags { get; set; }
         public DbSet<PostHashtag> PostHashtags { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-            optionsBuilder.UseSqlite("Data Source=MSMData.db");
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options) {
         }
         protected override void OnModelCreating(ModelBuilder builder) {
             base.OnModelCreating(builder);

@@ -1,11 +1,15 @@
 using Mini_Social_Media.Repository;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 namespace Mini_Social_Media {
     public class Program {
         public static void Main(string[] args) {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -13,6 +17,10 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<ICommentRepository, CommentRepository>();
             builder.Services.AddScoped<ILikeRepository, LikeRepository>();
             builder.Services.AddScoped<IFollowRepository, FollowRepository>();
+
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<ITokenService, TokenService>();
+
 
             builder.Services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options => {
@@ -45,7 +53,7 @@ namespace Mini_Social_Media {
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
+                pattern: "{controller=Auth}/{action=Login}/{id?}")
                 .WithStaticAssets();
 
             app.Run();
