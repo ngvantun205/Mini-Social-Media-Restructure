@@ -9,6 +9,8 @@ namespace Mini_Social_Media.IRepository {
         Task DeleteAsync(int id);
     }
     public interface IUserRepository : IRepository<User> {
+        Task<bool> UserExist(string userName, string email);
+        Task<User?> GetByUserNameOrEmailAsync(string userNameOrEmail);
     }
     public interface IPostRepository : IRepository<Post> {
     }

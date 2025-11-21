@@ -9,7 +9,7 @@ namespace Mini_Social_Media.Repository {
         }
         public async Task<IEnumerable<User>> GetAllAsync() {
             return await _context.Users.ToListAsync();
-        }   
+        }
         public async Task<User?> GetByIdAsync(int id) {
             return await _context.Users.FindAsync(id);
         }
@@ -23,13 +23,20 @@ namespace Mini_Social_Media.Repository {
                 _context.Users.Remove(user);
                 await _context.SaveChangesAsync();
             }
-        }   
+        }
         public async Task UpdateAsync(User entity) {
             var existingUser = await _context.Users.FindAsync(entity.UserId);
             if (existingUser != null) {
                 _context.Entry(existingUser).CurrentValues.SetValues(entity);
                 await _context.SaveChangesAsync();
             }
+        }
+        public async Task<bool> UserExist(string userName, string email) {
+            return await _context.Users.AnyAsync(u => u.UserName == userName || u.Email == email);
+        }
+        public async Task<User?> GetByUserNameOrEmailAsync(string userNameOrEmail) {
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.UserName == userNameOrEmail || u.Email == userNameOrEmail);
         }
     }
 }

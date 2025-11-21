@@ -1,12 +1,10 @@
-using Mini_Social_Media.IRepository;
 using Mini_Social_Media.Repository;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
-namespace Mini_Social_Media
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
+namespace Mini_Social_Media {
+    public class Program {
+        public static void Main(string[] args) {
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllersWithViews();
@@ -16,10 +14,24 @@ namespace Mini_Social_Media
             builder.Services.AddScoped<ILikeRepository, LikeRepository>();
             builder.Services.AddScoped<IFollowRepository, FollowRepository>();
 
+            builder.Services.AddAuthentication("Bearer")
+                .AddJwtBearer("Bearer", options => {
+                    options.TokenValidationParameters = new TokenValidationParameters {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
+                        )
+                    };
+                });
             var app = builder.Build();
 
-            if (!app.Environment.IsDevelopment())
-            {
+            if (!app.Environment.IsDevelopment()) {
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
@@ -27,6 +39,7 @@ namespace Mini_Social_Media
             app.UseHttpsRedirection();
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();

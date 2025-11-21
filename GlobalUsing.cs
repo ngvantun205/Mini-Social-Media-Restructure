@@ -4,3 +4,6 @@ global using Mini_Social_Media.Models.DomainModel;
 global using Mini_Social_Media.Models.ViewModel;
 global using Mini_Social_Media.Models.InputModel;
 global using Mini_Social_Media.Data;
+global using Mini_Social_Media.DTO;
+global using Mini_Social_Media.IAppService;
+global using Mini_Social_Media.AppService;

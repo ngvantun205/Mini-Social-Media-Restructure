@@ -14,5 +14,12 @@ namespace Mini_Social_Media.Models.InputModel {
         [Required, Compare("Password")]
         public string ConfirmPassword { get; set; } = "";
     }
+    public class LoginInputModel {
+        [Required]
+        public string? UserNameOrEmail { get; set; }
+
+        [Required, MinLength(6)]
+        public string? Password { get; set; }
+    }
 
 }
