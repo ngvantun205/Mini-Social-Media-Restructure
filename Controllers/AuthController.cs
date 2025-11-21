@@ -9,6 +9,8 @@ namespace Mini_Social_Media.Controllers {
         }
         [HttpGet]
         public IActionResult Login() {
+            var userId = User.FindFirst("userId")?.Value;
+            Console.WriteLine($"Log Information User ID: {userId}");
             return View();
         }
         [HttpPost]
@@ -43,6 +45,10 @@ namespace Mini_Social_Media.Controllers {
                 return View(model); 
             }
             var result = await _authService.RegisterAsync(model);
+            if (!string.IsNullOrEmpty(result.ErrorMessage)) {
+                ModelState.AddModelError("", result.ErrorMessage);
+                return View(model);
+            }
             return RedirectToAction("Login", "Auth");
         }
         [HttpGet]

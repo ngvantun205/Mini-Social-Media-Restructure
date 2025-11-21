@@ -1,5 +1,6 @@
 ﻿@model Mini_Social_Media.Models.InputModel.RegisterInputModel;
 
+@Html.ValidationSummary(false, "", new { @class = "text-danger" })
 <form asp-action="Register" method="post">
     <div>
         <label asp-for="UserName"></label>

@@ -1,0 +1,22 @@
+﻿@model Mini_Social_Media.Models.InputModel.PostInputModel;
+
+<form asp-controller="Post" asp-action="CreatePost" method="post">
+    
+    <div>
+        <label for="Caption">Caption</label>
+        <input asp-for="Caption" />
+    </div>
+    <div>
+        <label for="Location">Location</label>
+        <input asp-for="Location" />
+    </div>
+    <div>
+        <label for="MediaFiles">Media Files</label>
+        <input asp-for="MediaFiles" type="file" multiple />
+    </div>
+    <div>
+        <label for="Hashtags">Hashtags</label>
+        <input asp-for="Hashtags" />
+    </div>
+    <button type="submit">Create Post</button>
+</form>

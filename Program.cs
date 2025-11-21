@@ -1,12 +1,16 @@
-using Mini_Social_Media.Repository;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using CloudinaryDotNet;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Mini_Social_Media.Repository;
+using System.Text;
 
 namespace Mini_Social_Media {
     public class Program {
         public static void Main(string[] args) {
             var builder = WebApplication.CreateBuilder(args);
+            var cloudinarySettings = builder.Configuration.GetSection("CloudinarySettings");
 
             builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -20,7 +24,8 @@ namespace Mini_Social_Media {
 
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
-
+            builder.Services.AddScoped<IPostService, PostService>();
+            builder.Services.AddScoped<IUploadService, UploadService>();
 
             builder.Services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options => {
@@ -36,7 +41,28 @@ namespace Mini_Social_Media {
                             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
                         )
                     };
+                    options.Events = new JwtBearerEvents {
+                        OnMessageReceived = context =>
+                        {
+                            context.Token = context.Request.Cookies["jwt"];
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
+            builder.Services.AddSingleton(x =>
+            {
+                var config = cloudinarySettings.Get<CloudinarySettings>();
+                return new Cloudinary(new Account(
+                    config.CloudName,
+                    config.ApiKey,
+                    config.ApiSecret
+                ));
+            });
+            builder.Services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 1024 * 1024 * 50; // 50MB
+            });
+
             var app = builder.Build();
 
             if (!app.Environment.IsDevelopment()) {

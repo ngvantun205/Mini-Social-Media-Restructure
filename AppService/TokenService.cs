@@ -12,10 +12,9 @@ public class TokenService : ITokenService {
     }
 
     public string GenerateToken(User user) {
-        var claims = new[]
-        {
-            new Claim("userId", user.UserId.ToString()),
-            new Claim("userName", user.UserName)
+        var claims = new List<Claim> {
+            new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+            new Claim(ClaimTypes.Name, user.UserName)
         };
 
         var key = new SymmetricSecurityKey(

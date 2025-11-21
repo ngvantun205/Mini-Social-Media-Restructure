@@ -9,7 +9,7 @@
         }
         public async Task<RegisterDto> RegisterAsync(RegisterInputModel model) {
             if (await _userRepository.UserExist(model.UserName, model.Email)) {
-                throw new Exception("User already exists.");
+                return new RegisterDto { ErrorMessage = "Username or Email already exists." };
             }
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
             var user = new User {

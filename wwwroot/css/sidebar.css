@@ -1,0 +1,60 @@
+﻿.ig-sidebar {
+    width: 260px;
+    height: 100vh;
+    border-right: 1px solid #e5e5e5;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: #fff;
+    display: flex;
+}
+
+.ig-sidebar-inner {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 12px;
+    width: 100%;
+}
+
+.ig-logo-text {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    padding-left: 12px;
+}
+
+.ig-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #222;
+    text-decoration: none;
+    transition: 0.15s ease;
+}
+
+    .ig-item:hover {
+        background: #f2f2f2;
+    }
+
+    .ig-item i {
+        font-size: 22px;
+    }
+
+.ig-avatar {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+}
+
+.ig-item.active {
+    font-weight: 600;
+}
+
+.ig-main {
+    margin-left: 260px;
+    padding: 25px;
+}
