@@ -2,52 +2,58 @@
     <div class="ig-sidebar-inner">
 
         <div class="ig-logo">
-            <span class="ig-logo-text">Instagram</span>
+            <span class="ig-logo-text">MiniSocial</span>
         </div>
 
-        <a class="ig-item active" href="/">
-            <i class="bi bi-house-door"></i>
+        <a class="ig-item active" href="/" data-tooltip="Home">
+            <i class="bi bi-house-door-fill"></i>
             <span>Home</span>
         </a>
 
-        <a class="ig-item" href="#">
+        <a class="ig-item" href="#" data-tooltip="Search">
             <i class="bi bi-search"></i>
             <span>Search</span>
         </a>
 
-        <a class="ig-item" href="#">
+        <a class="ig-item" href="#" data-tooltip="Explore">
             <i class="bi bi-compass"></i>
             <span>Explore</span>
         </a>
 
-        <a class="ig-item" href="#">
+        <a class="ig-item" href="#" data-tooltip="Reels">
             <i class="bi bi-play-btn"></i>
             <span>Reels</span>
         </a>
 
-        <a class="ig-item" href="#">
+        <a class="ig-item" href="#" data-tooltip="Messages">
             <i class="bi bi-chat-dots"></i>
             <span>Messages</span>
         </a>
 
-        <a class="ig-item" href="#">
+        <a class="ig-item" href="#" data-tooltip="Notifications">
             <i class="bi bi-heart"></i>
             <span>Notifications</span>
         </a>
 
-        <a class="ig-item" asp-controller="Post" asp-action="CreatePost">
+        <a class="ig-item" asp-controller="Post" asp-action="CreatePost" data-tooltip="Create">
             <i class="bi bi-plus-square"></i>
             <span>Create</span>
         </a>
 
-        <a class="ig-item" href="/profile">
-            <img class="ig-avatar" src="/images/avatar.png" />
+        <a class="ig-item" href="/profile" data-tooltip="Profile">
+            <img class="ig-avatar" src="/images/avatar.png" alt="Profile" />
             <span>Profile</span>
         </a>
 
-        <div class="ig-item" style="margin-top: auto;">
-            <i class="bi bi-list"></i>
-            <span>More</span>
+        <div class="ig-sidebar-bottom">
+            <div class="ig-item" data-tooltip="More">
+                <i class="bi bi-list"></i>
+                <span>More</span>
+            </div>
+            <a class="ig-item" asp-controller="Auth" asp-action="Logout" data-tooltip="Log out">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Log out</span>
+            </a>
         </div>
     </div>
 </nav>

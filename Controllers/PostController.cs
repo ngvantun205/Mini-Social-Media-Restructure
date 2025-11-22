@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace Mini_Social_Media.Controllers {
     public class PostController : Controller {
@@ -15,9 +15,21 @@ namespace Mini_Social_Media.Controllers {
             return View();
         }
         [HttpPost]
+        [RequestSizeLimit(1073741824)]
+        [RequestFormLimits(MultipartBodyLengthLimit = 1073741824)]
         public async Task<IActionResult> CreatePost(PostInputModel model) {
             if (!ModelState.IsValid) {
-                return View(model);
+                Console.WriteLine("------------------------------------------------------------------------------------------------------------------");
+                var errors = ModelState.Values.SelectMany(v => v.Errors);
+                foreach (var error in errors) {
+                    Console.WriteLine("Lỗi: " + error.ErrorMessage);
+                    if (error.Exception != null) {
+                        Console.WriteLine("Exception: " + error.Exception.Message);
+                    }
+                }
+                Console.WriteLine("------------------------------------------------------------------------------------------------------------------");
+
+                return View();
             }
             int userId = int.Parse(_userManager.GetUserId(User));
             Console.WriteLine("User ID: " + userId);
@@ -57,15 +69,17 @@ namespace Mini_Social_Media.Controllers {
                 Caption = post.Caption,
                 Location = post.Location,
                 Hashtags = post.Hashtags,
-                MediaFiles = post.MediaUrls?.ToList() ?? new List<string>()
+                MediaFiles = post.MediaUrls?.Where(x => !string.IsNullOrEmpty(x)).ToList() ?? new List<string>()
             };
             return View(model);
         }
         [HttpPost]
+        [RequestSizeLimit(1073741824)]
+        [RequestFormLimits(MultipartBodyLengthLimit = 1073741824)]
         public async Task<IActionResult> EditPost(EditPostInputModel model) {
-            if (!ModelState.IsValid)
-                return View(model);
-
+            if (!ModelState.IsValid) {
+                return RedirectToAction("PostDetails", new { id = model.PostId });
+            }
             int userId = int.Parse(_userManager.GetUserId(User));
             await _postService.EditPostAsync(model, userId);
 

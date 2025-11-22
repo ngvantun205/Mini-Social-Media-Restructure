@@ -1,83 +1,179 @@
 ﻿@model EditPostViewModel
 
-<form asp-controller="Post" asp-action="EditPost" method="post" enctype="multipart/form-data">
+<!-- Include CSS -->
+<link rel="stylesheet" href="~/css/edit-post.css" />
 
-    <!-- Post Id -->
-    <input type="hidden" name="PostId" value="@Model.PostId" />
+<!-- Particles Background -->
+<div id="particles-js"></div>
 
-    <!-- Hidden để chứa danh sách media bị xoá -->
-    <input type="hidden" id="RemovedMedia" name="RemovedMedia" />
+<div class="edit-post-wrapper">
+    <div class="edit-post-card">
+        <div class="card-header">
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Edit Post
+            </h2>
+            <p class="subtitle">Update your post details and media</p>
+        </div>
 
-    <div class="mb-3">
-        <label>Caption</label>
-        <input asp-for="Caption" class="form-control" />
-    </div>
+        <form asp-controller="Post" asp-action="EditPost" method="post" enctype="multipart/form-data" id="editPostForm">
 
-    <div class="mb-3">
-        <label>Location</label>
-        <input asp-for="Location" class="form-control" />
-    </div>
+            <!-- Post Id -->
+            <input type="hidden" name="PostId" value="@Model.PostId" />
 
-    <div class="mb-3">
-        <label>Hashtags</label>
-        <input asp-for="Hashtags" class="form-control" />
-    </div>
+            <!-- Hidden để chứa danh sách media bị xoá -->
+            <input type="hidden" id="RemovedMedia" name="RemovedMedia" />
 
-    <div class="mb-3">
-        <label>Current Media</label>
-        <div>
-            @foreach (var media in Model.MediaFiles) {
-                var mediaId = "media_" + media.GetHashCode();
+            <!-- Caption -->
+            <div class="form-group">
+                <label asp-for="Caption">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Caption
+                </label>
+                <textarea asp-for="Caption" class="form-control" rows="3" placeholder="Write a caption..."></textarea>
+            </div>
 
-                <div id="@mediaId" style="display:inline-block; margin-right:15px; margin-bottom:10px;">
+            <!-- Location -->
+            <div class="form-group">
+                <label asp-for="Location">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    Location
+                </label>
+                <input asp-for="Location" class="form-control" placeholder="Add location..." />
+            </div>
 
-                    @* Hiển thị media *@
-                    @if (media.EndsWith(".mp4")) {
-                        <video src="@media" width="200" controls></video>
-                    }
-                    else {
-                        <img src="@media" width="200" />
-                    }
+            <!-- Hashtags -->
+            <div class="form-group">
+                <label asp-for="Hashtags">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="4" y1="9" x2="20" y2="9"></line>
+                        <line x1="4" y1="15" x2="20" y2="15"></line>
+                        <line x1="10" y1="3" x2="8" y2="21"></line>
+                        <line x1="16" y1="3" x2="14" y2="21"></line>
+                    </svg>
+                    Hashtags
+                </label>
+                <input asp-for="Hashtags" class="form-control" placeholder="#hashtag1 #hashtag2..." />
+            </div>
 
-                    @* Hidden để gửi media đang tồn tại *@
-                    <input type="hidden" name="ExistingMedia" value="@media" />
+            <!-- Current Media -->
+            @if (Model.MediaFiles != null && Model.MediaFiles.Count > 0) {
+                <div class="form-group">
+                    <label class="section-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                        Current Media
+                        <span class="media-count">(@Model.MediaFiles.Count)</span>
+                    </label>
 
-                    @* Nút xoá *@
-                    <button type="button"
-                            class="btn btn-danger btn-sm d-block mt-1"
-                            onclick="removeMedia('@media', '@mediaId')">
-                        Remove
-                    </button>
+                    <div class="media-grid" id="mediaGrid">
+                        @foreach (var media in Model.MediaFiles) {
+                            var mediaId = "media_" + media.GetHashCode();
 
+                            <div class="media-item" id="@mediaId" data-url="@media">
+                                <div class="media-container">
+                                    @if (media.EndsWith(".mp4") || media.EndsWith(".MP4")) {
+                                        <video src="@media" class="media-content"></video>
+                                        <div class="video-overlay">
+                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="white">
+                                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                            </svg>
+                                        </div>
+                                    }
+                                    else {
+                                        <img src="@media" class="media-content" alt="Post media" />
+                                    }
+
+                                    <button type="button"
+                                            class="remove-btn"
+                                            onclick="removeMedia('@media', '@mediaId')"
+                                            title="Remove media">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <input type="hidden" name="ExistingMedia" value="@media" />
+                            </div>
+                        }
+                    </div>
                 </div>
             }
-        </div>
+
+            <!-- Add New Media -->
+            <div class="form-group">
+                <label class="section-label">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    Add New Media
+                </label>
+
+                <div class="file-upload-wrapper">
+                    <input name="NewMediaFiles"
+                           type="file"
+                           multiple
+                           accept="image/*,video/*"
+                           class="file-input"
+                           id="newMediaInput"
+                           onchange="previewNewMedia(this)" />
+                    <label for="newMediaInput" class="file-upload-label">
+                        <div class="upload-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                        </div>
+                        <p class="upload-text">Click to upload or drag and drop</p>
+                        <p class="upload-subtext">Images or videos (Max 10 files)</p>
+                    </label>
+                </div>
+
+                <div id="newMediaPreview" class="media-grid" style="margin-top: 15px;"></div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Save Changes
+                </button>
+            </div>
+
+        </form>
     </div>
+</div>
 
-    <div class="mb-3">
-        <label>Add New Media</label>
-        <input name="NewMediaFiles" type="file" multiple class="form-control" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Save Changes</button>
-
-</form>
+<!-- Particles.js CDN -->
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 
 @section Scripts {
-    <script>
-        let removed = [];
-
-        function removeMedia(url, elementId) {
-
-            // thêm URL vào danh sách bị xoá
-            removed.push(url);
-            document.getElementById("RemovedMedia").value = removed.join(",");
-
-            // Ẩn media khỏi giao diện
-            let el = document.getElementById(elementId);
-            if (el) {
-                el.style.display = "none";   // biến mất hoàn toàn
-            }
-        }
-    </script>
+    <script src="~/js/edit-post.js"></script>
 }

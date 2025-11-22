@@ -127,10 +127,6 @@
             }
 
             if (model.RemovedMedia != null) {
-                Console.WriteLine("--------------------------------------------------------------------------------------------");
-                foreach (var item in model.RemovedMedia)
-                    Console.WriteLine($"Url to delete: {item}");
-                Console.WriteLine("--------------------------------------------------------------------------------------------");
                 var updatedMedia = model.ExistingMedia
                     .Where(url => !model.RemovedMedia.Contains(url))
                     .ToList();

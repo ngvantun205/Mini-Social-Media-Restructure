@@ -1,25 +1,35 @@
-﻿@model Mini_Social_Media.Models.InputModel.LoginInputModel;
+﻿@model Mini_Social_Media.Models.InputModel.LoginInputModel
+
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Login";
+}
+
+<h2>Welcome Back</h2>
 
 @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+
 <form asp-action="Login" method="post">
     <div>
-        <label asp-for="UserNameOrEmail"></label>
-        <input asp-for="UserNameOrEmail" />
+        <label asp-for="UserNameOrEmail">Username or Email</label>
+        <input asp-for="UserNameOrEmail" placeholder="Enter your username or email" />
         <span asp-validation-for="UserNameOrEmail" class="text-danger"></span>
     </div>
     <div>
-        <label asp-for="Password"></label>
-        <input asp-for="Password" type="password" />
+        <label asp-for="Password">Password</label>
+        <input asp-for="Password" type="password" placeholder="Enter your password" />
         <span asp-validation-for="Password" class="text-danger"></span>
     </div>
     <div>
-        <label for="RememberMe">Remember Me</label>
         <input type="checkbox" id="RememberMe" name="RememberMe" />
+        <label for="RememberMe">Remember Me</label>
     </div>
     <div>
         <button type="submit" class="btn btn-primary">Login</button>
     </div>
 </form>
+
 <div>
-    <a asp-action="Register" class="btn btn-secondary" >Register</a>
+    <span>Don't have an account?</span>
+    <a asp-action="Register" class="text-link">Register</a>
 </div>

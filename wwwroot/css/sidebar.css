@@ -1,4 +1,20 @@
-﻿.ig-sidebar {
+﻿/* Reset body and html */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+/* Sidebar Container */
+.ig-sidebar {
     width: 260px;
     height: 100vh;
     border-right: 1px solid #e5e5e5;
@@ -7,8 +23,11 @@
     left: 0;
     background: #fff;
     display: flex;
+    z-index: 100;
+    transition: all 0.3s ease;
 }
 
+/* Sidebar Inner */
 .ig-sidebar-inner {
     display: flex;
     flex-direction: column;
@@ -16,45 +35,304 @@
     width: 100%;
 }
 
-.ig-logo-text {
-    font-size: 32px;
-    font-weight: 700;
-    margin-bottom: 30px;
-    padding-left: 12px;
+/* Logo */
+.ig-logo {
+    padding: 12px;
+    margin-bottom: 20px;
 }
 
+.ig-logo-text {
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+}
+
+/* Menu Items */
 .ig-item {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 12px;
+    gap: 16px;
+    padding: 14px 12px;
     border-radius: 12px;
     cursor: pointer;
     font-size: 16px;
-    color: #222;
+    color: #333;
     text-decoration: none;
-    transition: 0.15s ease;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 4px;
 }
+
+    .ig-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 3px;
+        height: 100%;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        transform: scaleY(0);
+        transition: transform 0.2s ease;
+    }
 
     .ig-item:hover {
-        background: #f2f2f2;
+        background: linear-gradient(90deg, rgba(79, 172, 254, 0.08) 0%, rgba(0, 242, 254, 0.05) 100%);
+        transform: translateX(2px);
     }
+
+        .ig-item:hover::before {
+            transform: scaleY(1);
+        }
 
     .ig-item i {
-        font-size: 22px;
+        font-size: 24px;
+        color: #333;
+        transition: all 0.2s ease;
+        min-width: 24px;
+        text-align: center;
     }
 
+    .ig-item:hover i {
+        color: #4facfe;
+        transform: scale(1.1);
+    }
+
+    .ig-item span {
+        font-weight: 500;
+    }
+
+    /* Active State */
+    .ig-item.active {
+        background: linear-gradient(90deg, rgba(79, 172, 254, 0.12) 0%, rgba(0, 242, 254, 0.08) 100%);
+        font-weight: 600;
+        color: #4facfe;
+    }
+
+        .ig-item.active::before {
+            transform: scaleY(1);
+        }
+
+        .ig-item.active i {
+            color: #4facfe;
+            font-weight: 700;
+        }
+
+/* Avatar */
 .ig-avatar {
-    width: 25px;
-    height: 25px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    object-fit: cover;
 }
 
-.ig-item.active {
-    font-weight: 600;
+.ig-item:hover .ig-avatar {
+    border-color: #4facfe;
+    transform: scale(1.05);
 }
 
+.ig-item.active .ig-avatar {
+    border-color: #4facfe;
+    box-shadow: 0 0 0 2px rgba(79, 172, 254, 0.2);
+}
+
+/* Bottom Section */
+.ig-sidebar-bottom {
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid #e5e5e5;
+}
+
+/* Logout Button Special Style */
+.ig-item[href*="Logout"],
+.ig-item[asp-action="Logout"] {
+    color: #e74c3c;
+}
+
+    .ig-item[href*="Logout"]:hover,
+    .ig-item[asp-action="Logout"]:hover {
+        background: rgba(231, 76, 60, 0.08);
+    }
+
+    .ig-item[href*="Logout"] i,
+    .ig-item[asp-action="Logout"] i {
+        color: #e74c3c;
+    }
+
+    .ig-item[href*="Logout"]:hover i,
+    .ig-item[asp-action="Logout"]:hover i {
+        color: #c0392b;
+    }
+
+    .ig-item[href*="Logout"]::before,
+    .ig-item[asp-action="Logout"]::before {
+        background: #e74c3c;
+    }
+
+/* Main Content Area */
 .ig-main {
     margin-left: 260px;
     padding: 25px;
+    min-height: 100vh;
+    background: #fafafa;
+    transition: margin-left 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Scrollbar Styling */
+.ig-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ig-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.ig-sidebar::-webkit-scrollbar-thumb {
+    background: #d0d0d0;
+    border-radius: 3px;
+}
+
+    .ig-sidebar::-webkit-scrollbar-thumb:hover {
+        background: #b0b0b0;
+    }
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .ig-sidebar {
+        width: 72px;
+    }
+
+    .ig-logo-text {
+        font-size: 24px;
+    }
+
+    .ig-item span {
+        display: none;
+    }
+
+    .ig-item {
+        justify-content: center;
+        padding: 14px;
+    }
+
+        .ig-item i {
+            margin: 0;
+        }
+
+    .ig-sidebar-bottom {
+        border-top: none;
+    }
+
+    .ig-main {
+        margin-left: 72px;
+    }
+}
+
+@media (max-width: 768px) {
+    .ig-sidebar {
+        width: 100%;
+        height: auto;
+        bottom: 0;
+        top: auto;
+        border-right: none;
+        border-top: 1px solid #e5e5e5;
+    }
+
+    .ig-sidebar-inner {
+        flex-direction: row;
+        padding: 8px;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .ig-logo {
+        display: none;
+    }
+
+    .ig-item {
+        flex-direction: column;
+        gap: 4px;
+        padding: 8px 12px;
+        margin-bottom: 0;
+        min-width: 60px;
+    }
+
+        .ig-item span {
+            display: block;
+            font-size: 11px;
+        }
+
+        .ig-item i {
+            font-size: 20px;
+        }
+
+    .ig-sidebar-bottom {
+        display: flex;
+        gap: 4px;
+        border-top: none;
+        margin-top: 0;
+        padding-top: 0;
+    }
+
+    .ig-main {
+        margin-left: 0;
+        margin-bottom: 60px;
+        padding: 15px;
+    }
+}
+
+/* Animation for page load */
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.ig-sidebar {
+    animation: slideInLeft 0.4s ease-out;
+}
+
+/* Tooltip for collapsed sidebar */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .ig-item {
+        position: relative;
+    }
+
+        .ig-item:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #333;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            white-space: nowrap;
+            margin-left: 12px;
+            opacity: 0;
+            animation: fadeIn 0.2s ease forwards;
+            z-index: 1000;
+        }
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
 }

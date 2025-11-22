@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Mini Social</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="~/css/auth-modern.css" />
+    <link href="~/css/create-post.css" rel="stylesheet" />
+</head>
+<body>
+    <!-- Particles Background -->
+    <div id="particles-js"></div>
+
+    <!-- Auth Wrapper -->
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            @RenderBody()
+        </div>
+    </div>
+
+    <!-- Particles.js Library -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
+    <!-- Custom Animation Script -->
+    <script src="~/js/auth-animation.js"></script>
+
+    <!-- Render additional scripts if defined -->
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
