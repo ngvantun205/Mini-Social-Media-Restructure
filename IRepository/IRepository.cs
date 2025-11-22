@@ -24,4 +24,8 @@ namespace Mini_Social_Media.IRepository {
         Task<bool> IsExist(string hashtagName);
         Task<Hashtag?> GetByNameAsync(string hashtagName);
     }
+    public interface IPostMediaRepository : IRepository<PostMedia> {
+        Task<PostMedia?> GetByUrlAsync(string url);
+        Task RemoveRangeAsync(IEnumerable<PostMedia> postMedias);
+    }
 }

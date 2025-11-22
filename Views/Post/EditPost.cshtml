@@ -2,40 +2,82 @@
 
 <form asp-controller="Post" asp-action="EditPost" method="post" enctype="multipart/form-data">
 
-    <input type="hidden" name="postId" value="@Model.PostId" />
+    <!-- Post Id -->
+    <input type="hidden" name="PostId" value="@Model.PostId" />
 
-    <div>
+    <!-- Hidden để chứa danh sách media bị xoá -->
+    <input type="hidden" id="RemovedMedia" name="RemovedMedia" />
+
+    <div class="mb-3">
         <label>Caption</label>
         <input asp-for="Caption" class="form-control" />
     </div>
 
-    <div>
+    <div class="mb-3">
         <label>Location</label>
         <input asp-for="Location" class="form-control" />
     </div>
 
-    <div>
+    <div class="mb-3">
         <label>Hashtags</label>
         <input asp-for="Hashtags" class="form-control" />
     </div>
 
-    <div>
+    <div class="mb-3">
         <label>Current Media</label>
-        @foreach (var media in Model.MediaFiles) {
-            if (media.EndsWith(".mp4")) {
-                <video src="@media" width="200" controls></video>
+        <div>
+            @foreach (var media in Model.MediaFiles) {
+                var mediaId = "media_" + media.GetHashCode();
+
+                <div id="@mediaId" style="display:inline-block; margin-right:15px; margin-bottom:10px;">
+
+                    @* Hiển thị media *@
+                    @if (media.EndsWith(".mp4")) {
+                        <video src="@media" width="200" controls></video>
+                    }
+                    else {
+                        <img src="@media" width="200" />
+                    }
+
+                    @* Hidden để gửi media đang tồn tại *@
+                    <input type="hidden" name="ExistingMedia" value="@media" />
+
+                    @* Nút xoá *@
+                    <button type="button"
+                            class="btn btn-danger btn-sm d-block mt-1"
+                            onclick="removeMedia('@media', '@mediaId')">
+                        Remove
+                    </button>
+
+                </div>
             }
-            else {
-                <img src="@media" width="200" style="margin-right:10px" />
-            }
-        }
+        </div>
     </div>
 
-    <div>
+    <div class="mb-3">
         <label>Add New Media</label>
-        <input name="MediaFiles" type="file" multiple />
+        <input name="NewMediaFiles" type="file" multiple class="form-control" />
     </div>
 
-    <button type="submit" class="btn btn-secondary">Save Changes</button>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
 
 </form>
+
+@section Scripts {
+    <script>
+        let removed = [];
+
+        function removeMedia(url, elementId) {
+
+            // thêm URL vào danh sách bị xoá
+            removed.push(url);
+            document.getElementById("RemovedMedia").value = removed.join(",");
+
+            // Ẩn media khỏi giao diện
+            let el = document.getElementById(elementId);
+            if (el) {
+                el.style.display = "none";   // biến mất hoàn toàn
+            }
+        }
+    </script>
+}

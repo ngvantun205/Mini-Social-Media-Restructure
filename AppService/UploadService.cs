@@ -1,5 +1,6 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using System.Security.Cryptography;
 
 namespace Mini_Social_Media.AppService {
     public class UploadService : IUploadService {
@@ -10,32 +11,37 @@ namespace Mini_Social_Media.AppService {
         }
 
         public async Task<string?> UploadAsync(IFormFile file) {
-            if (file == null || file.Length == 0) {
-                Console.WriteLine("❌ File rỗng hoặc không tồn tại");
+            if (file == null || file.Length == 0)
+                return null;
+
+            string fileHash = ComputeFileHash(file);
+
+            var uploadParams = new ImageUploadParams() {
+                File = new FileDescription(file.FileName, file.OpenReadStream()),
+                PublicId = fileHash,
+                Overwrite = false
+            };
+
+            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+            if (uploadResult.Error != null) {
+                if (uploadResult.Error.Message.Contains("already exists")) {
+                    Console.WriteLine("⚠️ File đã tồn tại trên Cloudinary");
+                    return _cloudinary.Api.UrlImgUp.BuildUrl($"{fileHash}.jpg");
+                }
+
+                Console.WriteLine("❌ Lỗi upload: " + uploadResult.Error.Message);
                 return null;
             }
 
-            using (var stream = file.OpenReadStream()) {
-                var uploadParams = new ImageUploadParams() {
-                    File = new FileDescription(file.FileName, stream)
-                };
+            return uploadResult.SecureUrl.ToString();
+        }
 
-                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-
-                if (uploadResult == null) {
-                    Console.WriteLine("❌ uploadResult null → Upload thất bại");
-                    return null;
-                }
-
-                if (uploadResult.Error != null) {
-                    Console.WriteLine("❌ Cloudinary Error: " + uploadResult.Error.Message);
-                    return null;
-                }
-
-                Console.WriteLine("✅ Upload thành công → URL: " + uploadResult.SecureUrl);
-
-                return uploadResult.SecureUrl?.ToString();
-            }
+        public string ComputeFileHash(IFormFile file) {
+            using var sha = SHA256.Create();
+            using var stream = file.OpenReadStream();
+            var hashBytes = sha.ComputeHash(stream);
+            return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
         }
 
     }

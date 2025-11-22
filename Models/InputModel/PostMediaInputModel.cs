@@ -5,7 +5,7 @@ namespace Mini_Social_Media.Models.InputModel {
         [Required]
         public List<IFormFile> Files { get; set; } = new List<IFormFile>();
         [Required]
-        public string MediaType { get; set; } = "";
+        public string? MediaType { get; set; } 
     }
 
 }

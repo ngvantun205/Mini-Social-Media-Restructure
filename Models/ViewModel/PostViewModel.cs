@@ -12,6 +12,6 @@ namespace Mini_Social_Media.Models.ViewModel {
         public DateTime CreatedAt { get; set; }
         public List<PostMediaViewModel> Medias { get; set; } = new List<PostMediaViewModel>();
         public List<CommentViewModel> Comments { get; set; } = new List<CommentViewModel>();
-        public List<string> Hashtags { get; set; } = new List<string>();
+        public string? Hashtags { get; set; }
     }
 }

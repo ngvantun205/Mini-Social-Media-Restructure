@@ -39,7 +39,8 @@ namespace Mini_Social_Media.Controllers {
                 Medias = post.MediaUrls?.Select(url => new PostMediaViewModel {
                     Url = url,
                     MediaType = url.EndsWith(".mp4") ? "video" : "image"
-                }).ToList() ?? new List<PostMediaViewModel>()
+                }).ToList() ?? new List<PostMediaViewModel>(),
+                Hashtags = post.Hashtags,
             };
             if (post == null)
                 return NotFound();
@@ -48,7 +49,6 @@ namespace Mini_Social_Media.Controllers {
         }
         [HttpGet]
         public async Task<IActionResult> EditPost(int postId) {
-            Console.WriteLine($"Editing post with ID: {postId}");
             var post = await _postService.GetByIdAsync(postId);
             var model = new EditPostViewModel {
                 PostId = post.PostId,
@@ -63,9 +63,6 @@ namespace Mini_Social_Media.Controllers {
         public async Task<IActionResult> EditPost(EditPostInputModel model) {
             if (!ModelState.IsValid)
                 return View(model);
-            Console.WriteLine($"Received edit for post ID: {model.PostId}");
-            Console.WriteLine($"New Caption: {model.Caption}");
-            Console.WriteLine($"New Location: {model.Location}");
 
             int userId = int.Parse(_userManager.GetUserId(User));
             await _postService.EditPostAsync(model, userId);
