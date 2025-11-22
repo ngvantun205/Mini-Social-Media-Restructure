@@ -21,6 +21,7 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<ICommentRepository, CommentRepository>();
             builder.Services.AddScoped<ILikeRepository, LikeRepository>();
             builder.Services.AddScoped<IFollowRepository, FollowRepository>();
+            builder.Services.AddScoped<IHashtagRepository, HashtagRepository>();
 
             builder.Services.AddScoped<IPostService, PostService>();
             builder.Services.AddScoped<IUploadService, UploadService>();

@@ -1,7 +1,6 @@
 ﻿@model Mini_Social_Media.Models.InputModel.PostInputModel;
 
-<form asp-controller="Post" asp-action="CreatePost" method="post">
-    
+<form asp-controller="Post" asp-action="CreatePost" method="post" enctype="multipart/form-data">
     <div>
         <label for="Caption">Caption</label>
         <input asp-for="Caption" />

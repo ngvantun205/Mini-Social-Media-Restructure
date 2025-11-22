@@ -3,6 +3,6 @@
         public string? Caption { get; set; }
         public string? Location { get; set; }
         public List<IFormFile>? MediaFiles { get; set; }
-        public List<string>? Hashtags { get; set; }
+        public string? Hashtags { get; set; }
     }
 }

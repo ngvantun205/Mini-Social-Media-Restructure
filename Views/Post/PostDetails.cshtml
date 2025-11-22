@@ -1,8 +1,22 @@
-﻿@model Mini_Social_Media.DTO.PostDto;   
+﻿@model PostViewModel
 
-<h2>Post</h2>
-<p>@Model.Caption</p>
+<h2>@Model.Caption</h2>
 <p>@Model.Location</p>
-<p>Likes: @Model.LikeCount</p>
-<p>Comments: @Model.CommentCount</p>
+<p>@Model.LikeCount likes</p>
+<p>@Model.CommentCount comments</p>
 
+@if (Model.Medias.Any()) {
+    foreach (var media in Model.Medias) {
+        if (media.MediaType == "video") {
+            <video controls width="400">
+                <source src="@media.Url" type="video/mp4" />
+            </video>
+        }
+        else {
+            <img src="@media.Url" width="400" style="margin: 10px;" />
+        }
+    }
+}
+else {
+    <p>No media available.</p>
+}

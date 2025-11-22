@@ -9,21 +9,35 @@ namespace Mini_Social_Media.AppService {
             _cloudinary = cloudinary;
         }
 
-        public async Task<string> UploadAsync(IFormFile file) {
-            if (file.Length <= 0)
+        public async Task<string?> UploadAsync(IFormFile file) {
+            if (file == null || file.Length == 0) {
+                Console.WriteLine("❌ File rỗng hoặc không tồn tại");
                 return null;
+            }
 
-            await using var stream = file.OpenReadStream();
+            using (var stream = file.OpenReadStream()) {
+                var uploadParams = new ImageUploadParams() {
+                    File = new FileDescription(file.FileName, stream)
+                };
 
-            var upload = new ImageUploadParams {
-                File = new FileDescription(file.FileName, stream),
-                Folder = "mini_social_media"
-            };
+                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
 
-            var result = await _cloudinary.UploadAsync(upload);
+                if (uploadResult == null) {
+                    Console.WriteLine("❌ uploadResult null → Upload thất bại");
+                    return null;
+                }
 
-            return result?.SecureUrl?.ToString();
+                if (uploadResult.Error != null) {
+                    Console.WriteLine("❌ Cloudinary Error: " + uploadResult.Error.Message);
+                    return null;
+                }
+
+                Console.WriteLine("✅ Upload thành công → URL: " + uploadResult.SecureUrl);
+
+                return uploadResult.SecureUrl?.ToString();
+            }
         }
+
     }
 
 }

@@ -20,4 +20,8 @@ namespace Mini_Social_Media.IRepository {
     }
     public interface IFollowRepository : IRepository<Follow> {
     }
+    public interface IHashtagRepository : IRepository<Hashtag> {
+        Task<bool> IsExist(string hashtagName);
+        Task<Hashtag?> GetByNameAsync(string hashtagName);
+    }
 }

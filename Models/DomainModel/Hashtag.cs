@@ -6,6 +6,7 @@ namespace Mini_Social_Media.Models.DomainModel {
         public int HashtagId { get; set; }
         public string? HashtagName { get; set; }
         public int UsageCount { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public ICollection<PostHashtag>? PostHashtags { get; set; }
     }
 }

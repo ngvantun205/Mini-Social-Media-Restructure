@@ -13,6 +13,7 @@
         public string? UserAvatar { get; set; }
         public string? Caption { get; set; }
         public string? Location { get; set; }
+        public DateTime CreatedAt { get; set; }
         public List<string>? MediaUrls { get; set; }
         public int LikeCount { get; set; }
         public int CommentCount { get; set; }

@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Mini_Social_Media.Models.ViewModel {
     public class PostViewModel {
-        public string Caption { get; set; } = "";
-        public string Location { get; set; } = "";
+        public string? Caption { get; set; }
+        public string? Location { get; set; }
         public int LikeCount { get; set; }
         public int CommentCount { get; set; }
         public DateTime CreatedAt { get; set; }

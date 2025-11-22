@@ -28,10 +28,21 @@ namespace Mini_Social_Media.Controllers {
         [HttpGet]
         public async Task<IActionResult> PostDetails(int id) {
             var post = await _postService.GetByIdAsync(id);
+            var postviewmodel = new PostViewModel {
+                Caption = post.Caption,
+                Location = post.Location,
+                LikeCount = post.LikeCount,
+                CommentCount = post.CommentCount,
+                CreatedAt = post.CreatedAt, 
+                Medias = post.MediaUrls?.Select(url => new PostMediaViewModel {
+                    Url = url,
+                    MediaType = url.EndsWith(".mp4") ? "video" : "image"
+                }).ToList() ?? new List<PostMediaViewModel>()
+            };
             if (post == null)
                 return NotFound();
 
-            return View(post);
+            return View(postviewmodel);
         }
     }
 }
