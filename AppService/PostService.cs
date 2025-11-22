@@ -67,8 +67,6 @@
                 MediaUrls = post.Medias.Select(x => x.Url).ToList()
             };
         }
-
-
         public async Task<PostDto?> GetByIdAsync(int postId) {
             var post = await _postRepository.GetByIdAsync(postId);
             return new PostDto {
@@ -83,6 +81,26 @@
                 UserName = post.User?.UserName,
             };
         }
+        public async Task<PostDto?> EditPostAsync(EditPostInputModel model, int userId) {
+            var post = await _postRepository.GetByIdAsync(model.PostId);
+            if (post == null || post.UserId != userId) {
+                return null;
+            }
+            post.Caption = model.Caption;
+            post.Location = model.Location;
 
+            await _postRepository.UpdateAsync(post);
+            return new PostDto {
+                PostId = post.PostId,
+                UserId = post.UserId,
+                Caption = post.Caption,
+                Location = post.Location,
+                CreatedAt = post.CreatedAt,
+                LikeCount = post.LikeCount,
+                CommentCount = post.CommentCount,
+                MediaUrls = post.Medias.Select(x => x.Url).ToList(),
+                UserName = post.User?.UserName,
+            };
+        }
     }
 }

@@ -1,22 +1,26 @@
 ﻿@model PostViewModel
+<div>
+    <h2>@Model.Caption</h2>
+    <p>@Model.Location</p>
+    <p>@Model.LikeCount likes</p>
+    <p>@Model.CommentCount comments</p>
 
-<h2>@Model.Caption</h2>
-<p>@Model.Location</p>
-<p>@Model.LikeCount likes</p>
-<p>@Model.CommentCount comments</p>
-
-@if (Model.Medias.Any()) {
-    foreach (var media in Model.Medias) {
-        if (media.MediaType == "video") {
-            <video controls width="400">
-                <source src="@media.Url" type="video/mp4" />
-            </video>
-        }
-        else {
-            <img src="@media.Url" width="400" style="margin: 10px;" />
+    @if (Model.Medias.Any()) {
+        foreach (var media in Model.Medias) {
+            if (media.MediaType == "video") {
+                <video controls width="400">
+                    <source src="@media.Url" type="video/mp4" />
+                </video>
+            }
+            else {
+                <img src="@media.Url" width="400" style="margin: 10px;" />
+            }
         }
     }
-}
-else {
-    <p>No media available.</p>
-}
+    else {
+        <p>No media available.</p>
+    }
+    @if (Model.UserId == int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value) ) {
+        <a asp-action="EditPost" asp-route-postId="@Model.PostId" class="btn btn-primary">Edit Post</a>
+    }
+</div>

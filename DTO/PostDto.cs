@@ -15,6 +15,7 @@
         public string? Location { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<string>? MediaUrls { get; set; }
+        public string? Hashtags { get; set; } 
         public int LikeCount { get; set; }
         public int CommentCount { get; set; }
         public bool IsLikedByCurrentUser { get; set; }

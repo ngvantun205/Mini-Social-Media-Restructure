@@ -1,0 +1,41 @@
+﻿@model EditPostViewModel
+
+<form asp-controller="Post" asp-action="EditPost" method="post" enctype="multipart/form-data">
+
+    <input type="hidden" name="postId" value="@Model.PostId" />
+
+    <div>
+        <label>Caption</label>
+        <input asp-for="Caption" class="form-control" />
+    </div>
+
+    <div>
+        <label>Location</label>
+        <input asp-for="Location" class="form-control" />
+    </div>
+
+    <div>
+        <label>Hashtags</label>
+        <input asp-for="Hashtags" class="form-control" />
+    </div>
+
+    <div>
+        <label>Current Media</label>
+        @foreach (var media in Model.MediaFiles) {
+            if (media.EndsWith(".mp4")) {
+                <video src="@media" width="200" controls></video>
+            }
+            else {
+                <img src="@media" width="200" style="margin-right:10px" />
+            }
+        }
+    </div>
+
+    <div>
+        <label>Add New Media</label>
+        <input name="MediaFiles" type="file" multiple />
+    </div>
+
+    <button type="submit" class="btn btn-secondary">Save Changes</button>
+
+</form>
