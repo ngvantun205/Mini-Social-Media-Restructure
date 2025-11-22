@@ -24,4 +24,8 @@
     @if (Model.UserId == int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value) ) {
         <a asp-action="EditPost" asp-route-postId="@Model.PostId" class="btn btn-primary">Edit Post</a>
     }
+    <form asp-action="DeletePost" method="post">
+        <input type="hidden" name="postId" value="@Model.PostId" />
+        <button type="submit" class="btn btn-danger">Delete Post</button>
+    </form>
 </div>

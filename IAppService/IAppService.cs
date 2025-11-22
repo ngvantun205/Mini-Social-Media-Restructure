@@ -3,6 +3,7 @@
         Task<CreatePostDto> CreatePost(PostInputModel model, int userId);
         Task<PostDto?> GetByIdAsync(int postId);
         Task<PostDto?> EditPostAsync(EditPostInputModel model, int userId);
+        Task<bool> DeletePostAsync(int postId, int userId);
     }
     public interface IUploadService {
         Task<string> UploadAsync(IFormFile file);

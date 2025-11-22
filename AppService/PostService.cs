@@ -72,6 +72,9 @@
         }
         public async Task<PostDto?> GetByIdAsync(int postId) {
             var post = await _postRepository.GetByIdAsync(postId);
+            if (post == null) {
+                return null;
+            }
             var hashtagNames = post.PostHashtags
                 .Select(ph => ph.Hashtag.HashtagName)
                 .ToList();
@@ -163,6 +166,14 @@
                 UserName = post.User?.UserName,
                 Hashtags = string.Join(' ', post.PostHashtags.Select(x => x.Hashtag.HashtagName))
             };
+        }
+        public async Task<bool> DeletePostAsync(int postId, int userId) {
+            var post = await _postRepository.GetByIdAsync(postId);
+            if (post == null || post.UserId != userId) {
+                return false;
+            }
+            await _postRepository.DeleteAsync(postId);
+            return true;
         }
     }
 }

@@ -28,24 +28,26 @@ namespace Mini_Social_Media.Controllers {
         [HttpGet]
         public async Task<IActionResult> PostDetails(int id) {
             var post = await _postService.GetByIdAsync(id);
-            var postviewmodel = new PostViewModel {
-                UserId = post.UserId,
-                PostId = post.PostId,
-                Caption = post.Caption,
-                Location = post.Location,
-                LikeCount = post.LikeCount,
-                CommentCount = post.CommentCount,
-                CreatedAt = post.CreatedAt,
-                Medias = post.MediaUrls?.Select(url => new PostMediaViewModel {
-                    Url = url,
-                    MediaType = url.EndsWith(".mp4") ? "video" : "image"
-                }).ToList() ?? new List<PostMediaViewModel>(),
-                Hashtags = post.Hashtags,
-            };
             if (post == null)
                 return NotFound();
+            else {
+                var postviewmodel = new PostViewModel {
+                    UserId = post.UserId,
+                    PostId = post.PostId,
+                    Caption = post.Caption,
+                    Location = post.Location,
+                    LikeCount = post.LikeCount,
+                    CommentCount = post.CommentCount,
+                    CreatedAt = post.CreatedAt,
+                    Medias = post.MediaUrls?.Select(url => new PostMediaViewModel {
+                        Url = url,
+                        MediaType = url.EndsWith(".mp4") ? "video" : "image"
+                    }).ToList() ?? new List<PostMediaViewModel>(),
+                    Hashtags = post.Hashtags,
+                };
 
-            return View(postviewmodel);
+                return View(postviewmodel);
+            }
         }
         [HttpGet]
         public async Task<IActionResult> EditPost(int postId) {
@@ -68,6 +70,14 @@ namespace Mini_Social_Media.Controllers {
             await _postService.EditPostAsync(model, userId);
 
             return RedirectToAction("PostDetails", new { id = model.PostId });
+        }
+        public async Task<IActionResult> DeletePost(int postId) {
+            int userId = int.Parse(_userManager.GetUserId(User));
+            bool result = await _postService.DeletePostAsync(postId, userId);
+            if (!result) {
+                return BadRequest("Không thể xóa bài viết.");
+            }
+            return RedirectToAction("Index", "Home");
         }
     }
 }
