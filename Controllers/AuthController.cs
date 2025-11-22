@@ -1,61 +1,80 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Mini_Social_Media.Controllers {
     public class AuthController : Controller {
-        private readonly IAuthService _authService;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
 
-        public AuthController(IAuthService authService) {
-            _authService = authService;
+        public AuthController(UserManager<User> userManager, SignInManager<User> signInManager) {
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
+
+        //How to get user id without usermanager
+        //var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //int userId = int.Parse(userIdString);
+
         [HttpGet]
         public IActionResult Login() {
-            var userId = User.FindFirst("userId")?.Value;
-            Console.WriteLine($"Log Information User ID: {userId}");
             return View();
         }
+
         [HttpPost]
         public async Task<IActionResult> Login(LoginInputModel model) {
-            if (!ModelState.IsValid) {
-                return View(model); 
-            }
-            var result = await _authService.LoginAsync(model);
-            if (!string.IsNullOrEmpty(result.ErrorMessage)) {
-                ModelState.AddModelError("", result.ErrorMessage);
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var result = await _signInManager.PasswordSignInAsync(
+                model.UserNameOrEmail,
+                model.Password,
+                isPersistent: false,
+                lockoutOnFailure: false
+            );
+
+            if (!result.Succeeded) {
+                ModelState.AddModelError("", "Invalid login attempt");
                 return View(model);
             }
-            string token = result.Token!;
-            var cookieOptions = new CookieOptions {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddMinutes(15)
-            };
-            // var token = Request.Cookies["jwt"]; - how to read cookie
-            Response.Cookies.Append("jwt", token, cookieOptions);
 
             return RedirectToAction("Index", "Home");
         }
+
         [HttpGet]
         public IActionResult Register() {
             return View();
         }
+
         [HttpPost]
         public async Task<IActionResult> Register(RegisterInputModel model) {
-            if (!ModelState.IsValid) {
-                return View(model); 
-            }
-            var result = await _authService.RegisterAsync(model);
-            if (!string.IsNullOrEmpty(result.ErrorMessage)) {
-                ModelState.AddModelError("", result.ErrorMessage);
+            if (!ModelState.IsValid)
+                return View(model);
+            Console.WriteLine("Registering user: " + model.UserName);
+            Console.WriteLine("Email: " + model.Email);
+            Console.WriteLine("Password: " + model.Password);
+            var user = new User {
+                UserName = model.UserName,
+                Email = model.Email,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var createResult = await _userManager.CreateAsync(user, model.Password);
+
+            if (!createResult.Succeeded) {
+                foreach (var error in createResult.Errors)
+                    ModelState.AddModelError("", error.Description);
+
                 return View(model);
             }
-            return RedirectToAction("Login", "Auth");
+
+            return RedirectToAction("Login");
         }
+
         [HttpGet]
         public async Task<IActionResult> Logout() {
-            Response.Cookies.Delete("jwt");
-            await _authService.LogoutAsync();
-            return RedirectToAction("Login", "Auth");
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login");
         }
     }
 }

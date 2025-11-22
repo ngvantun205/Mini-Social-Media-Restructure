@@ -25,7 +25,7 @@ namespace Mini_Social_Media.Repository {
             }
         }
         public async Task UpdateAsync(User entity) {
-            var existingUser = await _context.Users.FindAsync(entity.UserId);
+            var existingUser = await _context.Users.FindAsync(entity.Id);
             if (existingUser != null) {
                 _context.Entry(existingUser).CurrentValues.SetValues(entity);
                 await _context.SaveChangesAsync();

@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace Mini_Social_Media.Controllers {
     public class PostController : Controller {
+        private readonly UserManager<User> _userManager;
         private readonly IPostService _postService;
-        public PostController(IPostService postService) {
+        public PostController(UserManager<User> userManager, IPostService postService) {
+            _userManager = userManager;
             _postService = postService;
         }
         [HttpGet]
@@ -13,17 +16,12 @@ namespace Mini_Social_Media.Controllers {
         }
         [HttpPost]
         public async Task<IActionResult> CreatePost(PostInputModel model) {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userIdString))
-                return Unauthorized();
-
-            int userId = int.Parse(userIdString);
-
             if (!ModelState.IsValid) {
                 return View(model);
-            }
-            var createPostDto = await _postService.CreatePost(model,userId);
+            } 
+            int userId = int.Parse(_userManager.GetUserId(User));
+            Console.WriteLine("User ID: " + userId);
+            var createPostDto = await _postService.CreatePost(model, userId);
             return RedirectToAction("PostDetails", new { id = createPostDto.PostId });
             
         }

@@ -1,17 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace Mini_Social_Media.Models.DomainModel {
-    public class User {
-        [Key]
-        public int UserId { get; set; }
-        public string UserName { get; set; } = "";
-        public string Email { get; set; } = "";
-        public string PasswordHash { get; set; } = "";
+    public class User : IdentityUser<int> {
         public string FullName { get; set; } = "";
         public string Bio { get; set; } = "";
         public string AvatarUrl { get; set; } = "";
         public string WebsiteUrl { get; set; } = "";
-        public bool IsPrivate { get; set; } = false;
+        public bool IsPrivate { get; set; } = false; 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdateAt { get; set; }
         public ICollection<Post> Posts { get; set; } = new List<Post>();

@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Mini_Social_Media.Models.DomainModel;
 
 namespace Mini_Social_Media.Data {
-    public class AppDbContext : DbContext {
+    public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int> {
         public DbSet<User> Users { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<PostMedia> PostMedias { get; set; }

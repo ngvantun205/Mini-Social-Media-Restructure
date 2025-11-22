@@ -1,6 +1,6 @@
 using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Mini_Social_Media.Repository;
@@ -22,8 +22,6 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<ILikeRepository, LikeRepository>();
             builder.Services.AddScoped<IFollowRepository, FollowRepository>();
 
-            builder.Services.AddScoped<IAuthService, AuthService>();
-            builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IPostService, PostService>();
             builder.Services.AddScoped<IUploadService, UploadService>();
 
@@ -58,9 +56,15 @@ namespace Mini_Social_Media {
                     config.ApiSecret
                 ));
             });
-            builder.Services.Configure<FormOptions>(options =>
+            builder.Services.AddIdentity<User, IdentityRole<int>>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
+            builder.Services.Configure<IdentityOptions>(options =>
             {
-                options.MultipartBodyLengthLimit = 1024 * 1024 * 50; // 50MB
+                options.User.AllowedUserNameCharacters =
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.";
+
+                options.User.RequireUniqueEmail = true;
             });
 
             var app = builder.Build();

@@ -8,9 +8,9 @@ namespace Mini_Social_Media.Models.DomainModel {
         [Required]
         public int PostId { get; set; }
         [ForeignKey("PostId")]
-        public Post Post { get; set; } = new Post();
-        public string Url { get; set; } = "";
-        public string MediaType { get; set; } = "";
-        public string SortOrder { get; set; } = "";
+        public Post? Post { get; set; }
+        public string? Url { get; set; }
+        public string? MediaType { get; set; } 
+        public string? SortOrder { get; set; } 
     }
 }

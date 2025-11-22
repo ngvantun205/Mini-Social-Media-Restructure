@@ -4,9 +4,9 @@ namespace Mini_Social_Media.Models.DomainModel {
     public class PostHashtag {
         public int PostId { get; set; }
         [ForeignKey("PostId")]
-        public Post Post { get; set; } = new Post();
+        public Post? Post { get; set; }
         public int HashtagId { get; set; }
         [ForeignKey("HashtagId")]
-        public Hashtag Hashtag { get; set; } = new Hashtag();
+        public Hashtag? Hashtag { get; set; } 
     }
 }
