@@ -20,6 +20,16 @@ namespace Mini_Social_Media.Repository {
                     .ThenInclude(ph => ph.Hashtag)   
                 .FirstOrDefaultAsync(p => p.PostId == id);
         }
+        public async Task<IEnumerable<Post>> GetPostsPagedAsync(int page, int pageSize) {
+            return await _context.Posts
+                .Include(p => p.User)
+                .Include(p => p.Medias)
+                .Include(p  => p.Likes)
+                .OrderByDescending(p => p.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
 
         public async Task AddAsync(Post entity) {
             await _context.Posts.AddAsync(entity);
@@ -37,6 +47,20 @@ namespace Mini_Social_Media.Repository {
             if (existingPost != null) {
                 _context.Entry(existingPost).CurrentValues.SetValues(entity);
                 await _context.SaveChangesAsync();
+            }
+        }
+        public async Task LikePostAsync(int postId) {
+            var post = await GetByIdAsync(postId);
+            if (post != null) {
+                post.LikeCount++;
+                await UpdateAsync(post);
+            }
+        }
+        public async Task UnLikePostAsync(int postId) {
+            var post = await GetByIdAsync(postId);
+            if (post != null) {
+                post.LikeCount--;
+                await UpdateAsync(post);
             }
         }
     }

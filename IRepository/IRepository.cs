@@ -13,10 +13,15 @@ namespace Mini_Social_Media.IRepository {
         Task<User?> GetByUserNameOrEmailAsync(string userNameOrEmail);
     }
     public interface IPostRepository : IRepository<Post> {
+        Task<IEnumerable<Post>> GetPostsPagedAsync(int page, int pageSize);
+        Task LikePostAsync(int postId);
+        Task UnLikePostAsync(int postId);
     }
     public interface ICommentRepository : IRepository<Comment> {
     }
     public interface ILikeRepository : IRepository<Like> {
+        Task DeleteByPostIdAndUserIdAsync(int postId, int userId);
+        Task<bool> IsLikedByCurrentUser(int postId, int userId); 
     }
     public interface IFollowRepository : IRepository<Follow> {
     }

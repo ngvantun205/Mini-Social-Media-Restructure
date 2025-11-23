@@ -18,7 +18,7 @@
         public string? Hashtags { get; set; } 
         public int LikeCount { get; set; }
         public int CommentCount { get; set; }
-        public bool IsLikedByCurrentUser { get; set; }
+        public bool IsLiked { get; set; }
     }
     public class CreatePostResultDto {
         public int PostId { get; set; }

@@ -1,15 +1,30 @@
-﻿namespace Mini_Social_Media.AppService {
+﻿using System.Text.RegularExpressions;
+
+namespace Mini_Social_Media.AppService {
     public class PostService : IPostService {
         private readonly IPostRepository _postRepository;
         private readonly IUploadService _uploadService;
         private readonly IHashtagRepository _hashtagRepository;
         private readonly IPostMediaRepository _postMediaRepository;
-        public PostService(IPostRepository postRepository, IUploadService uploadService, IHashtagRepository hashtagRepository, IPostMediaRepository postMediaRepository) {
+        private readonly ILikeRepository _likeRepository;
+
+        public PostService(IPostRepository postRepository, IUploadService uploadService, IHashtagRepository hashtagRepository, IPostMediaRepository postMediaRepository, ILikeRepository likeRepository) {
             _postRepository = postRepository;
             _uploadService = uploadService;
             _hashtagRepository = hashtagRepository;
             _postMediaRepository = postMediaRepository;
+            _likeRepository = likeRepository;
         }
+
+        private List<string> ExtractHashtags(string caption) {
+            if (string.IsNullOrEmpty(caption))
+                return new List<string>();
+            // Regex: Bắt các từ bắt đầu bằng #, bao gồm chữ cái, số và _
+            var regex = new Regex(@"#\w+");
+            var matches = regex.Matches(caption);
+            return matches.Select(m => m.Value).Distinct().ToList();
+        }
+
         public async Task<CreatePostDto> CreatePost(PostInputModel model, int userId) {
 
             var post = new Post {
@@ -70,14 +85,14 @@
                 MediaUrls = post.Medias.Select(x => x.Url).ToList()
             };
         }
+
         public async Task<PostDto?> GetByIdAsync(int postId) {
             var post = await _postRepository.GetByIdAsync(postId);
-            if (post == null) {
+            if (post == null)
                 return null;
-            }
-            var hashtagNames = post.PostHashtags
-                .Select(ph => ph.Hashtag.HashtagName)
-                .ToList();
+
+            var hashtagNames = post.PostHashtags.Select(ph => ph.Hashtag.HashtagName).ToList();
+
             return new PostDto {
                 PostId = post.PostId,
                 UserId = post.UserId,
@@ -88,9 +103,10 @@
                 CommentCount = post.CommentCount,
                 MediaUrls = post.Medias.Select(x => x.Url).ToList(),
                 UserName = post.User?.UserName,
-                Hashtags = string.Join(' ', hashtagNames)
+                Hashtags = string.Join(" ", hashtagNames) 
             };
         }
+
         public async Task<PostDto?> EditPostAsync(EditPostInputModel model, int userId) {
             var post = await _postRepository.GetByIdAsync(model.PostId);
             if (post == null || post.UserId != userId) {
@@ -165,11 +181,33 @@
         }
         public async Task<bool> DeletePostAsync(int postId, int userId) {
             var post = await _postRepository.GetByIdAsync(postId);
-            if (post == null || post.UserId != userId) {
+            if (post == null || post.UserId != userId)
                 return false;
+
+            // Lưu ý: Nên giảm UsageCount của hashtag trước khi xóa post nếu cần thiết
+            foreach (var ph in post.PostHashtags) {
+                ph.Hashtag.UsageCount = Math.Max(0, ph.Hashtag.UsageCount - 1);
             }
+
             await _postRepository.DeleteAsync(postId);
             return true;
+        }
+
+        public async Task<IEnumerable<PostDto>> GetPostsPagedAsync(int page, int pageSize, int userId) {
+            var posts = await _postRepository.GetPostsPagedAsync(page, pageSize);
+
+            return posts.Select(p => new PostDto {
+                PostId = p.PostId,
+                UserId = p.UserId,
+                UserName = p.User?.UserName,
+                Caption = p.Caption,
+                CreatedAt = p.CreatedAt,
+                MediaUrls = p.Medias.Select(m => m.Url).ToList(),
+                LikeCount = p.LikeCount,
+                CommentCount = p.CommentCount,
+                IsLiked = p.Likes.Any(l => l.UserId == userId),
+                Hashtags = string.Join(" ", p.PostHashtags.Select(ph => ph.Hashtag.HashtagName))
+            }).ToList();
         }
     }
 }

@@ -15,20 +15,15 @@ namespace Mini_Social_Media.Controllers {
             return View();
         }
         [HttpPost]
-        [RequestSizeLimit(1073741824)]
-        [RequestFormLimits(MultipartBodyLengthLimit = 1073741824)]
         public async Task<IActionResult> CreatePost(PostInputModel model) {
             if (!ModelState.IsValid) {
-                Console.WriteLine("------------------------------------------------------------------------------------------------------------------");
-                var errors = ModelState.Values.SelectMany(v => v.Errors);
-                foreach (var error in errors) {
-                    Console.WriteLine("Lỗi: " + error.ErrorMessage);
-                    if (error.Exception != null) {
-                        Console.WriteLine("Exception: " + error.Exception.Message);
-                    }
-                }
-                Console.WriteLine("------------------------------------------------------------------------------------------------------------------");
-
+                //var errors = ModelState.Values.SelectMany(v => v.Errors);
+                //foreach (var error in errors) {
+                //    Console.WriteLine("Lỗi: " + error.ErrorMessage);
+                //    if (error.Exception != null) {
+                //        Console.WriteLine("Exception: " + error.Exception.Message);
+                //    }
+                //}
                 return View();
             }
             int userId = int.Parse(_userManager.GetUserId(User));
@@ -74,8 +69,6 @@ namespace Mini_Social_Media.Controllers {
             return View(model);
         }
         [HttpPost]
-        [RequestSizeLimit(1073741824)]
-        [RequestFormLimits(MultipartBodyLengthLimit = 1073741824)]
         public async Task<IActionResult> EditPost(EditPostInputModel model) {
             if (!ModelState.IsValid) {
                 return RedirectToAction("PostDetails", new { id = model.PostId });
@@ -89,7 +82,7 @@ namespace Mini_Social_Media.Controllers {
             int userId = int.Parse(_userManager.GetUserId(User));
             bool result = await _postService.DeletePostAsync(postId, userId);
             if (!result) {
-                return BadRequest("Không thể xóa bài viết.");
+                return BadRequest("Cannot delete post.");
             }
             return RedirectToAction("Index", "Home");
         }

@@ -1,0 +1,117 @@
+﻿@model List<Mini_Social_Media.DTO.PostDto>
+
+@foreach (var post in Model) {
+    <div class="post-detail-card mb-4" style="background: white; border-radius: 8px; border: 1px solid #dbdbdb; margin-bottom: 20px;">
+
+        <div class="post-header" style="display: flex; align-items: center; padding: 10px;">
+            <div class="post-user-info" style="display: flex; align-items: center; flex-grow: 1;">
+                <div class="user-avatar" style="margin-right: 10px;">
+                    <img src="/images/avatar.png" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />
+                </div>
+                <div class="user-details">
+                    <h5 class="username" style="margin: 0; font-size: 16px;">@post.UserName</h5>
+                    @if (!string.IsNullOrEmpty(post.Location)) {
+                        <p class="location" style="margin: 0; font-size: 12px; color: gray;">
+                            <i class="bi bi-geo-alt-fill"></i> @post.Location
+                        </p>
+                    }
+                    <small style="font-size: 11px; color: #8e8e8e;">@post.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                </div>
+            </div>
+
+            <div class="post-actions-menu">
+                <a href="/Post/PostDetails?id=@post.PostId" class="btn btn-sm btn-light">
+                    <i class="bi bi-three-dots"></i>
+                </a>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(post.Caption)) {
+            <div class="post-caption" style="padding: 0 15px 5px;">
+                <span class="caption-text">@post.Caption</span>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(post.Hashtags)) {
+            <div class="post-hashtags" style="padding: 0 15px 10px;">
+                @foreach (var tag in post.Hashtags.Split(' ', StringSplitOptions.RemoveEmptyEntries)) {
+                    var displayTag = tag.StartsWith("#") ? tag : "#" + tag;
+                    <a href="#" class="hashtag" style="color: #00376b; margin-right: 5px; text-decoration: none; background: #fafafa; padding: 2px 5px; border-radius: 4px;">@displayTag</a>
+                }
+            </div>
+        }
+
+        @if (post.MediaUrls != null && post.MediaUrls.Any()) {
+            <div class="post-media-container">
+                @if (post.MediaUrls.Count == 1) {
+                    var url = post.MediaUrls.First();
+                    <div class="media-single">
+                        @if (url.EndsWith(".mp4")) {
+                            <video controls style="width: 100%; display: block;">
+                                <source src="@url" type="video/mp4" />
+                            </video>
+                        }
+                        else {
+                            <img src="@url" alt="Post media" style="width: 100%; object-fit: cover; display: block;" />
+                        }
+                    </div>
+                }
+                else {
+                    <div id="carousel-@post.PostId" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            @for (int i = 0; i < post.MediaUrls.Count; i++) {
+                                var url = post.MediaUrls[i];
+                                <div class="carousel-item @(i == 0 ? "active" : "")">
+                                    @if (url.EndsWith(".mp4")) {
+                                        <video controls style="width: 100%; height: 400px; object-fit: contain; background: black;">
+                                            <source src="@url" type="video/mp4" />
+                                        </video>
+                                    }
+                                    else {
+                                        <img src="@url" class="d-block w-100" style="height: 400px; object-fit: cover;" alt="...">
+                                    }
+                                </div>
+                            }
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel-@post.PostId" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carousel-@post.PostId" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="post-actions" style="padding: 10px 15px;">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <button class="btn btn-link p-0 me-3"
+                            onclick="toggleLike(this, @post.PostId)"
+                            style="font-size: 1.5rem; text-decoration: none; border: none; background: none;">
+                        <i class="bi @(post.IsLiked ? "bi-heart-fill text-danger" : "bi-heart text-dark")"></i>
+                    </button>
+
+                    <button class="btn btn-link text-dark p-0 me-3" style="font-size: 1.5rem; border: none; background: none;">
+                        <i class="bi bi-chat"></i>
+                    </button>
+                    <button class="btn btn-link text-dark p-0" style="font-size: 1.5rem; border: none; background: none;">
+                        <i class="bi bi-send"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="post-stats mt-2">
+                <p class="likes-count mb-1">
+                    <strong class="like-number">@post.LikeCount</strong> <strong>likes</strong>
+                </p>
+                <button class="btn btn-link text-muted p-0 text-decoration-none" style="font-size: 0.9rem; border: none; background: none;">
+                    View all @post.CommentCount comments
+                </button>
+            </div>
+        </div>
+    </div>
+}

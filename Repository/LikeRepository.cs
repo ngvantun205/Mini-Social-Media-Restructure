@@ -32,5 +32,15 @@ namespace Mini_Social_Media.Repository {
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task DeleteByPostIdAndUserIdAsync(int postId, int userId) {
+            var like =  await _context.Likes.FirstOrDefaultAsync(l => l.UserId == userId && l.PostId == postId);
+            if (like != null) {
+                _context.Likes.Remove(like);
+                await _context.SaveChangesAsync();
+            }
+        }
+        public async Task<bool> IsLikedByCurrentUser(int postId, int userId) {
+            return await _context.Likes.AnyAsync(l => l.UserId == userId && l.PostId == postId);
+        }
     }
 }

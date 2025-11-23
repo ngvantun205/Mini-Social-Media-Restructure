@@ -1,1 +1,134 @@
-﻿
+﻿@model List<Mini_Social_Media.DTO.PostDto>
+@{
+    ViewData["Title"] = "News Feed";
+}
+
+<div class="container" style="max-width: 600px; margin-top: 20px;">
+
+    <div id="postContainer">
+        @await Html.PartialAsync("_PostListPartial", Model)
+    </div>
+
+    <div id="loading" style="display:none; text-align: center; padding: 20px;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <div id="endOfFeed" style="display:none; text-align: center; padding: 20px; color: #8e8e8e;">
+        <p>You're all caught up!</p>
+        <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // --- PHẦN 1: LOGIC CUỘN TRANG (INFINITE SCROLL) ---
+        let page = 1;
+        let isLoading = false;
+        let isFinished = false;
+        let scrollTimeout;
+
+        window.addEventListener("scroll", () => {
+            if (scrollTimeout) clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                if (isLoading || isFinished) return;
+
+                // Load khi cuộn gần tới đáy (còn 500px)
+                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+                    loadMore();
+                }
+            }, 100);
+        });
+
+        function loadMore() {
+            isLoading = true;
+            document.getElementById("loading").style.display = "block";
+
+            let nextPage = page + 1;
+
+            fetch(`/Home/LoadMore?page=${nextPage}`)
+                .then(res => {
+                    if (res.status === 204) { // 204 No Content
+                        isFinished = true;
+                        document.getElementById("endOfFeed").style.display = "block";
+                        return null;
+                    }
+                    return res.text();
+                })
+                .then(html => {
+                    if (html) {
+                        document.getElementById("postContainer").insertAdjacentHTML("beforeend", html);
+                        page++;
+                    }
+                })
+                .catch(err => console.error("Load failed:", err))
+                .finally(() => {
+                    document.getElementById("loading").style.display = "none";
+                    isLoading = false;
+                });
+        }
+
+        // --- PHẦN 2: LOGIC LIKE (TOGGLE) ---
+        function toggleLike(btnElement, postId) {
+            // 1. Tìm các thành phần DOM cần thay đổi
+            const icon = btnElement.querySelector("i");
+            // Tìm thẻ hiển thị số like (đi ngược lên cha, rồi tìm xuống con)
+            const container = btnElement.closest(".post-actions");
+            const countStrong = container.querySelector(".like-number");
+
+            let currentCount = parseInt(countStrong.innerText);
+
+            // Biến cờ để lưu trạng thái vừa thực hiện (True = User muốn Like, False = User muốn Unlike)
+            let isLikingAction = false;
+
+            // 2. Optimistic UI: Đổi màu ngay lập tức (chưa cần đợi Server)
+            if (icon.classList.contains("bi-heart-fill")) {
+                // Đang Like -> Chuyển thành Unlike (Rỗng)
+                icon.classList.remove("bi-heart-fill", "text-danger");
+                icon.classList.add("bi-heart", "text-dark");
+                countStrong.innerText = currentCount - 1;
+                isLikingAction = false;
+            } else {
+                // Chưa Like -> Chuyển thành Like (Đỏ)
+                icon.classList.remove("bi-heart", "text-dark");
+                icon.classList.add("bi-heart-fill", "text-danger");
+                countStrong.innerText = currentCount + 1;
+                isLikingAction = true;
+            }
+
+            // 3. Gọi API xuống Server
+            fetch('/Like/Like', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ postId: postId })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("API Error");
+                return res.json();
+            })
+            .then(data => {
+                // Thành công -> Không cần làm gì vì UI đã đổi rồi
+            })
+            .catch(err => {
+                console.error("Like failed:", err);
+
+                // 4. Rollback: Nếu lỗi mạng/server -> Hoàn tác lại giao diện như cũ
+                if (isLikingAction) {
+                    // Nãy ấn Like mà lỗi -> Trả về tim rỗng
+                    icon.classList.remove("bi-heart-fill", "text-danger");
+                    icon.classList.add("bi-heart", "text-dark");
+                    countStrong.innerText = currentCount;
+                } else {
+                    // Nãy ấn Unlike mà lỗi -> Trả về tim đỏ
+                    icon.classList.remove("bi-heart", "text-dark");
+                    icon.classList.add("bi-heart-fill", "text-danger");
+                    countStrong.innerText = currentCount;
+                }
+                alert("Lỗi kết nối. Vui lòng thử lại!");
+            });
+        }
+    </script>
+}
