@@ -95,9 +95,9 @@
                         <i class="bi @(post.IsLiked ? "bi-heart-fill text-danger" : "bi-heart text-dark")"></i>
                     </button>
 
-                    <button class="btn btn-link text-dark p-0 me-3" style="font-size: 1.5rem; border: none; background: none;">
+                    <a href="/Post/PostDetails?id=@post.PostId" class="btn btn-link text-dark p-0 me-3" style="font-size: 1.5rem; border: none; background: none;">
                         <i class="bi bi-chat"></i>
-                    </button>
+                    </a>
                     <button class="btn btn-link text-dark p-0" style="font-size: 1.5rem; border: none; background: none;">
                         <i class="bi bi-send"></i>
                     </button>
@@ -108,9 +108,9 @@
                 <p class="likes-count mb-1">
                     <strong class="like-number">@post.LikeCount</strong> <strong>likes</strong>
                 </p>
-                <button class="btn btn-link text-muted p-0 text-decoration-none" style="font-size: 0.9rem; border: none; background: none;">
+                <a href="/Post/PostDetails?id=@post.PostId" class="btn btn-link text-muted p-0 text-decoration-none" style="font-size: 0.9rem; border: none; background: none;">
                     View all @post.CommentCount comments
-                </button>
+                </a>
             </div>
         </div>
     </div>

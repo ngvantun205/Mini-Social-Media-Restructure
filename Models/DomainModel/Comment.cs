@@ -13,9 +13,10 @@ namespace Mini_Social_Media.Models {
         [ForeignKey("UserId")]
         public User? User { get; set; }
         public string? Content { get; set; }
-        public int ParentCommentId { get; set; }
+        public int? ParentCommentId { get; set; }
         public Comment? ParentComment { get; set; }
         public DateTime CreatedAt { get; set; }
-        public ICollection<Comment>? Replies { get; set; }
+        public int ReplyCount { get; set; }  
+        public ICollection<Comment>? Replies { get; set; } = new List<Comment>();
     }
 }

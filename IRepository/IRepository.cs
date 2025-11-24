@@ -1,6 +1,4 @@
-﻿using Mini_Social_Media.Models.DomainModel;
-
-namespace Mini_Social_Media.IRepository {
+﻿namespace Mini_Social_Media.IRepository {
     public interface IRepository<T> where T : class {
         Task<IEnumerable<T>> GetAllAsync();
         Task<T?> GetByIdAsync(int id);
@@ -16,8 +14,13 @@ namespace Mini_Social_Media.IRepository {
         Task<IEnumerable<Post>> GetPostsPagedAsync(int page, int pageSize);
         Task LikePostAsync(int postId);
         Task UnLikePostAsync(int postId);
+        Task<bool> AddCommentAsync(int postId);
+        Task<bool> RemoveCommentAsync(int postId);
     }
     public interface ICommentRepository : IRepository<Comment> {
+        Task<IEnumerable<Comment>> GetCommentsByPostIdAsync(int postId);
+        Task<bool> AddReplyAsync(int commentId);    
+        Task<bool> RemoveReplyAsync(int commentId);
     }
     public interface ILikeRepository : IRepository<Like> {
         Task DeleteByPostIdAndUserIdAsync(int postId, int userId);

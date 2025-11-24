@@ -52,7 +52,7 @@
             <div class="post-header d-flex align-items-center border-bottom pb-2">
                 <img src="/images/avatar.png" width="32" height="32" class="rounded-circle me-2">
                 <div>
-                    <h6 class="m-0">@User.Identity.Name</h6>
+                    <h6 class="m-0">@Model.FullName</h6>
                     @if (!string.IsNullOrEmpty(Model.Location)) {
                         <small class="text-muted">@Model.Location</small>
                     }
@@ -67,7 +67,7 @@
 
             <div class="comments-area flex-grow-1 py-2" style="overflow-y: auto; max-height: 400px;">
                 <div class="caption mb-2">
-                    <strong>@User.Identity.Name</strong> @Model.Caption
+                    <strong>@Model.UserName</strong> @Model.Caption
                     @if (!string.IsNullOrEmpty(Model.Hashtags)) {
                         <div class="mt-1">
                             @foreach (var tag in Model.Hashtags.Split(' ', StringSplitOptions.RemoveEmptyEntries)) {
@@ -92,10 +92,16 @@
                 <p class="mb-1"><strong>@Model.LikeCount likes</strong></p>
                 <small class="text-muted text-uppercase">@Model.CreatedAt.ToString("MMM dd, yyyy")</small>
             </div>
-
             <div class="add-comment border-top mt-2 pt-2 d-flex">
-                <input type="text" class="form-control border-0" placeholder="Add a comment...">
-                <button class="btn btn-link text-primary text-decoration-none fw-bold">Post</button>
+                <input type="hidden" id="commentPostId" value="@Model.PostId" />
+
+                <input type="text" id="commentContent" class="form-control border-0" placeholder="Add a comment...">
+
+                <button class="btn btn-link text-primary text-decoration-none fw-bold"
+                        type="button"
+                        onclick="postComment()">
+                    Post
+                </button>
             </div>
         </div>
     </div>
@@ -106,5 +112,60 @@
 </form>
 
 @section Scripts {
+    <script>
+
+        function postComment() {
+            // 1. Lấy dữ liệu từ input
+            const postId = document.getElementById("commentPostId").value;
+            const contentInput = document.getElementById("commentContent");
+            const content = contentInput.value.trim();
+
+            if (!content) {
+                alert("Please enter a comment");
+                return;
+            }
+
+            // 2. Gọi API
+            fetch('/Comment/AddComment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    postId: parseInt(postId),
+                    content: content
+                })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to post comment");
+                return res.json();
+            })
+            .then(newComment => {
+                // 3. Xử lý giao diện
+                contentInput.value = "";
+
+                // Ẩn dòng "No comments yet"
+                const noCommentText = document.querySelector(".comments-area p.text-muted");
+                if(noCommentText) noCommentText.style.display = 'none';
+
+                // Chèn comment mới
+                const commentsArea = document.querySelector(".comments-area");
+
+                const commentHtml = `
+                    <div class="comment-item mb-2">
+                        <strong>${newComment.userName || 'You'}</strong>
+                        <span>${newComment.content}</span>
+                    </div>
+                `;
+
+                commentsArea.insertAdjacentHTML('beforeend', commentHtml);
+                commentsArea.scrollTop = commentsArea.scrollHeight;
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error posting comment.");
+            });
+        }
+    </script>
     <script src="~/js/post-detail.js"></script>
 }

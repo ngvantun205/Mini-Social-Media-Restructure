@@ -4,7 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Mini_Social_Media.Models.ViewModel {
     public class PostViewModel {
         public int PostId { get; set; }
-        public int UserId { get; set; } 
+        public int UserId { get; set; }
+        public string? FullName { get; set; }
+        public string? UserName { get; set; }    
         public string? Caption { get; set; }
         public string? Location { get; set; }
         public int LikeCount { get; set; }

@@ -12,4 +12,12 @@
     public interface ILikeService {
         Task<LikeDto> ToggleLikeAsync(LikeInputModel inputModel, int userId);
     }
+    public interface ICommentService {
+        Task<CommentDto>? AddCommentAsync(CommentInputModel model, int userId);
+        Task<bool> DeleteCommentAsync(int commentId, int userId);
+        Task<CommentDto?> EditCommentAsync(EditCommentInputModel model, int userId);
+        Task<IEnumerable<CommentDto>> GetCommentsByPostIdAsync(int postId);
+        Task<IEnumerable<ReplyCommentDto>> GetRepliesByCommentIdAsync(int commentId);
+        Task<ReplyCommentDto?> AddReplyAsync(ReplyCommentInputModel model, int userId);
+    }
 }

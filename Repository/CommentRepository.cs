@@ -11,7 +11,12 @@ namespace Mini_Social_Media.Repository {
             return await _context.Comments.ToListAsync();
         }
         public async Task<Comment?> GetByIdAsync(int id) {
-            return await _context.Comments.FindAsync(id);
+            return await _context.Comments
+                .Include(c => c.User)
+                .Include(c => c.Replies)
+                .Include(c => c.Post)
+                .Include(c => c.ParentComment)
+                .FirstOrDefaultAsync(c => c.CommentId == id);
         }
         public async Task AddAsync(Comment entity) {
             await _context.Comments.AddAsync(entity);
@@ -30,6 +35,26 @@ namespace Mini_Social_Media.Repository {
                 _context.Entry(existingComment).CurrentValues.SetValues(entity);
                 await _context.SaveChangesAsync();
             }
+        }
+        public async Task<IEnumerable<Comment>> GetCommentsByPostIdAsync(int postId) {
+            return await _context.Comments
+                .Where(c => c.PostId == postId)
+                .Include(c => c.User)
+                .ToListAsync();
+        }
+        public async Task<bool> AddReplyAsync(int commentId) {
+            var comment = await GetByIdAsync(commentId);
+            if (comment == null) return false;
+            comment.ReplyCount++;
+            await UpdateAsync(comment);
+            return true;
+        }
+        public async Task<bool> RemoveReplyAsync(int commentId) {
+            var comment = await GetByIdAsync(commentId);
+            if (comment == null) return false;
+            comment.ReplyCount--;
+            await UpdateAsync(comment);
+            return true;
         }
     }
 }

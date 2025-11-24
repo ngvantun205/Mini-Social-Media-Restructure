@@ -103,6 +103,7 @@ namespace Mini_Social_Media.AppService {
                 CommentCount = post.CommentCount,
                 MediaUrls = post.Medias.Select(x => x.Url).ToList(),
                 UserName = post.User?.UserName,
+                FullName = post.User?.FullName,
                 Hashtags = string.Join(" ", hashtagNames) 
             };
         }
@@ -184,7 +185,6 @@ namespace Mini_Social_Media.AppService {
             if (post == null || post.UserId != userId)
                 return false;
 
-            // Lưu ý: Nên giảm UsageCount của hashtag trước khi xóa post nếu cần thiết
             foreach (var ph in post.PostHashtags) {
                 ph.Hashtag.UsageCount = Math.Max(0, ph.Hashtag.UsageCount - 1);
             }

@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Mini_Social_Media.Models.InputModel {
-    public class CommentInputModel {
+    public class EditCommentInputModel {
+        [Required]
+        public int CommentId { get; set; }
         [Required]
         public string? Content { get; set; }
         [Required]
         public int PostId { get; set; }
     }
-
 }

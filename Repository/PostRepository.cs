@@ -17,14 +17,16 @@ namespace Mini_Social_Media.Repository {
                 .Include(p => p.Comments)
                 .Include(p => p.Likes)
                 .Include(p => p.PostHashtags)
-                    .ThenInclude(ph => ph.Hashtag)   
+                    .ThenInclude(ph => ph.Hashtag)
                 .FirstOrDefaultAsync(p => p.PostId == id);
         }
         public async Task<IEnumerable<Post>> GetPostsPagedAsync(int page, int pageSize) {
             return await _context.Posts
                 .Include(p => p.User)
                 .Include(p => p.Medias)
-                .Include(p  => p.Likes)
+                .Include(p => p.Likes)
+                .Include(p => p.PostHashtags)
+                    .ThenInclude(ph => ph.Hashtag)
                 .OrderByDescending(p => p.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -62,6 +64,25 @@ namespace Mini_Social_Media.Repository {
                 post.LikeCount--;
                 await UpdateAsync(post);
             }
+        }
+        public async Task<bool> AddCommentAsync(int postId) {
+            var post = await GetByIdAsync(postId);
+            if (post != null) {
+                post.CommentCount++;
+                await UpdateAsync(post);
+                return true;
+            }
+            return false;
+        }
+        public async Task<bool> RemoveCommentAsync(int postId) {
+            var post = await GetByIdAsync(postId);
+            if (post != null) {
+                post.CommentCount--;
+                await UpdateAsync(post);
+                return true;
+            }
+            else
+                return false;
         }
     }
 }

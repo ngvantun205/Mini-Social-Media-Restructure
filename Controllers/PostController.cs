@@ -46,6 +46,8 @@ namespace Mini_Social_Media.Controllers {
                     LikeCount = post.LikeCount,
                     CommentCount = post.CommentCount,
                     CreatedAt = post.CreatedAt,
+                    UserName = post.UserName,
+                    FullName = post.FullName,
                     Medias = post.MediaUrls?.Select(url => new PostMediaViewModel {
                         Url = url,
                         MediaType = url.EndsWith(".mp4") ? "video" : "image"
