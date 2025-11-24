@@ -7,13 +7,15 @@ namespace Mini_Social_Media.AppService {
         private readonly IHashtagRepository _hashtagRepository;
         private readonly IPostMediaRepository _postMediaRepository;
         private readonly ILikeRepository _likeRepository;
+        private readonly ICommentRepository _commentRepository;
 
-        public PostService(IPostRepository postRepository, IUploadService uploadService, IHashtagRepository hashtagRepository, IPostMediaRepository postMediaRepository, ILikeRepository likeRepository) {
+        public PostService(IPostRepository postRepository, IUploadService uploadService, IHashtagRepository hashtagRepository, IPostMediaRepository postMediaRepository, ILikeRepository likeRepository, ICommentRepository commentRepository) {
             _postRepository = postRepository;
             _uploadService = uploadService;
             _hashtagRepository = hashtagRepository;
             _postMediaRepository = postMediaRepository;
             _likeRepository = likeRepository;
+            _commentRepository = commentRepository;
         }
 
         private List<string> ExtractHashtags(string caption) {
@@ -92,7 +94,7 @@ namespace Mini_Social_Media.AppService {
                 return null;
 
             var hashtagNames = post.PostHashtags.Select(ph => ph.Hashtag.HashtagName).ToList();
-
+            var comments = await _commentRepository.GetCommentsByPostIdAsync(postId);
             return new PostDto {
                 PostId = post.PostId,
                 UserId = post.UserId,
@@ -104,7 +106,17 @@ namespace Mini_Social_Media.AppService {
                 MediaUrls = post.Medias.Select(x => x.Url).ToList(),
                 UserName = post.User?.UserName,
                 FullName = post.User?.FullName,
-                Hashtags = string.Join(" ", hashtagNames) 
+                Hashtags = string.Join(" ", hashtagNames) ,
+                Comments = comments.Select(c => new CommentDto {
+                    CommentId = c.CommentId,
+                    PostId = c.PostId,
+                    UserId = c.UserId,
+                    UserName = c.User?.UserName,
+                    FullName = c.User?.FullName,
+                    UserAvatarUrl = c.User?.AvatarUrl,
+                    Content = c.Content,
+                    CreatedAt = c.CreatedAt
+                }).ToList()
             };
         }
 

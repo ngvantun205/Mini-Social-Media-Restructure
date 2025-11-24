@@ -15,6 +15,8 @@ namespace Mini_Social_Media.Repository {
                 .Include(p => p.User)
                 .Include(p => p.Medias)
                 .Include(p => p.Comments)
+                .Include(p => p.Comments!)
+                    .ThenInclude(c => c.User)
                 .Include(p => p.Likes)
                 .Include(p => p.PostHashtags)
                     .ThenInclude(ph => ph.Hashtag)

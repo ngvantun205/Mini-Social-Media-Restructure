@@ -1,5 +1,6 @@
 ﻿namespace Mini_Social_Media {
     public class CommentDto {
+        public int PostId { get; set; }
         public int CommentId { get; set; }
         public int UserId { get; set; }
         public string? UserName { get; set; }

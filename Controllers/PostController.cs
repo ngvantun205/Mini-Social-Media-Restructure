@@ -34,29 +34,40 @@ namespace Mini_Social_Media.Controllers {
         }
         [HttpGet]
         public async Task<IActionResult> PostDetails(int id) {
+            // Lưu ý: Service phải Include Comment và User của Comment thì mới có dữ liệu
             var post = await _postService.GetByIdAsync(id);
+
             if (post == null)
                 return NotFound();
-            else {
-                var postviewmodel = new PostViewModel {
-                    UserId = post.UserId,
-                    PostId = post.PostId,
-                    Caption = post.Caption,
-                    Location = post.Location,
-                    LikeCount = post.LikeCount,
-                    CommentCount = post.CommentCount,
-                    CreatedAt = post.CreatedAt,
-                    UserName = post.UserName,
-                    FullName = post.FullName,
-                    Medias = post.MediaUrls?.Select(url => new PostMediaViewModel {
-                        Url = url,
-                        MediaType = url.EndsWith(".mp4") ? "video" : "image"
-                    }).ToList() ?? new List<PostMediaViewModel>(),
-                    Hashtags = post.Hashtags,
-                };
 
-                return View(postviewmodel);
-            }
+            var postviewmodel = new PostViewModel {
+                UserId = post.UserId,
+                PostId = post.PostId,
+                Caption = post.Caption,
+                Location = post.Location,
+                LikeCount = post.LikeCount,
+                CommentCount = post.CommentCount,
+                CreatedAt = post.CreatedAt,
+                UserName = post.UserName,
+                // Map media
+                Medias = post.MediaUrls?.Select(url => new PostMediaViewModel {
+                    Url = url,
+                    MediaType = url.EndsWith(".mp4") ? "video" : "image"
+                }).ToList() ?? new List<PostMediaViewModel>(),
+                Hashtags = post.Hashtags,
+
+                // Map Comments sang ViewModel
+                Comments = post.Comments?.Select(c => new CommentViewModel {
+                    CommentId = c.CommentId,
+                    UserName = c.UserName,
+                    FullName = c.FullName,
+                    UserAvatarUrl = c.UserAvatarUrl, 
+                    Content = c.Content,
+                    CreatedAt = c.CreatedAt
+                }).OrderBy(c => c.CreatedAt).ToList() ?? new List<CommentViewModel>()
+            };
+
+            return View(postviewmodel);
         }
         [HttpGet]
         public async Task<IActionResult> EditPost(int postId) {
