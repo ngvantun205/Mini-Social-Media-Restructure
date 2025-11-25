@@ -21,6 +21,7 @@
         Task<IEnumerable<Comment>> GetCommentsByPostIdAsync(int postId);
         Task<bool> AddReplyAsync(int commentId);    
         Task<bool> RemoveReplyAsync(int commentId);
+        Task<IEnumerable<Comment>> GetRepliesByCommentIdAsync(int commentId);
     }
     public interface ILikeRepository : IRepository<Like> {
         Task DeleteByPostIdAndUserIdAsync(int postId, int userId);

@@ -81,10 +81,10 @@
                         @foreach (var media in Model.MediaFiles) {
                             var mediaId = "media_" + media.GetHashCode();
 
-                            <div class="media-item" id="@mediaId" data-url="@media">
+                            <div class="media-item" id="@mediaId" data-url="@media.Url">
                                 <div class="media-container">
-                                    @if (media.EndsWith(".mp4") || media.EndsWith(".MP4")) {
-                                        <video src="@media" class="media-content"></video>
+                                    @if (media.MediaType == "video") {
+                                        <video src="@media.Url" class="media-content"></video>
                                         <div class="video-overlay">
                                             <svg width="48" height="48" viewBox="0 0 24 24" fill="white">
                                                 <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -92,12 +92,12 @@
                                         </div>
                                     }
                                     else {
-                                        <img src="@media" class="media-content" alt="Post media" />
+                                        <img src="@media.Url" class="media-content" alt="Post media" />
                                     }
 
                                     <button type="button"
                                             class="remove-btn"
-                                            onclick="removeMedia('@media', '@mediaId')"
+                                            onclick="removeMedia('@media.Url', '@mediaId')"
                                             title="Remove media">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <polyline points="3 6 5 6 21 6"></polyline>

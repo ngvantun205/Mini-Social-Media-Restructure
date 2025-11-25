@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using Mini_Social_Media.Models.DomainModel;
+using System.Text.RegularExpressions;
 
 namespace Mini_Social_Media.AppService {
     public class PostService : IPostService {
@@ -18,15 +19,6 @@ namespace Mini_Social_Media.AppService {
             _commentRepository = commentRepository;
         }
 
-        private List<string> ExtractHashtags(string caption) {
-            if (string.IsNullOrEmpty(caption))
-                return new List<string>();
-            // Regex: Bắt các từ bắt đầu bằng #, bao gồm chữ cái, số và _
-            var regex = new Regex(@"#\w+");
-            var matches = regex.Matches(caption);
-            return matches.Select(m => m.Value).Distinct().ToList();
-        }
-
         public async Task<CreatePostDto> CreatePost(PostInputModel model, int userId) {
 
             var post = new Post {
@@ -44,7 +36,6 @@ namespace Mini_Social_Media.AppService {
                         post.PostHashtags.Add(new PostHashtag {
                             HashtagId = existingTag.HashtagId
                         });
-                        Console.WriteLine("📌 Thêm hashtag có sẵn vào Post → " + tag);
                     }
                     else {
                         var newTag = new Hashtag {
@@ -56,7 +47,6 @@ namespace Mini_Social_Media.AppService {
                         post.PostHashtags.Add(new PostHashtag {
                             Hashtag = newTag
                         });
-                        Console.WriteLine("📌 Tạo và thêm hashtag mới vào Post → " + tag);
                     }
                 }
             }
@@ -65,30 +55,22 @@ namespace Mini_Social_Media.AppService {
                     var url = await _uploadService.UploadAsync(file);
 
                     if (string.IsNullOrEmpty(url)) {
-                        Console.WriteLine("❌ Không thể upload file: " + file.FileName);
                         continue;
                     }
-
-                    Console.WriteLine("📌 Thêm Media vào Post → URL: " + url);
-
                     post.Medias.Add(new PostMedia {
                         Url = url,
                         MediaType = file.ContentType.StartsWith("video") ? "video" : "image"
                     });
                 }
             }
-
-            Console.WriteLine("📌 Tổng số media được thêm: " + post.Medias.Count);
-
             await _postRepository.AddAsync(post);
-
             return new CreatePostDto {
                 PostId = post.PostId,
                 MediaUrls = post.Medias.Select(x => x.Url).ToList()
             };
         }
 
-        public async Task<PostDto?> GetByIdAsync(int postId) {
+        public async Task<PostDto?> GetByIdAsync(int postId, int userId) {
             var post = await _postRepository.GetByIdAsync(postId);
             if (post == null)
                 return null;
@@ -102,8 +84,9 @@ namespace Mini_Social_Media.AppService {
                 Location = post.Location,
                 CreatedAt = post.CreatedAt,
                 LikeCount = post.LikeCount,
+                IsLiked = post.Likes.Any(l => l.UserId == userId),
                 CommentCount = post.CommentCount,
-                MediaUrls = post.Medias.Select(x => x.Url).ToList(),
+                MediaUrls = post.Medias.Select(m => new PostMediaDto { Url = m.Url, MediaType = m.MediaType }).ToList(),
                 UserName = post.User?.UserName,
                 FullName = post.User?.FullName,
                 Hashtags = string.Join(" ", hashtagNames) ,
@@ -137,7 +120,6 @@ namespace Mini_Social_Media.AppService {
                         post.PostHashtags.Add(new PostHashtag {
                             HashtagId = existingTag.HashtagId
                         });
-                        Console.WriteLine("📌 Thêm hashtag có sẵn vào Post → " + tag);
                     }
                     else if (!await _hashtagRepository.IsExist(tag)) {
                         var newTag = new Hashtag {
@@ -149,7 +131,6 @@ namespace Mini_Social_Media.AppService {
                         post.PostHashtags.Add(new PostHashtag {
                             Hashtag = newTag
                         });
-                        Console.WriteLine("📌 Tạo và thêm hashtag mới vào Post → " + tag);
                     }
 
                 }
@@ -187,7 +168,7 @@ namespace Mini_Social_Media.AppService {
                 CreatedAt = post.CreatedAt,
                 LikeCount = post.LikeCount,
                 CommentCount = post.CommentCount,
-                MediaUrls = post.Medias.Select(x => x.Url).ToList(),
+                MediaUrls = post.Medias.Select(m => new PostMediaDto { Url = m.Url, MediaType = m.MediaType }).ToList(),
                 UserName = post.User?.UserName,
                 Hashtags = string.Join(' ', post.PostHashtags.Select(x => x.Hashtag.HashtagName))
             };
@@ -200,7 +181,6 @@ namespace Mini_Social_Media.AppService {
             foreach (var ph in post.PostHashtags) {
                 ph.Hashtag.UsageCount = Math.Max(0, ph.Hashtag.UsageCount - 1);
             }
-
             await _postRepository.DeleteAsync(postId);
             return true;
         }
@@ -214,7 +194,7 @@ namespace Mini_Social_Media.AppService {
                 UserName = p.User?.UserName,
                 Caption = p.Caption,
                 CreatedAt = p.CreatedAt,
-                MediaUrls = p.Medias.Select(m => m.Url).ToList(),
+                MediaUrls = p.Medias.Select(m =>  new PostMediaDto() {Url = m.Url, MediaType = m.MediaType }).ToList(),
                 LikeCount = p.LikeCount,
                 CommentCount = p.CommentCount,
                 IsLiked = p.Likes.Any(l => l.UserId == userId),

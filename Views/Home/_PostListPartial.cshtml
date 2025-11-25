@@ -1,4 +1,4 @@
-﻿@model List<Mini_Social_Media.DTO.PostDto>
+﻿@model List<Mini_Social_Media.Models.ViewModel.PostViewModel>
 
 @foreach (var post in Model) {
     <div class="post-detail-card mb-4" style="background: white; border-radius: 8px; border: 1px solid #dbdbdb; margin-bottom: 20px;">
@@ -41,34 +41,34 @@
             </div>
         }
 
-        @if (post.MediaUrls != null && post.MediaUrls.Any()) {
+        @if (post.Medias != null && post.Medias.Any()) {
             <div class="post-media-container">
-                @if (post.MediaUrls.Count == 1) {
-                    var url = post.MediaUrls.First();
+                @if (post.Medias.Count == 1) {
+                    var media = post.Medias.First();
                     <div class="media-single">
-                        @if (url.EndsWith(".mp4")) {
+                        @if (media.MediaType == "video") {
                             <video controls style="width: 100%; display: block;">
-                                <source src="@url" type="video/mp4" />
+                                <source src="@media.Url" type="video/mp4" />
                             </video>
                         }
                         else {
-                            <img src="@url" alt="Post media" style="width: 100%; object-fit: cover; display: block;" />
+                            <img src="@media.Url" alt="Post media" style="width: 100%; object-fit: cover; display: block;" />
                         }
                     </div>
                 }
                 else {
                     <div id="carousel-@post.PostId" class="carousel slide" data-bs-ride="carousel">
                         <div class="carousel-inner">
-                            @for (int i = 0; i < post.MediaUrls.Count; i++) {
-                                var url = post.MediaUrls[i];
+                            @for (int i = 0; i < post.Medias.Count; i++) {
+                                var media = post.Medias[i];
                                 <div class="carousel-item @(i == 0 ? "active" : "")">
-                                    @if (url.EndsWith(".mp4")) {
+                                    @if (media.MediaType == "video") {
                                         <video controls style="width: 100%; height: 400px; object-fit: contain; background: black;">
-                                            <source src="@url" type="video/mp4" />
+                                            <source src="@media.Url" type="video/mp4" />
                                         </video>
                                     }
                                     else {
-                                        <img src="@url" class="d-block w-100" style="height: 400px; object-fit: cover;" alt="...">
+                                        <img src="@media.Url" class="d-block w-100" style="height: 400px; object-fit: cover;" alt="...">
                                     }
                                 </div>
                             }

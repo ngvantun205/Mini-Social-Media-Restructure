@@ -15,12 +15,16 @@
         public string? Caption { get; set; }
         public string? Location { get; set; }
         public DateTime CreatedAt { get; set; }
-        public List<string>? MediaUrls { get; set; }
+        public List<PostMediaDto>? MediaUrls { get; set; }
         public List<CommentDto> Comments { get; set; } = new();
         public string? Hashtags { get; set; } 
         public int LikeCount { get; set; }
         public int CommentCount { get; set; }
         public bool IsLiked { get; set; }
+    }
+    public class PostMediaDto {
+        public string Url { get; set; }
+        public string MediaType { get; set; }
     }
     public class CreatePostResultDto {
         public int PostId { get; set; }

@@ -70,7 +70,8 @@
                 CreatedAt = c.CreatedAt,
                 UserAvatarUrl = c.User?.AvatarUrl,
                 UserName = c.User?.UserName,
-                FullName = c.User?.FullName
+                FullName = c.User?.FullName,
+                ReplyCount = c.ReplyCount
             });
         }
         public async Task<IEnumerable<ReplyCommentDto>> GetRepliesByCommentIdAsync(int commentId) {
@@ -78,13 +79,14 @@
             if (comment == null) {
                 return Enumerable.Empty<ReplyCommentDto>();
             }
-            var replies = comment.Replies ?? Enumerable.Empty<Comment>();
+            var replies = await _commentRepository.GetRepliesByCommentIdAsync(commentId);
             return replies.Select(r => new ReplyCommentDto {
                 CommentId = r.CommentId,
                 UserId = r.UserId,
                 Content = r.Content,
                 CreatedAt = r.CreatedAt,
                 UserName = r.User?.UserName,
+                ReplyCount = r.ReplyCount,
                 UserAvatarUrl = r.User?.AvatarUrl
             });
         }
@@ -98,7 +100,10 @@
             };
             var result = await _postRepository.AddCommentAsync(model.PostId);
             if (!result)
-                return null!;
+                return null;
+            var resultReply = await _commentRepository.AddReplyAsync(model.ParentCommentId);
+            if (!resultReply)
+                return null;
             await _commentRepository.AddAsync(reply);
             var createdreply = await _commentRepository.GetByIdAsync(reply.CommentId);
             return new ReplyCommentDto {

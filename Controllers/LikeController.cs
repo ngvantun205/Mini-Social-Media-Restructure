@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace Mini_Social_Media.Controllers {
+    [Authorize]
     public class LikeController : Controller {
         private readonly UserManager<User> _userManager;
         private readonly ILikeService _likeService;
@@ -11,6 +12,7 @@ namespace Mini_Social_Media.Controllers {
             _likeService = likeService;
         }
         [HttpPost]
+        [Route("Like/Like")]
         public async Task<IActionResult> LikeAsync([FromBody] LikeInputModel likeinput) 
 {
             var userIdStr = _userManager.GetUserId(User);

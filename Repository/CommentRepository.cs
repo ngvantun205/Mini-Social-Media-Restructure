@@ -23,8 +23,13 @@ namespace Mini_Social_Media.Repository {
             await _context.SaveChangesAsync();
         }
         public async Task DeleteAsync(int id) {
-            var comment = await _context.Comments.FindAsync(id);
+            var comment = await _context.Comments
+                .Include(c => c.Replies)
+                .FirstOrDefaultAsync(c => c.CommentId == id);
             if (comment != null) {
+                if (comment.Replies != null && comment.Replies.Any()) {
+                    _context.Comments.RemoveRange(comment.Replies);
+                }
                 _context.Comments.Remove(comment);
                 await _context.SaveChangesAsync();
             }
@@ -38,7 +43,13 @@ namespace Mini_Social_Media.Repository {
         }
         public async Task<IEnumerable<Comment>> GetCommentsByPostIdAsync(int postId) {
             return await _context.Comments
-                .Where(c => c.PostId == postId)
+                .Where(c => c.PostId == postId && c.ParentCommentId == null)
+                .Include(c => c.User)
+                .ToListAsync();
+        }
+        public async Task<IEnumerable<Comment>> GetRepliesByCommentIdAsync(int commentId) {
+            return await _context.Comments
+                .Where(c => c.ParentCommentId == commentId)
                 .Include(c => c.User)
                 .ToListAsync();
         }

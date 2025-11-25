@@ -12,6 +12,7 @@ namespace Mini_Social_Media.Models.ViewModel {
         public int LikeCount { get; set; }
         public int CommentCount { get; set; }
         public DateTime CreatedAt { get; set; }
+        public bool IsLiked { get; set; }    
         public List<PostMediaViewModel> Medias { get; set; } = new List<PostMediaViewModel>();
         public List<CommentViewModel> Comments { get; set; } = new List<CommentViewModel>();
         public string? Hashtags { get; set; }

@@ -2,136 +2,183 @@
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Post Detail";
+
+    var currentUserIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var currentUserId = string.IsNullOrEmpty(currentUserIdStr) ? 0 : int.Parse(currentUserIdStr);
 }
 
-<div class="container" style="max-width: 900px; margin-top: 20px; height: 85vh;">
-    <div class="post-detail-card" style="background: white; border: 1px solid #dbdbdb; border-radius: 3px; display: flex; height: 100%;">
+@functions {
+    public void RenderCommentItem(CommentViewModel comment, int currentUserId, bool isReply) {
+        var divId = $"comment-wrapper-{comment.CommentId}";
+        var textId = $"comment-text-{comment.CommentId}";
+        var safeContent = System.Web.HttpUtility.JavaScriptStringEncode(comment.Content);
 
-        <div class="post-media-section" style="flex: 1; background: black; display: flex; align-items: center; justify-content: center; border-right: 1px solid #efefef; overflow: hidden;">
-            @if (Model.Medias != null && Model.Medias.Any()) {
-                if (Model.Medias.Count() == 1) {
+        // Nếu là reply thì thụt đầu dòng
+        var indentClass = isReply ? "ps-5 ms-3 border-start" : "";
+
+        <div class="comment-item mb-3 @indentClass" id="@divId">
+            <div class="d-flex">
+                <img src="/images/avatar.png" class="rounded-circle me-2" width="32" height="32" style="object-fit: cover;">
+
+                <div class="flex-grow-1">
+                    <div class="bg-light p-2 px-3 rounded-4 d-inline-block">
+                        <strong class="d-block small text-dark">@comment.UserName</strong>
+                        <p class="mb-0 text-break small" id="@textId">@comment.Content</p>
+                    </div>
+
+                    <div class="d-flex gap-3 ms-2 mt-1 small text-muted align-items-center">
+                        <span role="button" class="fw-bold" style="font-size: 11px;">Like</span>
+                        <span role="button" class="fw-bold" style="font-size: 11px;"
+                              onclick="prepareReply(@comment.CommentId, '@comment.UserName', '@safeContent')">Reply</span>
+                        <span style="font-size: 11px;">@comment.CreatedAt.ToString("HH:mm")</span>
+
+                        <div class="dropdown d-inline">
+                            <button class="btn btn-link text-muted p-0 border-0 text-decoration-none" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                            <ul class="dropdown-menu shadow-sm">
+                                @if (comment.UserId == currentUserId) {
+                                    <li><a class="dropdown-item" href="javascript:void(0)" onclick="prepareEdit(@comment.CommentId, '@safeContent')">Edit</a></li>
+                                    <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteComment(@comment.CommentId)">Delete</a></li>
+                                }
+                                else {
+                                    <li><a class="dropdown-item" href="#">Report</a></li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+
+                    @if (comment.ReplyCount > 0) {
+                        <div class="mt-1 ms-2">
+                            <a href="javascript:void(0)" class="text-decoration-none fw-bold small text-muted"
+                               id="btn-view-replies-@comment.CommentId"
+                               onclick="loadReplies(@comment.CommentId)">
+                                <i class="bi bi-arrow-return-right me-1"></i>View @comment.ReplyCount replies
+                            </a>
+                        </div>
+                        <div id="replies-container-@comment.CommentId" style="display: none;"></div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}
+
+<div class="container mt-4 mb-5" style="max-width: 700px;">
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white border-bottom-0 d-flex align-items-center p-3">
+            <img src="/images/avatar.png" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+            <div class="flex-grow-1">
+                <h6 class="m-0 fw-bold">@Model.UserName</h6>
+                @if (!string.IsNullOrEmpty(Model.Location)) {
+                    <small class="text-muted">@Model.Location</small>
+                }
+            </div>
+            @if (User.Identity.IsAuthenticated && Model.UserId == currentUserId) {
+                <div class="d-flex gap-2">
+                    <a asp-action="EditPost" asp-route-postId="@Model.PostId" class="btn btn-light btn-sm rounded-circle"><i class="bi bi-pencil"></i></a>
+                    <button onclick="confirmDeletePost(@Model.PostId)" class="btn btn-light btn-sm rounded-circle text-danger"><i class="bi bi-trash"></i></button>
+                </div>
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.Caption)) {
+            <div class="card-body pt-0 pb-2">
+                <p class="card-text mb-1 text-break">@Model.Caption</p>
+                @if (!string.IsNullOrEmpty(Model.Hashtags)) {
+                    <div class="mb-2">
+                        @foreach (var tag in Model.Hashtags.Split(' ', StringSplitOptions.RemoveEmptyEntries)) {
+                            <a href="#" class="text-decoration-none me-1 small">@tag</a>
+                        }
+                    </div>
+                }
+                <p class="card-text"><small class="text-muted">@Model.CreatedAt.ToString("d MMMM, yyyy • HH:mm")</small></p>
+            </div>
+        }
+
+        @if (Model.Medias != null && Model.Medias.Any()) {
+            <div class="bg-black d-flex align-items-center justify-content-center" style="min-height: 300px; max-height: 600px; overflow: hidden;">
+                @if (Model.Medias.Count() == 1) {
                     var media = Model.Medias.First();
                     if (media.MediaType == "video") {
-                        <video controls style="max-width: 100%; max-height: 100%;"><source src="@media.Url" type="video/mp4" /></video>
-                    } else {
-                        <img src="@media.Url" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                        <video controls class="w-100" style="max-height: 600px;"><source src="@media.Url" type="video/mp4" /></video>
                     }
-                } else {
-                    <div id="carouselDetail" class="carousel slide" data-bs-ride="carousel" style="width:100%">
+                    else {
+                        <img src="@media.Url" class="w-100" style="max-height: 600px; object-fit: contain;" />
+                    }
+                }
+                else {
+                    <div id="carouselPost" class="carousel slide w-100" data-bs-ride="carousel">
                         <div class="carousel-inner">
                             @for (int i = 0; i < Model.Medias.Count(); i++) {
                                 var media = Model.Medias.ElementAt(i);
                                 <div class="carousel-item @(i == 0 ? "active" : "")">
                                     @if (media.MediaType == "video") {
-                                        <video controls class="d-block w-100" style="max-height: 85vh;"><source src="@media.Url" type="video/mp4" /></video>
-                                    } else {
-                                        <img src="@media.Url" class="d-block w-100" style="max-height: 85vh; object-fit: contain;" />
+                                        <video controls class="d-block w-100" style="max-height: 600px; object-fit: contain;"><source src="@media.Url" type="video/mp4" /></video>
+                                    }
+                                    else {
+                                        <img src="@media.Url" class="d-block w-100" style="max-height: 600px; object-fit: contain;" />
                                     }
                                 </div>
                             }
                         </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselDetail" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#carouselDetail" data-bs-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        </button>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselPost" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselPost" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
                     </div>
                 }
-            } else {
-                <div class="text-white">No Media</div>
-            }
+            </div>
+        }
+
+        <div class="card-body border-bottom py-2 post-footer">
+            <div class="d-flex justify-content-between mb-2">
+                <div>
+                    <button class="btn btn-link p-0 me-3" onclick="toggleLike(this, @Model.PostId)" style="text-decoration: none;">
+                        <i class="bi @(Model.IsLiked ? "bi-heart-fill text-danger" : "bi-heart text-dark") fs-4"></i>
+                    </button>
+                    <i class="bi bi-chat fs-4 me-3 cursor-pointer"></i>
+                    <i class="bi bi-send fs-4 cursor-pointer"></i>
+                </div>
+                <i class="bi bi-bookmark fs-4 cursor-pointer"></i>
+            </div>
+            <p class="fw-bold mb-0 small likes-count">@Model.LikeCount likes</p>
         </div>
 
-        <div class="post-info-section" style="width: 350px; display: flex; flex-direction: column; background: #fff;">
+        <div class="card-footer bg-white border-0 p-3">
+            <div id="commentList" class="mb-3" style="max-height: 400px; overflow-y: auto;">
+                @if (Model.Comments != null && Model.Comments.Any()) {
+                    // CHỈ LOAD COMMENT GỐC (ROOT)
+                    // Không dùng đệ quy tự động, để hiện nút View Replies
+                    var rootComments = Model.Comments.Where(c => c.ParentCommentId == null).ToList();
 
-            <div class="post-header d-flex align-items-center p-3 border-bottom">
-                <img src="/images/avatar.png" width="32" height="32" class="rounded-circle me-2" style="object-fit: cover;">
-                
-                <div style="flex-grow: 1; min-width: 0;">
-                    <h6 class="m-0 fw-bold text-truncate">@Model.UserName</h6>
-                    @if (!string.IsNullOrEmpty(Model.Location)) {
-                        <small class="text-muted d-block text-truncate" style="font-size: 11px;">@Model.Location</small>
+                    foreach (var comment in rootComments) {
+                        RenderCommentItem(comment, currentUserId, false);
+                        // Div chứa reply sẽ rỗng lúc đầu
+                        <div id="replies-container-@comment.CommentId" style="display: none;"></div>
                     }
-                </div>
-
-                @if (User.Identity.IsAuthenticated && Model.UserId == int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value)) {
-                    <div class="ms-2 d-flex align-items-center gap-1">
-                        <a asp-action="EditPost" asp-route-postId="@Model.PostId" class="btn btn-sm btn-light text-secondary" title="Edit Post">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
-                        <button onclick="confirmDelete(@Model.PostId)" class="btn btn-sm btn-light text-danger" title="Delete Post">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
+                }
+                else {
+                    <div class="text-center text-muted py-3 no-comments small">No comments yet.</div>
                 }
             </div>
 
-            <div class="comments-area flex-grow-1 p-3" style="overflow-y: auto;">
-                
-                @if (!string.IsNullOrEmpty(Model.Caption)) {
-                    <div class="caption-section mb-3">
-                        <span class="text-dark text-break" style="font-size: 14px;">@Model.Caption</span>
-                        
-                        @if (!string.IsNullOrEmpty(Model.Hashtags)) {
-                            <div class="mt-2">
-                                @foreach (var tag in Model.Hashtags.Split(' ', StringSplitOptions.RemoveEmptyEntries)) {
-                                    <a href="#" class="text-primary text-decoration-none me-1 small">@tag</a>
-                                }
-                            </div>
-                        }
-                        <div class="text-muted mt-2" style="font-size: 11px;">@Model.CreatedAt.ToString("d MMMM, yyyy • HH:mm")</div>
+            <div class="position-relative">
+                <div id="actionPreview" class="alert alert-light d-flex justify-content-between align-items-center p-2 mb-0 border border-bottom-0 rounded-top" style="display: none;">
+                    <div class="small text-truncate" style="max-width: 90%;">
+                        <strong id="actionLabel" class="text-primary"></strong>:
+                        <span id="actionContentPreview" class="text-muted"></span>
                     </div>
-                    <hr class="text-muted opacity-25 my-2">
-                }
-
-                <div id="commentList">
-                    @if (Model.Comments != null && Model.Comments.Any()) {
-                        foreach (var comment in Model.Comments) {
-                            <div class="comment-item mb-3 d-flex">
-                                <img src="/images/avatar.png" width="32" height="32" class="rounded-circle me-2" style="min-width: 32px; object-fit:cover; margin-top: 2px;">
-                                
-                                <div class="comment-body">
-                                    <div class="bg-light p-2 px-3 rounded-4 d-inline-block" style="background-color: #f0f2f5 !important;">
-                                        <strong class="d-block small text-dark">@comment.UserName</strong>
-                                        <p class="mb-0 text-break small">@comment.Content</p>
-                                    </div>
-                                    <div class="d-flex gap-3 ms-2 mt-1 small text-muted">
-                                        <span role="button" class="fw-bold" style="font-size: 11px;">Like</span>
-                                        <span role="button" class="fw-bold" style="font-size: 11px;">Reply</span>
-                                        <span style="font-size: 11px;">@comment.CreatedAt.ToString("HH:mm")</span>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    } else {
-                        <div class="text-center py-4 no-comment-text">
-                            <span class="text-muted small">No comments yet.</span>
-                        </div>
-                    }
+                    <button type="button" class="btn-close small" style="font-size: 10px;" onclick="cancelAction()"></button>
                 </div>
-            </div>
 
-            <div class="post-footer border-top p-3 bg-white">
-                <div class="d-flex justify-content-between mb-2">
-                    <div>
-                        <i class="bi bi-heart fs-4 me-3 cursor-pointer" onclick="toggleLike(this, @Model.PostId)"></i>
-                        <i class="bi bi-chat fs-4 me-3 cursor-pointer"></i>
-                        <i class="bi bi-send fs-4 cursor-pointer"></i>
-                    </div>
-                    <i class="bi bi-bookmark fs-4 cursor-pointer"></i>
-                </div>
-                <p class="fw-bold mb-1 small">@Model.LikeCount likes</p>
-                
-                <div class="add-comment mt-3 position-relative d-flex align-items-center">
+                <div class="d-flex align-items-center border rounded-bottom p-1 ps-3 bg-white" id="inputContainer" style="border-radius: 20px;">
                     <input type="hidden" id="commentPostId" value="@Model.PostId" />
-                    <input type="text" id="commentContent" class="form-control rounded-pill pe-5" placeholder="Add a comment..." style="font-size: 14px;">
-                    <button class="btn btn-link text-primary fw-bold position-absolute end-0 text-decoration-none" 
-                            onclick="postComment()" 
-                            style="font-size: 14px;">Post</button>
+                    <input type="hidden" id="parentCommentId" value="" />
+                    <input type="hidden" id="editCommentId" value="" />
+                    <input type="text" id="commentContent" class="form-control border-0 shadow-none" placeholder="Add a comment..." style="font-size: 14px;">
+                    <button class="btn btn-link text-decoration-none fw-bold ms-2" onclick="submitAction()">Post</button>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
@@ -144,79 +191,254 @@
     <script src="~/js/post-detail.js"></script>
 
     <script>
-        // Logic Comment (AJAX)
-        function postComment() {
+        const currentUserId = @currentUserId;
+
+        // 1. LOAD REPLIES (Khi bấm View Replies)
+        function loadReplies(commentId) {
+            const container = document.getElementById(`replies-container-${commentId}`);
+            const btn = document.getElementById(`btn-view-replies-${commentId}`);
+
+            if (container.style.display === 'block') {
+                container.style.display = 'none';
+                return;
+            }
+            if (container.innerHTML.trim() !== "") {
+                container.style.display = 'block';
+                return;
+            }
+
+            fetch(`/Comment/GetReplies/${commentId}`)
+                .then(res => res.json())
+                .then(replies => {
+                    if (replies && replies.length > 0) {
+                        let html = "";
+                        replies.forEach(reply => {
+                            // true = isReply -> để nó thụt đầu dòng
+                            html += generateCommentHtml(reply, true);
+                        });
+                        container.innerHTML = html;
+                        container.style.display = 'block';
+                        if(btn) btn.style.display = 'none';
+                    }
+                })
+                .catch(err => console.error(err));
+        }
+
+        // 2. GENERATE HTML (QUAN TRỌNG: Phải có logic tạo nút View Replies cho comment con nếu cần)
+        function generateCommentHtml(comment, isReply) {
+            const safeContent = comment.content.replace(/'/g, "\\'");
+            const indentClass = isReply ? "ps-5 ms-3 border-start" : "";
+
+            let buttons = '';
+            if (comment.userId === currentUserId) {
+                buttons = `
+                    <div class="d-flex gap-2">
+                        <a href="javascript:void(0)" class="text-secondary" onclick="prepareEdit(${comment.commentId}, '${safeContent}')"><i class="bi bi-pencil"></i></a>
+                        <a href="javascript:void(0)" class="text-danger" onclick="deleteComment(${comment.commentId})"><i class="bi bi-trash"></i></a>
+                    </div>`;
+            } else {
+                buttons = `
+                    <div class="dropdown">
+                        <button class="btn btn-link text-muted p-0 border-0" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
+                        <ul class="dropdown-menu shadow-sm"><li><a class="dropdown-item" href="#">Report</a></li></ul>
+                    </div>`;
+            }
+
+            // Logic View Nested Replies (Nếu reply này lại có con)
+            let viewRepliesBtn = '';
+            if (comment.replyCount > 0) {
+                viewRepliesBtn = `
+                    <div class="mt-1 ms-2">
+                        <a href="javascript:void(0)" class="text-decoration-none fw-bold small text-muted"
+                           id="btn-view-replies-${comment.commentId}"
+                           onclick="loadReplies(${comment.commentId})">
+                            <i class="bi bi-arrow-return-right me-1"></i>View ${comment.replyCount} replies
+                        </a>
+                    </div>
+                    <div id="replies-container-${comment.commentId}" style="display: none;"></div>
+                `;
+            }
+
+            return `
+                <div class="comment-item mb-3 ${indentClass}" id="comment-wrapper-${comment.commentId}">
+                    <div class="d-flex">
+                        <img src="/images/avatar.png" class="rounded-circle me-2" width="32" height="32" style="object-fit: cover;">
+                        <div class="flex-grow-1">
+                            <div class="bg-light p-2 px-3 rounded-4 d-inline-block">
+                                <strong class="d-block small text-dark">${comment.userName || 'User'}</strong>
+                                <p class="mb-0 text-break small" id="comment-text-${comment.commentId}">${comment.content}</p>
+                            </div>
+                            <div class="d-flex gap-3 ms-2 mt-1 small text-muted align-items-center">
+                                <span role="button" class="fw-bold" style="font-size: 12px;">Like</span>
+                                <span role="button" class="fw-bold" style="font-size: 12px;" onclick="prepareReply(${comment.commentId}, '${comment.userName}', '${safeContent}')">Reply</span>
+                                <span style="font-size: 11px;">Just now</span>
+                                ${buttons}
+                            </div>
+                            ${viewRepliesBtn}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 3. APPEND HTML
+        function appendNewCommentHtml(newComment) {
+            const isReply = newComment.parentCommentId != null;
+            const html = generateCommentHtml(newComment, isReply);
+
+            if (isReply) {
+                let container = document.getElementById(`replies-container-${newComment.parentCommentId}`);
+                if (!container) {
+                    // Nếu chưa có container (do chưa bấm View), tạo giả ngay sau cha
+                    const parent = document.getElementById(`comment-wrapper-${newComment.parentCommentId}`);
+                    if (parent) parent.insertAdjacentHTML('afterend', `<div id="replies-container-${newComment.parentCommentId}" style="display:block;">${html}</div>`);
+                } else {
+                    container.style.display = 'block';
+                    container.insertAdjacentHTML('beforeend', html);
+                }
+            } else {
+                document.getElementById("commentList").insertAdjacentHTML('beforeend', html);
+            }
+
+            const list = document.getElementById("commentList");
+            if(list) list.scrollTop = list.scrollHeight;
+        }
+
+        // --- CÁC HÀM KHÁC (Giữ nguyên) ---
+        function toggleInputShape(isOpen) {
+            const container = document.getElementById("inputContainer");
+            if (isOpen) {
+                container.style.borderTopLeftRadius = "0"; container.style.borderTopRightRadius = "0"; container.classList.remove("rounded-pill");
+            } else {
+                container.style.borderTopLeftRadius = "20px"; container.style.borderTopRightRadius = "20px"; container.classList.add("rounded-pill");
+            }
+        }
+
+        function prepareReply(commentId, username, content) {
+            cancelAction();
+            document.getElementById("parentCommentId").value = commentId;
+            document.getElementById("actionLabel").innerText = "Replying to " + username;
+            document.getElementById("actionContentPreview").innerText = content;
+            document.getElementById("actionPreview").style.display = "flex";
+            toggleInputShape(true);
+            const input = document.getElementById("commentContent");
+            input.value = '\u0040' + username + ' '; input.focus();
+        }
+
+        function prepareEdit(commentId, content) {
+            cancelAction();
+            document.getElementById("editCommentId").value = commentId;
+            document.getElementById("actionLabel").innerText = "Editing";
+            document.getElementById("actionContentPreview").innerText = content;
+            document.getElementById("actionPreview").style.display = "flex";
+            toggleInputShape(true);
+            const input = document.getElementById("commentContent");
+            input.value = content; input.focus();
+        }
+
+        function cancelAction() {
+            document.getElementById("parentCommentId").value = "";
+            document.getElementById("editCommentId").value = "";
+            document.getElementById("actionPreview").style.display = "none";
+            toggleInputShape(false);
+            document.getElementById("commentContent").value = "";
+        }
+
+        function submitAction() {
             const postId = document.getElementById("commentPostId").value;
             const contentInput = document.getElementById("commentContent");
             const content = contentInput.value.trim();
+            const parentId = document.getElementById("parentCommentId").value;
+            const editId = document.getElementById("editCommentId").value;
 
-            if (!content) {
-                contentInput.focus();
-                return;
-            }
+            if (!content) { contentInput.focus(); return; }
             contentInput.disabled = true;
 
-            fetch('/Comment/AddComment', {
-                method: 'POST',
+            let url = '/Comment/AddComment';
+            let method = 'POST';
+            let bodyData = { postId: parseInt(postId), content: content };
+
+            if (editId) {
+                url = '/Comment/EditComment'; method = 'PUT';
+                bodyData = { commentId: parseInt(editId), content: content };
+            } else if (parentId) {
+                url = '/Comment/ReplyComment';
+                bodyData = { postId: parseInt(postId), content: content, parentCommentId: parseInt(parentId) };
+            }
+
+            fetch(url, {
+                method: method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ postId: parseInt(postId), content: content })
+                body: JSON.stringify(bodyData)
             })
-            .then(res => {
-                if (!res.ok) throw new Error("Failed");
-                return res.json();
+            .then(res => { if (!res.ok) throw new Error("Error"); return res.json(); })
+            .then(data => {
+                if (editId) {
+                    const textEl = document.getElementById(`comment-text-${editId}`);
+                    if(textEl) textEl.innerText = data.content;
+                } else {
+                    const noCmt = document.querySelector(".no-comments");
+                    if(noCmt) noCmt.style.display = 'none';
+                    appendNewCommentHtml(data);
+                }
+                cancelAction();
             })
-            .then(newComment => {
-                contentInput.value = "";
-                const noCommentText = document.querySelector(".no-comment-text");
-                if(noCommentText) noCommentText.style.display = 'none';
-
-                const commentList = document.getElementById("commentList");
-                
-                // Template HTML Comment mới (Giống bên trên)
-                const commentHtml = `
-                    <div class="comment-item mb-3 d-flex">
-                        <img src="/images/avatar.png" width="32" height="32" class="rounded-circle me-2" style="min-width: 32px; object-fit:cover; margin-top: 2px;">
-                        <div class="comment-body">
-                            <div class="bg-light p-2 px-3 rounded-4 d-inline-block" style="background-color: #f0f2f5 !important;">
-                                <strong class="d-block small text-dark">${newComment.userName || 'You'}</strong>
-                                <p class="mb-0 text-break small">${newComment.content}</p>
-                            </div>
-                            <div class="d-flex gap-3 ms-2 mt-1 small text-muted">
-                                <span role="button" class="fw-bold" style="font-size: 11px;">Like</span>
-                                <span role="button" class="fw-bold" style="font-size: 11px;">Reply</span>
-                                <span style="font-size: 11px;">Just now</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                commentList.insertAdjacentHTML('beforeend', commentHtml);
-                const commentsArea = document.querySelector(".comments-area");
-                commentsArea.scrollTop = commentsArea.scrollHeight;
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Failed to post comment.");
-            })
+            .catch(err => alert("Action failed."))
             .finally(() => {
                 contentInput.disabled = false;
                 contentInput.focus();
             });
         }
 
-        // Hỗ trợ Enter
-        document.getElementById("commentContent").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                postComment();
-            }
-        });
+        function deleteComment(commentId) {
+            if(!confirm("Delete this comment?")) return;
+            fetch('/Comment/DeleteComment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(commentId)
+            }).then(res => {
+                if (res.ok) {
+                    const el = document.getElementById(`comment-wrapper-${commentId}`);
+                    if(el) el.remove();
+                } else alert("Failed.");
+            });
+        }
 
-        // Logic Xóa bài viết
-        function confirmDelete(postId) {
-            if (confirm("Are you sure you want to delete this post?")) {
+        function confirmDeletePost(postId) {
+            if (confirm("Delete post?")) {
                 document.getElementById('deletePostId').value = postId;
                 document.getElementById('deleteForm').submit();
             }
         }
+
+        function toggleLike(btnElement, postId) {
+            let icon = btnElement.querySelector("i") || btnElement;
+            const footer = btnElement.closest(".post-footer");
+            const countP = footer.querySelector(".likes-count");
+            let currentCount = parseInt(countP.innerText);
+            let isLikingAction = false;
+
+            if (icon.classList.contains("bi-heart-fill")) {
+                icon.classList.remove("bi-heart-fill", "text-danger");
+                icon.classList.add("bi-heart", "text-dark");
+                countP.innerText = (currentCount - 1) + " likes";
+                isLikingAction = false;
+            } else {
+                icon.classList.remove("bi-heart", "text-dark");
+                icon.classList.add("bi-heart-fill", "text-danger");
+                countP.innerText = (currentCount + 1) + " likes";
+                isLikingAction = true;
+            }
+
+            fetch('/Like/Like', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ postId: postId })
+            }).then(res => { if (!res.ok) throw new Error("Error"); });
+        }
+
+        document.getElementById("commentContent").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") submitAction();
+        });
     </script>
 }

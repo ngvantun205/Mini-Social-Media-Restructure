@@ -92,5 +92,12 @@ namespace Mini_Social_Media.Controllers {
             }
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("Comment/GetReplies/{commentId}")]
+        public async Task<IActionResult> GetReplies(int commentId) {
+            var replies = await _commentService.GetRepliesByCommentIdAsync(commentId);
+            return Ok(replies);
+        }
     }
 }

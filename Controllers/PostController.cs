@@ -1,14 +1,24 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http.Features;
+using System.Security.Claims;
 
 namespace Mini_Social_Media.Controllers {
+    [Authorize]
     public class PostController : Controller {
         private readonly UserManager<User> _userManager;
         private readonly IPostService _postService;
-        public PostController(UserManager<User> userManager, IPostService postService) {
+        private readonly ICommentService _commentService;
+        public PostController(UserManager<User> userManager, IPostService postService, ICommentService commentService) {
             _userManager = userManager;
             _postService = postService;
+            _commentService = commentService;
+        }
+        private int GetCurrentUserId() {
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdStr))
+                return 0;
+            return int.Parse(userIdStr);
         }
         [HttpGet]
         public IActionResult CreatePost() {
@@ -35,11 +45,12 @@ namespace Mini_Social_Media.Controllers {
         [HttpGet]
         public async Task<IActionResult> PostDetails(int id) {
             // Lưu ý: Service phải Include Comment và User của Comment thì mới có dữ liệu
-            var post = await _postService.GetByIdAsync(id);
-
+            int userId = GetCurrentUserId();
+            if (userId == 0)
+                return Unauthorized();
+            var post = await _postService.GetByIdAsync(id, userId);
             if (post == null)
                 return NotFound();
-
             var postviewmodel = new PostViewModel {
                 UserId = post.UserId,
                 PostId = post.PostId,
@@ -49,21 +60,22 @@ namespace Mini_Social_Media.Controllers {
                 CommentCount = post.CommentCount,
                 CreatedAt = post.CreatedAt,
                 UserName = post.UserName,
-                // Map media
-                Medias = post.MediaUrls?.Select(url => new PostMediaViewModel {
-                    Url = url,
-                    MediaType = url.EndsWith(".mp4") ? "video" : "image"
-                }).ToList() ?? new List<PostMediaViewModel>(),
+                IsLiked = post.IsLiked,
+                Medias = post.MediaUrls.Select(m => new PostMediaViewModel {
+                    Url = m.Url,
+                    MediaType = m.MediaType
+                }).ToList(),
                 Hashtags = post.Hashtags,
 
-                // Map Comments sang ViewModel
-                Comments = post.Comments?.Select(c => new CommentViewModel {
+                Comments = (await _commentService.GetCommentsByPostIdAsync(post.PostId)).Select(c => new CommentViewModel {
                     CommentId = c.CommentId,
                     UserName = c.UserName,
                     FullName = c.FullName,
                     UserAvatarUrl = c.UserAvatarUrl, 
                     Content = c.Content,
-                    CreatedAt = c.CreatedAt
+                    ParentCommentId = c.ParentCommentId,
+                    CreatedAt = c.CreatedAt,
+                    ReplyCount = c.ReplyCount
                 }).OrderBy(c => c.CreatedAt).ToList() ?? new List<CommentViewModel>()
             };
 
@@ -71,13 +83,16 @@ namespace Mini_Social_Media.Controllers {
         }
         [HttpGet]
         public async Task<IActionResult> EditPost(int postId) {
-            var post = await _postService.GetByIdAsync(postId);
+            var post = await _postService.GetByIdAsync(postId, GetCurrentUserId());
             var model = new EditPostViewModel {
                 PostId = post.PostId,
                 Caption = post.Caption,
                 Location = post.Location,
                 Hashtags = post.Hashtags,
-                MediaFiles = post.MediaUrls?.Where(x => !string.IsNullOrEmpty(x)).ToList() ?? new List<string>()
+                MediaFiles = post.MediaUrls.Select(m => new PostMediaViewModel {
+                    Url = m.Url,
+                    MediaType = m.MediaType
+                }).ToList()
             };
             return View(model);
         }
@@ -99,5 +114,6 @@ namespace Mini_Social_Media.Controllers {
             }
             return RedirectToAction("Index", "Home");
         }
+
     }
 }
