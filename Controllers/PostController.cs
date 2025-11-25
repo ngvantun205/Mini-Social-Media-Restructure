@@ -71,6 +71,7 @@ namespace Mini_Social_Media.Controllers {
                     CommentId = c.CommentId,
                     UserName = c.UserName,
                     FullName = c.FullName,
+                    UserId = c.UserId,
                     UserAvatarUrl = c.UserAvatarUrl, 
                     Content = c.Content,
                     ParentCommentId = c.ParentCommentId,

@@ -12,48 +12,51 @@
         var divId = $"comment-wrapper-{comment.CommentId}";
         var textId = $"comment-text-{comment.CommentId}";
         var safeContent = System.Web.HttpUtility.JavaScriptStringEncode(comment.Content);
+        var indentClass = isReply ? "reply-comment" : "";
 
-        // Nếu là reply thì thụt đầu dòng
-        var indentClass = isReply ? "ps-5 ms-3 border-start" : "";
-
-        <div class="comment-item mb-3 @indentClass" id="@divId">
-            <div class="d-flex">
-                <img src="/images/avatar.png" class="rounded-circle me-2" width="32" height="32" style="object-fit: cover;">
+        <div class="comment-item @indentClass" id="@divId">
+            <div class="d-flex gap-2">
+                <img src="/images/avatar.png" class="comment-avatar" alt="@comment.UserName">
 
                 <div class="flex-grow-1">
-                    <div class="bg-light p-2 px-3 rounded-4 d-inline-block">
-                        <strong class="d-block small text-dark">@comment.UserName</strong>
-                        <p class="mb-0 text-break small" id="@textId">@comment.Content</p>
+                    <div class="comment-bubble">
+                        <strong class="comment-username">@comment.UserName</strong>
+                        <p class="comment-text mb-0" id="@textId">@comment.Content</p>
                     </div>
 
-                    <div class="d-flex gap-3 ms-2 mt-1 small text-muted align-items-center">
-                        <span role="button" class="fw-bold" style="font-size: 11px;">Like</span>
-                        <span role="button" class="fw-bold" style="font-size: 11px;"
-                              onclick="prepareReply(@comment.CommentId, '@comment.UserName', '@safeContent')">Reply</span>
-                        <span style="font-size: 11px;">@comment.CreatedAt.ToString("HH:mm")</span>
+                    <div class="comment-actions">
+                        <button class="comment-action-btn" onclick="likeComment(@comment.CommentId)">Like</button>
+                        <button class="comment-action-btn" onclick="prepareReply(@comment.CommentId, '@comment.UserName', '@safeContent')">Reply</button>
+                        <span class="comment-timestamp">@comment.CreatedAt.ToString("HH:mm")</span>
 
-                        <div class="dropdown d-inline">
-                            <button class="btn btn-link text-muted p-0 border-0 text-decoration-none" type="button" data-bs-toggle="dropdown">
+                        <div class="comment-dropdown d-inline">
+                            <button class="dropdown-toggle-btn" type="button">
                                 <i class="bi bi-three-dots"></i>
                             </button>
-                            <ul class="dropdown-menu shadow-sm">
+                            <div class="dropdown-menu">
                                 @if (comment.UserId == currentUserId) {
-                                    <li><a class="dropdown-item" href="javascript:void(0)" onclick="prepareEdit(@comment.CommentId, '@safeContent')">Edit</a></li>
-                                    <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteComment(@comment.CommentId)">Delete</a></li>
+                                    <a class="dropdown-item" href="javascript:void(0)" onclick="event.stopPropagation(); prepareEdit(@comment.CommentId, '@safeContent')">
+                                        <i class="bi bi-pencil me-2"></i>Edit
+                                    </a>
+                                    <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="event.stopPropagation(); deleteComment(@comment.CommentId)">
+                                        <i class="bi bi-trash me-2"></i>Delete
+                                    </a>
                                 }
                                 else {
-                                    <li><a class="dropdown-item" href="#">Report</a></li>
+                                    <a class="dropdown-item" href="javascript:void(0)" onclick="event.stopPropagation();">
+                                        <i class="bi bi-flag me-2"></i>Report
+                                    </a>
                                 }
-                            </ul>
+                            </div>
                         </div>
                     </div>
 
                     @if (comment.ReplyCount > 0) {
-                        <div class="mt-1 ms-2">
-                            <a href="javascript:void(0)" class="text-decoration-none fw-bold small text-muted"
+                        <div class="mt-1">
+                            <a href="javascript:void(0)" class="view-replies-btn"
                                id="btn-view-replies-@comment.CommentId"
                                onclick="loadReplies(@comment.CommentId)">
-                                <i class="bi bi-arrow-return-right me-1"></i>View @comment.ReplyCount replies
+                                <i class="bi bi-arrow-return-right me-1"></i>View @comment.ReplyCount @(comment.ReplyCount > 1 ? "replies" : "reply")
                             </a>
                         </div>
                         <div id="replies-container-@comment.CommentId" style="display: none;"></div>
@@ -64,48 +67,57 @@
     }
 }
 
-<div class="container mt-4 mb-5" style="max-width: 700px;">
-    <div class="card border-0 shadow-sm">
+<div class="post-detail-container">
+    <div class="card post-card border-0">
 
-        <div class="card-header bg-white border-bottom-0 d-flex align-items-center p-3">
-            <img src="/images/avatar.png" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
-            <div class="flex-grow-1">
-                <h6 class="m-0 fw-bold">@Model.UserName</h6>
+        <!-- HEADER -->
+        <div class="post-header">
+            <img src="/images/avatar.png" class="post-avatar" alt="@Model.UserName">
+            <div class="post-user-info flex-grow-1">
+                <h6>@Model.UserName</h6>
                 @if (!string.IsNullOrEmpty(Model.Location)) {
-                    <small class="text-muted">@Model.Location</small>
+                    <p class="post-location">@Model.Location</p>
                 }
             </div>
             @if (User.Identity.IsAuthenticated && Model.UserId == currentUserId) {
                 <div class="d-flex gap-2">
-                    <a asp-action="EditPost" asp-route-postId="@Model.PostId" class="btn btn-light btn-sm rounded-circle"><i class="bi bi-pencil"></i></a>
-                    <button onclick="confirmDeletePost(@Model.PostId)" class="btn btn-light btn-sm rounded-circle text-danger"><i class="bi bi-trash"></i></button>
+                    <a asp-action="EditPost" asp-route-postId="@Model.PostId" class="post-actions-btn">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <button onclick="confirmDeletePost(@Model.PostId)" class="post-actions-btn delete-btn">
+                        <i class="bi bi-trash"></i>
+                    </button>
                 </div>
             }
         </div>
 
+        <!-- CAPTION -->
         @if (!string.IsNullOrEmpty(Model.Caption)) {
-            <div class="card-body pt-0 pb-2">
-                <p class="card-text mb-1 text-break">@Model.Caption</p>
+            <div class="post-caption">
+                <p>@Model.Caption</p>
                 @if (!string.IsNullOrEmpty(Model.Hashtags)) {
                     <div class="mb-2">
                         @foreach (var tag in Model.Hashtags.Split(' ', StringSplitOptions.RemoveEmptyEntries)) {
-                            <a href="#" class="text-decoration-none me-1 small">@tag</a>
+                            <a href="#" class="hashtag-link me-1">@tag</a>
                         }
                     </div>
                 }
-                <p class="card-text"><small class="text-muted">@Model.CreatedAt.ToString("d MMMM, yyyy • HH:mm")</small></p>
+                <p class="post-timestamp">@Model.CreatedAt.ToString("d MMMM, yyyy • HH:mm")</p>
             </div>
         }
 
+        <!-- MEDIA -->
         @if (Model.Medias != null && Model.Medias.Any()) {
-            <div class="bg-black d-flex align-items-center justify-content-center" style="min-height: 300px; max-height: 600px; overflow: hidden;">
+            <div class="media-container">
                 @if (Model.Medias.Count() == 1) {
                     var media = Model.Medias.First();
                     if (media.MediaType == "video") {
-                        <video controls class="w-100" style="max-height: 600px;"><source src="@media.Url" type="video/mp4" /></video>
+                        <video controls class="w-100">
+                            <source src="@media.Url" type="video/mp4" />
+                        </video>
                     }
                     else {
-                        <img src="@media.Url" class="w-100" style="max-height: 600px; object-fit: contain;" />
+                        <img src="@media.Url" class="w-100" alt="Post media" />
                     }
                 }
                 else {
@@ -115,330 +127,97 @@
                                 var media = Model.Medias.ElementAt(i);
                                 <div class="carousel-item @(i == 0 ? "active" : "")">
                                     @if (media.MediaType == "video") {
-                                        <video controls class="d-block w-100" style="max-height: 600px; object-fit: contain;"><source src="@media.Url" type="video/mp4" /></video>
+                                        <video controls class="d-block w-100">
+                                            <source src="@media.Url" type="video/mp4" />
+                                        </video>
                                     }
                                     else {
-                                        <img src="@media.Url" class="d-block w-100" style="max-height: 600px; object-fit: contain;" />
+                                        <img src="@media.Url" class="d-block w-100" alt="Post media" />
                                     }
                                 </div>
                             }
                         </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselPost" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#carouselPost" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselPost" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselPost" data-bs-slide="next">
+                            <span class="carousel-control-next-icon"></span>
+                        </button>
                     </div>
                 }
             </div>
         }
 
-        <div class="card-body border-bottom py-2 post-footer">
-            <div class="d-flex justify-content-between mb-2">
-                <div>
-                    <button class="btn btn-link p-0 me-3" onclick="toggleLike(this, @Model.PostId)" style="text-decoration: none;">
-                        <i class="bi @(Model.IsLiked ? "bi-heart-fill text-danger" : "bi-heart text-dark") fs-4"></i>
+        <!-- POST FOOTER (INTERACTIONS) -->
+        <div class="post-footer">
+            <div class="interaction-icons mb-2">
+                <div class="d-flex gap-2">
+                    <button class="icon-btn @(Model.IsLiked ? "liked" : "")" onclick="toggleLike(this, @Model.PostId)">
+                        <i class="bi @(Model.IsLiked ? "bi-heart-fill text-danger" : "bi-heart")"></i>
                     </button>
-                    <i class="bi bi-chat fs-4 me-3 cursor-pointer"></i>
-                    <i class="bi bi-send fs-4 cursor-pointer"></i>
+                    <button class="icon-btn">
+                        <i class="bi bi-chat"></i>
+                    </button>
+                    <button class="icon-btn">
+                        <i class="bi bi-send"></i>
+                    </button>
                 </div>
-                <i class="bi bi-bookmark fs-4 cursor-pointer"></i>
+                <button class="icon-btn ms-auto">
+                    <i class="bi bi-bookmark"></i>
+                </button>
             </div>
-            <p class="fw-bold mb-0 small likes-count">@Model.LikeCount likes</p>
+            <p class="likes-count">@Model.LikeCount @(Model.LikeCount == 1 ? "like" : "likes")</p>
         </div>
 
-        <div class="card-footer bg-white border-0 p-3">
-            <div id="commentList" class="mb-3" style="max-height: 400px; overflow-y: auto;">
+        <!-- COMMENTS SECTION -->
+        <div class="comments-section">
+            <div id="commentList" class="comment-list">
                 @if (Model.Comments != null && Model.Comments.Any()) {
-                    // CHỈ LOAD COMMENT GỐC (ROOT)
-                    // Không dùng đệ quy tự động, để hiện nút View Replies
                     var rootComments = Model.Comments.Where(c => c.ParentCommentId == null).ToList();
-
                     foreach (var comment in rootComments) {
                         RenderCommentItem(comment, currentUserId, false);
-                        // Div chứa reply sẽ rỗng lúc đầu
-                        <div id="replies-container-@comment.CommentId" style="display: none;"></div>
                     }
                 }
                 else {
-                    <div class="text-center text-muted py-3 no-comments small">No comments yet.</div>
+                    <div class="no-comments">No comments yet. Be the first to comment!</div>
                 }
             </div>
 
-            <div class="position-relative">
-                <div id="actionPreview" class="alert alert-light d-flex justify-content-between align-items-center p-2 mb-0 border border-bottom-0 rounded-top" style="display: none;">
-                    <div class="small text-truncate" style="max-width: 90%;">
-                        <strong id="actionLabel" class="text-primary"></strong>:
-                        <span id="actionContentPreview" class="text-muted"></span>
+            <!-- COMMENT INPUT -->
+            <div class="comment-input-wrapper">
+                <div id="actionPreview" class="action-preview" style="display: none;">
+                    <div class="d-flex align-items-center gap-2 flex-grow-1" style="min-width: 0;">
+                        <strong id="actionLabel" class="action-label text-nowrap"></strong>
+                        <span id="actionContentPreview" class="action-content-preview"></span>
                     </div>
-                    <button type="button" class="btn-close small" style="font-size: 10px;" onclick="cancelAction()"></button>
+                    <button type="button" class="btn-close-action" onclick="cancelAction()">
+                        <i class="bi bi-x"></i>
+                    </button>
                 </div>
 
-                <div class="d-flex align-items-center border rounded-bottom p-1 ps-3 bg-white" id="inputContainer" style="border-radius: 20px;">
+                <div class="comment-input-container" id="inputContainer">
                     <input type="hidden" id="commentPostId" value="@Model.PostId" />
                     <input type="hidden" id="parentCommentId" value="" />
                     <input type="hidden" id="editCommentId" value="" />
-                    <input type="text" id="commentContent" class="form-control border-0 shadow-none" placeholder="Add a comment..." style="font-size: 14px;">
-                    <button class="btn btn-link text-decoration-none fw-bold ms-2" onclick="submitAction()">Post</button>
+                    <input type="text" id="commentContent" class="comment-input" placeholder="Add a comment..." />
+                    <button class="btn-post-comment" onclick="submitAction()">Post</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- DELETE POST FORM -->
 <form asp-action="DeletePost" method="post" id="deleteForm" style="display: none;">
     <input type="hidden" name="postId" id="deletePostId" value="@Model.PostId" />
 </form>
 
+
 @section Scripts {
-    <script src="~/js/post-detail.js"></script>
-
     <script>
-        const currentUserId = @currentUserId;
-
-        // 1. LOAD REPLIES (Khi bấm View Replies)
-        function loadReplies(commentId) {
-            const container = document.getElementById(`replies-container-${commentId}`);
-            const btn = document.getElementById(`btn-view-replies-${commentId}`);
-
-            if (container.style.display === 'block') {
-                container.style.display = 'none';
-                return;
-            }
-            if (container.innerHTML.trim() !== "") {
-                container.style.display = 'block';
-                return;
-            }
-
-            fetch(`/Comment/GetReplies/${commentId}`)
-                .then(res => res.json())
-                .then(replies => {
-                    if (replies && replies.length > 0) {
-                        let html = "";
-                        replies.forEach(reply => {
-                            // true = isReply -> để nó thụt đầu dòng
-                            html += generateCommentHtml(reply, true);
-                        });
-                        container.innerHTML = html;
-                        container.style.display = 'block';
-                        if(btn) btn.style.display = 'none';
-                    }
-                })
-                .catch(err => console.error(err));
-        }
-
-        // 2. GENERATE HTML (QUAN TRỌNG: Phải có logic tạo nút View Replies cho comment con nếu cần)
-        function generateCommentHtml(comment, isReply) {
-            const safeContent = comment.content.replace(/'/g, "\\'");
-            const indentClass = isReply ? "ps-5 ms-3 border-start" : "";
-
-            let buttons = '';
-            if (comment.userId === currentUserId) {
-                buttons = `
-                    <div class="d-flex gap-2">
-                        <a href="javascript:void(0)" class="text-secondary" onclick="prepareEdit(${comment.commentId}, '${safeContent}')"><i class="bi bi-pencil"></i></a>
-                        <a href="javascript:void(0)" class="text-danger" onclick="deleteComment(${comment.commentId})"><i class="bi bi-trash"></i></a>
-                    </div>`;
-            } else {
-                buttons = `
-                    <div class="dropdown">
-                        <button class="btn btn-link text-muted p-0 border-0" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
-                        <ul class="dropdown-menu shadow-sm"><li><a class="dropdown-item" href="#">Report</a></li></ul>
-                    </div>`;
-            }
-
-            // Logic View Nested Replies (Nếu reply này lại có con)
-            let viewRepliesBtn = '';
-            if (comment.replyCount > 0) {
-                viewRepliesBtn = `
-                    <div class="mt-1 ms-2">
-                        <a href="javascript:void(0)" class="text-decoration-none fw-bold small text-muted"
-                           id="btn-view-replies-${comment.commentId}"
-                           onclick="loadReplies(${comment.commentId})">
-                            <i class="bi bi-arrow-return-right me-1"></i>View ${comment.replyCount} replies
-                        </a>
-                    </div>
-                    <div id="replies-container-${comment.commentId}" style="display: none;"></div>
-                `;
-            }
-
-            return `
-                <div class="comment-item mb-3 ${indentClass}" id="comment-wrapper-${comment.commentId}">
-                    <div class="d-flex">
-                        <img src="/images/avatar.png" class="rounded-circle me-2" width="32" height="32" style="object-fit: cover;">
-                        <div class="flex-grow-1">
-                            <div class="bg-light p-2 px-3 rounded-4 d-inline-block">
-                                <strong class="d-block small text-dark">${comment.userName || 'User'}</strong>
-                                <p class="mb-0 text-break small" id="comment-text-${comment.commentId}">${comment.content}</p>
-                            </div>
-                            <div class="d-flex gap-3 ms-2 mt-1 small text-muted align-items-center">
-                                <span role="button" class="fw-bold" style="font-size: 12px;">Like</span>
-                                <span role="button" class="fw-bold" style="font-size: 12px;" onclick="prepareReply(${comment.commentId}, '${comment.userName}', '${safeContent}')">Reply</span>
-                                <span style="font-size: 11px;">Just now</span>
-                                ${buttons}
-                            </div>
-                            ${viewRepliesBtn}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // 3. APPEND HTML
-        function appendNewCommentHtml(newComment) {
-            const isReply = newComment.parentCommentId != null;
-            const html = generateCommentHtml(newComment, isReply);
-
-            if (isReply) {
-                let container = document.getElementById(`replies-container-${newComment.parentCommentId}`);
-                if (!container) {
-                    // Nếu chưa có container (do chưa bấm View), tạo giả ngay sau cha
-                    const parent = document.getElementById(`comment-wrapper-${newComment.parentCommentId}`);
-                    if (parent) parent.insertAdjacentHTML('afterend', `<div id="replies-container-${newComment.parentCommentId}" style="display:block;">${html}</div>`);
-                } else {
-                    container.style.display = 'block';
-                    container.insertAdjacentHTML('beforeend', html);
-                }
-            } else {
-                document.getElementById("commentList").insertAdjacentHTML('beforeend', html);
-            }
-
-            const list = document.getElementById("commentList");
-            if(list) list.scrollTop = list.scrollHeight;
-        }
-
-        // --- CÁC HÀM KHÁC (Giữ nguyên) ---
-        function toggleInputShape(isOpen) {
-            const container = document.getElementById("inputContainer");
-            if (isOpen) {
-                container.style.borderTopLeftRadius = "0"; container.style.borderTopRightRadius = "0"; container.classList.remove("rounded-pill");
-            } else {
-                container.style.borderTopLeftRadius = "20px"; container.style.borderTopRightRadius = "20px"; container.classList.add("rounded-pill");
-            }
-        }
-
-        function prepareReply(commentId, username, content) {
-            cancelAction();
-            document.getElementById("parentCommentId").value = commentId;
-            document.getElementById("actionLabel").innerText = "Replying to " + username;
-            document.getElementById("actionContentPreview").innerText = content;
-            document.getElementById("actionPreview").style.display = "flex";
-            toggleInputShape(true);
-            const input = document.getElementById("commentContent");
-            input.value = '\u0040' + username + ' '; input.focus();
-        }
-
-        function prepareEdit(commentId, content) {
-            cancelAction();
-            document.getElementById("editCommentId").value = commentId;
-            document.getElementById("actionLabel").innerText = "Editing";
-            document.getElementById("actionContentPreview").innerText = content;
-            document.getElementById("actionPreview").style.display = "flex";
-            toggleInputShape(true);
-            const input = document.getElementById("commentContent");
-            input.value = content; input.focus();
-        }
-
-        function cancelAction() {
-            document.getElementById("parentCommentId").value = "";
-            document.getElementById("editCommentId").value = "";
-            document.getElementById("actionPreview").style.display = "none";
-            toggleInputShape(false);
-            document.getElementById("commentContent").value = "";
-        }
-
-        function submitAction() {
-            const postId = document.getElementById("commentPostId").value;
-            const contentInput = document.getElementById("commentContent");
-            const content = contentInput.value.trim();
-            const parentId = document.getElementById("parentCommentId").value;
-            const editId = document.getElementById("editCommentId").value;
-
-            if (!content) { contentInput.focus(); return; }
-            contentInput.disabled = true;
-
-            let url = '/Comment/AddComment';
-            let method = 'POST';
-            let bodyData = { postId: parseInt(postId), content: content };
-
-            if (editId) {
-                url = '/Comment/EditComment'; method = 'PUT';
-                bodyData = { commentId: parseInt(editId), content: content };
-            } else if (parentId) {
-                url = '/Comment/ReplyComment';
-                bodyData = { postId: parseInt(postId), content: content, parentCommentId: parseInt(parentId) };
-            }
-
-            fetch(url, {
-                method: method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(bodyData)
-            })
-            .then(res => { if (!res.ok) throw new Error("Error"); return res.json(); })
-            .then(data => {
-                if (editId) {
-                    const textEl = document.getElementById(`comment-text-${editId}`);
-                    if(textEl) textEl.innerText = data.content;
-                } else {
-                    const noCmt = document.querySelector(".no-comments");
-                    if(noCmt) noCmt.style.display = 'none';
-                    appendNewCommentHtml(data);
-                }
-                cancelAction();
-            })
-            .catch(err => alert("Action failed."))
-            .finally(() => {
-                contentInput.disabled = false;
-                contentInput.focus();
-            });
-        }
-
-        function deleteComment(commentId) {
-            if(!confirm("Delete this comment?")) return;
-            fetch('/Comment/DeleteComment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(commentId)
-            }).then(res => {
-                if (res.ok) {
-                    const el = document.getElementById(`comment-wrapper-${commentId}`);
-                    if(el) el.remove();
-                } else alert("Failed.");
-            });
-        }
-
-        function confirmDeletePost(postId) {
-            if (confirm("Delete post?")) {
-                document.getElementById('deletePostId').value = postId;
-                document.getElementById('deleteForm').submit();
-            }
-        }
-
-        function toggleLike(btnElement, postId) {
-            let icon = btnElement.querySelector("i") || btnElement;
-            const footer = btnElement.closest(".post-footer");
-            const countP = footer.querySelector(".likes-count");
-            let currentCount = parseInt(countP.innerText);
-            let isLikingAction = false;
-
-            if (icon.classList.contains("bi-heart-fill")) {
-                icon.classList.remove("bi-heart-fill", "text-danger");
-                icon.classList.add("bi-heart", "text-dark");
-                countP.innerText = (currentCount - 1) + " likes";
-                isLikingAction = false;
-            } else {
-                icon.classList.remove("bi-heart", "text-dark");
-                icon.classList.add("bi-heart-fill", "text-danger");
-                countP.innerText = (currentCount + 1) + " likes";
-                isLikingAction = true;
-            }
-
-            fetch('/Like/Like', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ postId: postId })
-            }).then(res => { if (!res.ok) throw new Error("Error"); });
-        }
-
-        document.getElementById("commentContent").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") submitAction();
+        // Khởi tạo khi trang load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePostDetail(@currentUserId);
         });
     </script>
 }
