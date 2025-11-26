@@ -2,7 +2,7 @@
     public class PostSummaryDto {
         public int PostId { get; set; }
         public int UserId { get; set; }
-        public List<string>? MediaUrls { get; set; }    
+        public string? MediaUrl { get; set; }    
         public int LikeCount { get; set; }
         public int CommentCount { get; set; }
     }

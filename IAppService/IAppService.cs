@@ -20,4 +20,8 @@
         Task<IEnumerable<ReplyCommentDto>> GetRepliesByCommentIdAsync(int commentId);
         Task<ReplyCommentDto?> AddReplyAsync(ReplyCommentInputModel model, int userId);
     }
+    public interface IUserService {
+        Task<UserProfileDto?> GetUserProfileAsync(int userId, int requesterId);
+        Task<MyProfileDto?> GetMyProfileAsync(int userId);
+    }
 }

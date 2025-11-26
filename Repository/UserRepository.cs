@@ -11,7 +11,9 @@ namespace Mini_Social_Media.Repository {
             return await _context.Users.ToListAsync();
         }
         public async Task<User?> GetByIdAsync(int id) {
-            return await _context.Users.FindAsync(id);
+            return await _context.Users
+                .Include(u => u.Posts)
+                .FirstOrDefaultAsync(u => u.Id == id);
         }
         public async Task AddAsync(User entity) {
             await _context.Users.AddAsync(entity);

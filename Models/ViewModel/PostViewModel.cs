@@ -17,4 +17,11 @@ namespace Mini_Social_Media.Models.ViewModel {
         public List<CommentViewModel> Comments { get; set; } = new List<CommentViewModel>();
         public string? Hashtags { get; set; }
     }
+    public class PostSummaryViewModel {
+        public int PostId { get; set; }
+        public int UserId { get; set; }
+        public string? MediaUrl { get; set; }
+        public int LikeCount { get; set; }
+        public int CommentCount { get; set; }
+    }
 }

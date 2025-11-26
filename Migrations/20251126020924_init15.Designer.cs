@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Mini_Social_Media.Data;
 
@@ -10,9 +11,11 @@ using Mini_Social_Media.Data;
 namespace Mini_Social_Media.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251126020924_init15")]
+    partial class init15
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -326,9 +329,6 @@ namespace Mini_Social_Media.Migrations
                     b.Property<string>("Bio")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("CommentId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("TEXT");
@@ -352,9 +352,6 @@ namespace Mini_Social_Media.Migrations
                     b.Property<bool>("IsPrivate")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("LikeId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("INTEGER");
 
@@ -376,9 +373,6 @@ namespace Mini_Social_Media.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PostId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("SecurityStamp")

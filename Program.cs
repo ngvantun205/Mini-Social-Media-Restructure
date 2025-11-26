@@ -28,6 +28,7 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<IUploadService, UploadService>();
             builder.Services.AddScoped<ILikeService, LikeService>();
             builder.Services.AddScoped<ICommentService, CommentService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             builder.Services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options => {

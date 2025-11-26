@@ -1,60 +1,88 @@
 ﻿@model List<Mini_Social_Media.Models.ViewModel.PostViewModel>
+@{
+    var currentUserIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var currentUserId = string.IsNullOrEmpty(currentUserIdStr) ? 0 : int.Parse(currentUserIdStr);
+}
 
 @foreach (var post in Model) {
-    <div class="post-detail-card mb-4" style="background: white; border-radius: 8px; border: 1px solid #dbdbdb; margin-bottom: 20px;">
+    var isOwner = post.UserId == currentUserId;
 
-        <div class="post-header" style="display: flex; align-items: center; padding: 10px;">
-            <div class="post-user-info" style="display: flex; align-items: center; flex-grow: 1;">
-                <div class="user-avatar" style="margin-right: 10px;">
-                    <img src="/images/avatar.png" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />
-                </div>
-                <div class="user-details">
-                    <h5 class="username" style="margin: 0; font-size: 16px;">@post.UserName</h5>
-                    @if (!string.IsNullOrEmpty(post.Location)) {
-                        <p class="location" style="margin: 0; font-size: 12px; color: gray;">
-                            <i class="bi bi-geo-alt-fill"></i> @post.Location
-                        </p>
-                    }
-                    <small style="font-size: 11px; color: #8e8e8e;">@post.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
-                </div>
+    <div class="post-card" data-post-id="@post.PostId">
+
+        <!-- POST HEADER -->
+        <div class="post-card-header">
+            <img src="/images/avatar.png" class="post-user-avatar" alt="@post.UserName" />
+
+            <div class="post-user-details">
+                <h5 class="post-username">@post.UserName</h5>
+                @if (!string.IsNullOrEmpty(post.Location)) {
+                    <p class="post-location">
+                        <i class="bi bi-geo-alt-fill"></i> @post.Location
+                    </p>
+                }
+                <div class="post-timestamp">@post.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
             </div>
 
-            <div class="post-actions-menu">
-                <a href="/Post/PostDetails?id=@post.PostId" class="btn btn-sm btn-light">
+            <div class="post-dropdown">
+                <button class="post-menu-btn" onclick="togglePostMenu(this, @post.PostId, @isOwner.ToString().ToLower())">
                     <i class="bi bi-three-dots"></i>
-                </a>
+                </button>
+
+                <div class="post-dropdown-menu">
+                    @if (post.UserId == currentUserId) {
+                        <button class="dropdown-item-custom" onclick="goToEditPost(@post.PostId)">
+                            <i class="bi bi-pencil"></i>
+                            Edit Post
+                        </button>
+                        <button class="dropdown-item-custom danger" onclick="confirmDeletePost(@post.PostId)">
+                            <i class="bi bi-trash"></i>
+                            Delete Post
+                        </button>
+                    }
+                    else {
+                        <button class="dropdown-item-custom" onclick="goToPostDetail(@post.PostId)">
+                            <i class="bi bi-eye"></i>
+                            View Details
+                        </button>
+                        <button class="dropdown-item-custom danger" onclick="reportPost(@post.PostId)">
+                            <i class="bi bi-flag"></i>
+                            Report
+                        </button>
+                    }
+                </div>
             </div>
         </div>
 
+        <!-- CAPTION -->
         @if (!string.IsNullOrEmpty(post.Caption)) {
-            <div class="post-caption" style="padding: 0 15px 5px;">
-                <span class="caption-text">@post.Caption</span>
+            <div class="post-caption">
+                <span>@post.Caption</span>
             </div>
         }
 
+        <!-- HASHTAGS -->
         @if (!string.IsNullOrEmpty(post.Hashtags)) {
-            <div class="post-hashtags" style="padding: 0 15px 10px;">
+            <div class="post-hashtags">
                 @foreach (var tag in post.Hashtags.Split(' ', StringSplitOptions.RemoveEmptyEntries)) {
                     var displayTag = tag.StartsWith("#") ? tag : "#" + tag;
-                    <a href="#" class="hashtag" style="color: #00376b; margin-right: 5px; text-decoration: none; background: #fafafa; padding: 2px 5px; border-radius: 4px;">@displayTag</a>
+                    <a href="#" class="hashtag-tag">@displayTag</a>
                 }
             </div>
         }
 
+        <!-- MEDIA -->
         @if (post.Medias != null && post.Medias.Any()) {
-            <div class="post-media-container">
+            <div class="post-media-section">
                 @if (post.Medias.Count == 1) {
                     var media = post.Medias.First();
-                    <div class="media-single">
-                        @if (media.MediaType == "video") {
-                            <video controls style="width: 100%; display: block;">
-                                <source src="@media.Url" type="video/mp4" />
-                            </video>
-                        }
-                        else {
-                            <img src="@media.Url" alt="Post media" style="width: 100%; object-fit: cover; display: block;" />
-                        }
-                    </div>
+                    @if (media.MediaType == "video") {
+                        <video controls>
+                            <source src="@media.Url" type="video/mp4" />
+                        </video>
+                    }
+                    else {
+                        <img src="@media.Url" alt="Post media" />
+                    }
                 }
                 else {
                     <div id="carousel-@post.PostId" class="carousel slide" data-bs-ride="carousel">
@@ -63,52 +91,47 @@
                                 var media = post.Medias[i];
                                 <div class="carousel-item @(i == 0 ? "active" : "")">
                                     @if (media.MediaType == "video") {
-                                        <video controls style="width: 100%; height: 400px; object-fit: contain; background: black;">
+                                        <video controls style="width: 100%; object-fit: contain;">
                                             <source src="@media.Url" type="video/mp4" />
                                         </video>
                                     }
                                     else {
-                                        <img src="@media.Url" class="d-block w-100" style="height: 400px; object-fit: cover;" alt="...">
+                                        <img src="@media.Url" class="d-block w-100" alt="Post media">
                                     }
                                 </div>
                             }
                         </div>
                         <button class="carousel-control-prev" type="button" data-bs-target="#carousel-@post.PostId" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
+                            <span class="carousel-control-prev-icon"></span>
                         </button>
                         <button class="carousel-control-next" type="button" data-bs-target="#carousel-@post.PostId" data-bs-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Next</span>
+                            <span class="carousel-control-next-icon"></span>
                         </button>
                     </div>
                 }
             </div>
         }
 
-        <div class="post-actions" style="padding: 10px 15px;">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <button class="btn btn-link p-0 me-3"
-                            onclick="toggleLike(this, @post.PostId)"
-                            style="font-size: 1.5rem; text-decoration: none; border: none; background: none;">
-                        <i class="bi @(post.IsLiked ? "bi-heart-fill text-danger" : "bi-heart text-dark")"></i>
-                    </button>
+        <div class="post-actions-section">
+            <div class="post-action-buttons">
+                <button class="action-btn @(post.IsLiked ? "liked" : "")" onclick="toggleLike(this, @post.PostId)">
+                    <i class="bi @(post.IsLiked ? "bi-heart-fill text-danger" : "bi-heart")"></i>
+                </button>
 
-                    <a href="/Post/PostDetails?id=@post.PostId" class="btn btn-link text-dark p-0 me-3" style="font-size: 1.5rem; border: none; background: none;">
-                        <i class="bi bi-chat"></i>
-                    </a>
-                    <button class="btn btn-link text-dark p-0" style="font-size: 1.5rem; border: none; background: none;">
-                        <i class="bi bi-send"></i>
-                    </button>
-                </div>
+                <a class="action-btn" asp-controller="Post" asp-action="PostDetails" asp-route-id="@post.PostId">
+                    <i class="bi bi-chat"></i>
+                </a>
+
+                <button class="action-btn">
+                    <i class="bi bi-send"></i>
+                </button>
             </div>
 
-            <div class="post-stats mt-2">
-                <p class="likes-count mb-1">
-                    <strong class="like-number">@post.LikeCount</strong> <strong>likes</strong>
+            <div class="post-stats">
+                <p class="likes-count">
+                    <span class="like-number">@post.LikeCount</span> @(post.LikeCount == 1 ? "like" : "likes")
                 </p>
-                <a href="/Post/PostDetails?id=@post.PostId" class="btn btn-link text-muted p-0 text-decoration-none" style="font-size: 0.9rem; border: none; background: none;">
+                <a asp-controller="Post" asp-action="PostDetails" asp-route-id="@post.PostId" class="view-comments-link">
                     View all @post.CommentCount comments
                 </a>
             </div>
