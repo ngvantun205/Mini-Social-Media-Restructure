@@ -1,1 +1,113 @@
-﻿
+﻿@model MyProfileViewModel
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4" style="max-width: 935px;">
+    <header class="row mb-5 align-items-center">
+        <div class="col-4 col-md-4 d-flex justify-content-center">
+            <div class="position-relative">
+                <img src="@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/images/default-avatar.png" : Model.AvatarUrl)"
+                     alt="@Model.UserName"
+                     class="rounded-circle border border-2"
+                     style="width: 150px; height: 150px; object-fit: cover; cursor: pointer;">
+                <button class="btn btn-sm btn-light position-absolute bottom-0 end-0 rounded-circle shadow-sm" title="Change Avatar">
+                    <i class="bi bi-camera-fill"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="col-8 col-md-8">
+            <div class="d-flex align-items-center mb-3 flex-wrap gap-3">
+                <h2 class="fw-light m-0 me-3" style="font-size: 28px;">@Model.UserName</h2>
+
+                <a href="/Profile/EditProfile" class="btn btn-light btn-sm fw-bold border px-3">Edit Profile</a>
+                <button class="btn btn-light btn-sm fw-bold border px-3">View Archive</button>
+
+                <button class="btn btn-link text-dark p-0 ms-2"><i class="bi bi-gear-wide fs-4"></i></button>
+            </div>
+
+            <ul class="list-unstyled d-flex mb-3 gap-4" style="font-size: 16px;">
+                <li><strong>@Model.Posts.Count</strong> posts</li>
+                <li><a href="#" class="text-decoration-none text-dark"><strong>@Model.FollowerCount</strong> followers</a></li>
+                <li><a href="#" class="text-decoration-none text-dark"><strong>@Model.FollowingCount</strong> following</a></li>
+            </ul>
+
+            <div>
+                <div class="fw-bold">@Model.FullName</div>
+                <div class="text-break" style="white-space: pre-line;">@Model.Bio</div>
+                @if (!string.IsNullOrEmpty(Model.WebsiteUrl)) {
+                    <a href="@Model.WebsiteUrl" target="_blank" class="text-decoration-none fw-bold text-primary">
+                        <i class="bi bi-link-45deg"></i> @Model.WebsiteUrl
+                    </a>
+                }
+            </div>
+        </div>
+    </header>
+
+    <div class="d-flex gap-4 mb-5 overflow-auto pb-2 border-bottom">
+        <div class="text-center" style="min-width: 80px;">
+            <div class="rounded-circle border border-2 p-1 mb-1">
+                <div class="bg-light rounded-circle" style="width: 70px; height: 70px;"></div>
+            </div>
+            <small class="fw-bold">Highlights</small>
+        </div>
+        <div class="text-center" style="min-width: 80px; cursor: pointer;">
+            <div class="rounded-circle border border-2 p-1 mb-1">
+                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                    <i class="bi bi-plus-lg fs-2 text-muted"></i>
+                </div>
+            </div>
+            <small class="fw-bold">New</small>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs justify-content-center border-bottom-0 mb-3" id="profileTabs">
+        <li class="nav-item">
+            <a class="nav-link active text-uppercase border-0 border-top border-dark text-dark fw-bold" href="#" style="border-radius: 0; margin-top: -1px;">
+                <i class="bi bi-grid-3x3 me-1"></i> Posts
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-uppercase border-0 text-muted" href="#">
+                <i class="bi bi-bookmark me-1"></i> Saved
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-uppercase border-0 text-muted" href="#">
+                <i class="bi bi-person-badge me-1"></i> Tagged
+            </a>
+        </li>
+    </ul>
+
+    <div class="row g-1 g-md-4">
+        @if (Model.Posts != null && Model.Posts.Any()) {
+            foreach (var post in Model.Posts) {
+                <div class="col-4">
+                    <div class="ratio ratio-1x1 position-relative group-hover-overlay">
+                        @if (post.MediaUrl.EndsWith(".mp4")) {
+                            <video src="@post.MediaUrl" class="w-100 h-100 object-fit-cover"></video>
+                        }
+                        else {
+                            <img src="@post.MediaUrl" class="w-100 h-100 object-fit-cover" alt="Post">
+                        }
+
+                        <a href="/Post/PostDetails?id=@post.PostId" class="overlay d-flex justify-content-center align-items-center text-white text-decoration-none">
+                            <div class="d-flex gap-4 fs-5 fw-bold">
+                                <span><i class="bi bi-heart-fill"></i> @post.LikeCount</span>
+                                <span><i class="bi bi-chat-fill"></i> @post.CommentCount</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            }
+        }
+        else {
+            <div class="text-center py-5">
+                <div class="mb-3"><i class="bi bi-camera fs-1 border rounded-circle p-3"></i></div>
+                <h3>No Posts Yet</h3>
+            </div>
+        }
+    </div>
+</div>

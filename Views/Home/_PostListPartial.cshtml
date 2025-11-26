@@ -5,16 +5,16 @@
 }
 
 @foreach (var post in Model) {
-    var isOwner = post.UserId == currentUserId;
+    var isOwner = post.Owner.UserId == currentUserId;
 
     <div class="post-card" data-post-id="@post.PostId">
 
         <!-- POST HEADER -->
         <div class="post-card-header">
-            <img src="/images/avatar.png" class="post-user-avatar" alt="@post.UserName" />
+            <img src="@post.Owner.AvatarUrl" class="post-user-avatar" alt="@post.Owner.UserName" />
 
             <div class="post-user-details">
-                <h5 class="post-username">@post.UserName</h5>
+                <h5 class="post-username">@post.Owner.UserName</h5>
                 @if (!string.IsNullOrEmpty(post.Location)) {
                     <p class="post-location">
                         <i class="bi bi-geo-alt-fill"></i> @post.Location
@@ -29,7 +29,7 @@
                 </button>
 
                 <div class="post-dropdown-menu">
-                    @if (post.UserId == currentUserId) {
+                    @if (post.Owner.UserId == currentUserId) {
                         <button class="dropdown-item-custom" onclick="goToEditPost(@post.PostId)">
                             <i class="bi bi-pencil"></i>
                             Edit Post

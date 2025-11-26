@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Mini_Social_Media.Controllers {
     [Authorize]
@@ -80,6 +81,24 @@ namespace Mini_Social_Media.Controllers {
                     MediaUrl = p.MediaUrl
                 }).ToList()
             });
+        }
+        [HttpPost]
+        public async Task<IActionResult> UpdateAvatar(IFormFile avatarFile) {
+            var userId = GetCurrentUserId(); 
+            if (userId == 0)
+                return Unauthorized();
+
+            if (avatarFile == null || avatarFile.Length == 0) {
+                return BadRequest("File is empty.");
+            }
+
+            var profileDto = await _userService.UpdateUserAvatar(avatarFile, userId);
+
+            if (profileDto == null) {
+                return BadRequest("Failed to update avatar.");
+            }
+
+            return Ok(new { newUrl = profileDto.AvatarUrl });
         }
     }
 }

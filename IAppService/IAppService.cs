@@ -1,4 +1,6 @@
-﻿namespace Mini_Social_Media.IAppService {
+﻿using Microsoft.Extensions.Configuration.UserSecrets;
+
+namespace Mini_Social_Media.IAppService {
     public interface IPostService {
         Task<CreatePostDto> CreatePost(PostInputModel model, int userId);
         Task<PostDto?> GetByIdAsync(int postId, int userId);
@@ -23,5 +25,6 @@
     public interface IUserService {
         Task<UserProfileDto?> GetUserProfileAsync(int userId, int requesterId);
         Task<MyProfileDto?> GetMyProfileAsync(int userId);
+        Task<MyProfileDto> UpdateUserAvatar(IFormFile formFile, int userId);
     }
 }

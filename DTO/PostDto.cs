@@ -1,4 +1,6 @@
-﻿namespace Mini_Social_Media.DTO {
+﻿using System.Security.Principal;
+
+namespace Mini_Social_Media.DTO {
     public class PostSummaryDto {
         public int PostId { get; set; }
         public int UserId { get; set; }
@@ -8,10 +10,7 @@
     }
     public class PostDto {
         public int PostId { get; set; }
-        public int UserId { get; set; }
-        public string? FullName { get; set; }
-        public string? UserName { get; set; }
-        public string? UserAvatar { get; set; }
+        public UserSummaryDto Owner { get; set; }
         public string? Caption { get; set; }
         public string? Location { get; set; }
         public DateTime CreatedAt { get; set; }

@@ -17,15 +17,14 @@ namespace Mini_Social_Media.Controllers {
             int userId = int.Parse(userid);
             var posts = await _postService.GetPostsPagedAsync(1, 10, userId);
             return View(new List<PostViewModel>(posts.Select(post => new PostViewModel {
-                UserId = post.UserId,
+                Owner = new UserSummaryViewModel() {UserId = post.Owner.UserId, UserName = post.Owner.UserName, AvatarUrl = post.Owner.AvatarUrl, FullName = post.Owner.FullName },
                 PostId = post.PostId,
                 Caption = post.Caption,
                 Location = post.Location,
                 LikeCount = post.LikeCount,
                 IsLiked = post.IsLiked,
                 CommentCount = post.CommentCount,
-                CreatedAt = post.CreatedAt,
-                UserName = post.UserName,
+                CreatedAt = post.CreatedAt,                
                 Medias = post.MediaUrls.Select(m => new PostMediaViewModel {
                     Url = m.Url,
                     MediaType = m.MediaType
@@ -47,7 +46,7 @@ namespace Mini_Social_Media.Controllers {
             }
 
             return PartialView("_PostListPartial", new List<PostViewModel>(posts.Select(post => new PostViewModel {
-                UserId = post.UserId,
+                Owner = new UserSummaryViewModel() { UserId = post.Owner.UserId, UserName = post.Owner.UserName, AvatarUrl = post.Owner.AvatarUrl, FullName = post.Owner.FullName },
                 PostId = post.PostId,
                 Caption = post.Caption,
                 Location = post.Location,
@@ -55,7 +54,6 @@ namespace Mini_Social_Media.Controllers {
                 CommentCount = post.CommentCount,
                 CreatedAt = post.CreatedAt,
                 IsLiked = post.IsLiked,
-                UserName = post.UserName,
                 Medias = post.MediaUrls.Select(m => new PostMediaViewModel {
                     Url = m.Url,
                     MediaType = m.MediaType

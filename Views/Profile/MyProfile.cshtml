@@ -3,20 +3,27 @@
     ViewData["Title"] = "My Profile";
     Layout = "_Layout";
 }
-
 <div class="container mt-4" style="max-width: 935px;">
     <header class="row mb-5 align-items-center">
         <div class="col-4 col-md-4 d-flex justify-content-center">
             <div class="position-relative">
-                <img src="@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/images/default-avatar.png" : Model.AvatarUrl)"
+                <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="uploadAvatar(this)" />
+
+                <img id="avatarImage"
+                     src="@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/images/default-avatar.png" : Model.AvatarUrl)"
                      alt="@Model.UserName"
                      class="rounded-circle border border-2"
-                     style="width: 150px; height: 150px; object-fit: cover; cursor: pointer;">
-                <button class="btn btn-sm btn-light position-absolute bottom-0 end-0 rounded-circle shadow-sm" title="Change Avatar">
+                     style="width: 150px; height: 150px; object-fit: cover; cursor: pointer;"
+                     onclick="triggerFileInput()"> <div class="btn btn-sm btn-light position-absolute bottom-0 end-0 rounded-circle shadow-sm"
+                                                        title="Change Avatar"
+                                                        style="cursor: pointer;"
+                                                        onclick="triggerFileInput()">
                     <i class="bi bi-camera-fill"></i>
-                </button>
+                </div>
             </div>
         </div>
+
+        <div id="uploadLoading" style="display:none; position: absolute;">Uploading...</div>
 
         <div class="col-8 col-md-8">
             <div class="d-flex align-items-center mb-3 flex-wrap gap-3">
@@ -115,3 +122,44 @@
         }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function triggerFileInput() {
+            document.getElementById('avatarInput').click();
+        }
+
+        function uploadAvatar(inputElement) {
+            const file = inputElement.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                alert("Please select an image file.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('avatarFile', file); 
+
+
+            fetch('/Profile/UpdateAvatar', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => {
+                if (res.ok) return res.json();
+                throw new Error("Upload failed");
+            })
+            .then(data => {
+                if (data.newUrl) {
+                    document.getElementById('avatarImage').src = data.newUrl;
+                }
+                alert("Avatar updated successfully!");
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Failed to update avatar.");
+            });
+        }
+    </script>
+}

@@ -32,4 +32,10 @@
 
         public List<PostSummaryViewModel> Posts { get; set; } = new();
     }
+    public class UserSummaryViewModel {
+        public int UserId { get; set; }
+        public string? UserName { get; set; }
+        public string? FullName { get; set; }
+        public string? AvatarUrl { get; set; }
+    }
 }

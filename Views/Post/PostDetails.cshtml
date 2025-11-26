@@ -72,14 +72,14 @@
 
         <!-- HEADER -->
         <div class="post-header">
-            <img src="/images/avatar.png" class="post-avatar" alt="@Model.UserName">
+            <img src="/images/avatar.png" class="post-avatar" alt="@Model.Owner.UserName">
             <div class="post-user-info flex-grow-1">
-                <h6>@Model.UserName</h6>
+                <h6>@Model.Owner.UserName</h6>
                 @if (!string.IsNullOrEmpty(Model.Location)) {
                     <p class="post-location">@Model.Location</p>
                 }
             </div>
-            @if (User.Identity.IsAuthenticated && Model.UserId == currentUserId) {
+            @if (User.Identity.IsAuthenticated && Model.Owner.UserId == currentUserId) {
                 <div class="d-flex gap-2">
                     <a asp-action="EditPost" asp-route-postId="@Model.PostId" class="post-actions-btn">
                         <i class="bi bi-pencil"></i>

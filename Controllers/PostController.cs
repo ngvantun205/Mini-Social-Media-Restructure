@@ -44,7 +44,6 @@ namespace Mini_Social_Media.Controllers {
         }
         [HttpGet]
         public async Task<IActionResult> PostDetails(int id) {
-            // Lưu ý: Service phải Include Comment và User của Comment thì mới có dữ liệu
             int userId = GetCurrentUserId();
             if (userId == 0)
                 return Unauthorized();
@@ -52,14 +51,13 @@ namespace Mini_Social_Media.Controllers {
             if (post == null)
                 return NotFound();
             var postviewmodel = new PostViewModel {
-                UserId = post.UserId,
+                Owner = new UserSummaryViewModel() { UserId = post.Owner.UserId, UserName = post.Owner.UserName, AvatarUrl = post.Owner.AvatarUrl, FullName = post.Owner.FullName },
                 PostId = post.PostId,
                 Caption = post.Caption,
                 Location = post.Location,
                 LikeCount = post.LikeCount,
                 CommentCount = post.CommentCount,
                 CreatedAt = post.CreatedAt,
-                UserName = post.UserName,
                 IsLiked = post.IsLiked,
                 Medias = post.MediaUrls.Select(m => new PostMediaViewModel {
                     Url = m.Url,

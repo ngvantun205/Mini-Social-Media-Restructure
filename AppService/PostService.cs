@@ -1,4 +1,5 @@
-﻿using Mini_Social_Media.Models.DomainModel;
+﻿using Microsoft.Extensions.Hosting;
+using Mini_Social_Media.Models.DomainModel;
 using System.Text.RegularExpressions;
 
 namespace Mini_Social_Media.AppService {
@@ -79,7 +80,7 @@ namespace Mini_Social_Media.AppService {
             var comments = await _commentRepository.GetCommentsByPostIdAsync(postId);
             return new PostDto {
                 PostId = post.PostId,
-                UserId = post.UserId,
+                Owner = new UserSummaryDto() {UserName = post.User?.UserName, FullName = post.User ?.FullName, AvatarUrl = post.User ?.AvatarUrl, UserId = userId  },
                 Caption = post.Caption,
                 Location = post.Location,
                 CreatedAt = post.CreatedAt,
@@ -87,8 +88,6 @@ namespace Mini_Social_Media.AppService {
                 IsLiked = post.Likes.Any(l => l.UserId == userId),
                 CommentCount = post.CommentCount,
                 MediaUrls = post.Medias.Select(m => new PostMediaDto { Url = m.Url, MediaType = m.MediaType }).ToList(),
-                UserName = post.User?.UserName,
-                FullName = post.User?.FullName,
                 Hashtags = string.Join(" ", hashtagNames) ,
                 Comments = comments.Select(c => new CommentDto {
                     CommentId = c.CommentId,
@@ -162,14 +161,13 @@ namespace Mini_Social_Media.AppService {
 
             return new PostDto {
                 PostId = post.PostId,
-                UserId = post.UserId,
+                Owner = new UserSummaryDto() { UserName = post.User?.UserName, FullName = post.User?.FullName, AvatarUrl = post.User?.AvatarUrl, UserId = userId },
                 Caption = post.Caption,
                 Location = post.Location,
                 CreatedAt = post.CreatedAt,
                 LikeCount = post.LikeCount,
                 CommentCount = post.CommentCount,
                 MediaUrls = post.Medias.Select(m => new PostMediaDto { Url = m.Url, MediaType = m.MediaType }).ToList(),
-                UserName = post.User?.UserName,
                 Hashtags = string.Join(' ', post.PostHashtags.Select(x => x.Hashtag.HashtagName))
             };
         }
@@ -190,8 +188,7 @@ namespace Mini_Social_Media.AppService {
 
             return posts.Select(p => new PostDto {
                 PostId = p.PostId,
-                UserId = p.UserId,
-                UserName = p.User?.UserName,
+                Owner = new UserSummaryDto() { UserName = p.User?.UserName, FullName = p.User?.FullName, AvatarUrl = p.User?.AvatarUrl, UserId = userId },
                 Caption = p.Caption,
                 CreatedAt = p.CreatedAt,
                 MediaUrls = p.Medias.Select(m =>  new PostMediaDto() {Url = m.Url, MediaType = m.MediaType }).ToList(),
