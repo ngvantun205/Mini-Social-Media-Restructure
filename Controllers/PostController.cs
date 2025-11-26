@@ -67,10 +67,7 @@ namespace Mini_Social_Media.Controllers {
 
                 Comments = (await _commentService.GetCommentsByPostIdAsync(post.PostId)).Select(c => new CommentViewModel {
                     CommentId = c.CommentId,
-                    UserName = c.UserName,
-                    FullName = c.FullName,
-                    UserId = c.UserId,
-                    UserAvatarUrl = c.UserAvatarUrl, 
+                    Owner = new UserSummaryViewModel() {UserId = c.Owner.UserId, AvatarUrl = c.Owner.AvatarUrl, FullName = c.Owner.FullName, UserName = c.Owner.UserName },
                     Content = c.Content,
                     ParentCommentId = c.ParentCommentId,
                     CreatedAt = c.CreatedAt,

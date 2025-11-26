@@ -19,8 +19,8 @@ namespace Mini_Social_Media.IAppService {
         Task<bool> DeleteCommentAsync(int commentId, int userId);
         Task<CommentDto?> EditCommentAsync(EditCommentInputModel model, int userId);
         Task<IEnumerable<CommentDto>> GetCommentsByPostIdAsync(int postId);
-        Task<IEnumerable<ReplyCommentDto>> GetRepliesByCommentIdAsync(int commentId);
-        Task<ReplyCommentDto?> AddReplyAsync(ReplyCommentInputModel model, int userId);
+        Task<IEnumerable<CommentDto>> GetRepliesByCommentIdAsync(int commentId);
+        Task<CommentDto?> AddReplyAsync(ReplyCommentInputModel model, int userId);
     }
     public interface IUserService {
         Task<UserProfileDto?> GetUserProfileAsync(int userId, int requesterId);

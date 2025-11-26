@@ -23,12 +23,9 @@
             var createdComment = await _commentRepository.GetByIdAsync(comment.CommentId);
             return new CommentDto {
                 CommentId = createdComment.CommentId,
-                UserId = createdComment.UserId,
                 Content = createdComment.Content,
                 CreatedAt = createdComment.CreatedAt,
-                UserAvatarUrl = createdComment.User?.AvatarUrl,
-                UserName = createdComment.User?.UserName,
-                FullName = createdComment.User?.FullName
+                Owner = new UserSummaryDto() {UserId = createdComment.User.Id, UserName = createdComment.User.UserName, FullName = createdComment.User.FullName, AvatarUrl = createdComment.User.AvatarUrl  }
             };
         }
         public async Task<bool> DeleteCommentAsync(int commentId, int userId) {
@@ -56,41 +53,36 @@
             await _commentRepository.UpdateAsync(comment);
             return new CommentDto {
                 CommentId = comment.CommentId,
-                UserId = comment.UserId,
                 Content = comment.Content,
-                CreatedAt = comment.CreatedAt
+                CreatedAt = comment.CreatedAt,
+                Owner = new UserSummaryDto() { UserId = comment.User.Id, UserName = comment.User.UserName, FullName = comment.User.FullName, AvatarUrl = comment.User.AvatarUrl }
             };
         }
         public async Task<IEnumerable<CommentDto>> GetCommentsByPostIdAsync(int postId) {
             var comments = await _commentRepository.GetCommentsByPostIdAsync(postId);
             return comments.Select(c => new CommentDto {
                 CommentId = c.CommentId,
-                UserId = c.UserId,
                 Content = c.Content,
                 CreatedAt = c.CreatedAt,
-                UserAvatarUrl = c.User?.AvatarUrl,
-                UserName = c.User?.UserName,
-                FullName = c.User?.FullName,
-                ReplyCount = c.ReplyCount
+                ReplyCount = c.ReplyCount,
+                Owner = new UserSummaryDto() { UserId = c.User.Id, UserName = c.User.UserName, FullName = c.User.FullName, AvatarUrl = c.User.AvatarUrl }
             });
         }
-        public async Task<IEnumerable<ReplyCommentDto>> GetRepliesByCommentIdAsync(int commentId) {
+        public async Task<IEnumerable<CommentDto>> GetRepliesByCommentIdAsync(int commentId) {
             var comment = await _commentRepository.GetByIdAsync(commentId);
             if (comment == null) {
-                return Enumerable.Empty<ReplyCommentDto>();
+                return Enumerable.Empty<CommentDto>();
             }
             var replies = await _commentRepository.GetRepliesByCommentIdAsync(commentId);
-            return replies.Select(r => new ReplyCommentDto {
+            return replies.Select(r => new CommentDto {
                 CommentId = r.CommentId,
-                UserId = r.UserId,
                 Content = r.Content,
                 CreatedAt = r.CreatedAt,
-                UserName = r.User?.UserName,
                 ReplyCount = r.ReplyCount,
-                UserAvatarUrl = r.User?.AvatarUrl
+                Owner = new UserSummaryDto() { UserId = r.User.Id, UserName = r.User.UserName, FullName = r.User.FullName, AvatarUrl = r.User.AvatarUrl }
             });
         }
-        public async Task<ReplyCommentDto?> AddReplyAsync(ReplyCommentInputModel model, int userId) {
+        public async Task<CommentDto?> AddReplyAsync(ReplyCommentInputModel model, int userId) {
             var reply = new Comment {
                 UserId = userId,
                 Content = model.Content,
@@ -106,15 +98,13 @@
                 return null;
             await _commentRepository.AddAsync(reply);
             var createdreply = await _commentRepository.GetByIdAsync(reply.CommentId);
-            return new ReplyCommentDto {
+            return new CommentDto {
                 CommentId = createdreply.CommentId,
-                UserId = createdreply.UserId,
                 Content = createdreply.Content,
                 CreatedAt = createdreply.CreatedAt,
+                ReplyCount = createdreply.ReplyCount,
                 ParentCommentId = createdreply.ParentCommentId,
-                UserName = createdreply.User?.UserName,
-                UserAvatarUrl = createdreply.User?.AvatarUrl,
-                FullName = createdreply.User?.FullName
+                Owner = new UserSummaryDto() { UserId = createdreply.User.Id, UserName = createdreply.User.UserName, FullName = createdreply.User.FullName, AvatarUrl = createdreply.User.AvatarUrl }
             };
         }
     }

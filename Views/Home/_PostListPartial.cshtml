@@ -11,8 +11,17 @@
 
         <!-- POST HEADER -->
         <div class="post-card-header">
-            <img src="@post.Owner.AvatarUrl" class="post-user-avatar" alt="@post.Owner.UserName" />
-
+            @if (currentUserId != post.Owner.UserId) {
+                <a asp-controller="Profile" asp-action="UserProfile" asp-route-id="@post.Owner.UserId">
+                    <img src="@post.Owner.AvatarUrl" class="post-user-avatar" alt="@post.Owner.UserName" />
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Profile" asp-action="MyProfile">
+                    <img src="@post.Owner.AvatarUrl" class="post-user-avatar" alt="@post.Owner.UserName" />
+                </a>
+            }
             <div class="post-user-details">
                 <h5 class="post-username">@post.Owner.UserName</h5>
                 @if (!string.IsNullOrEmpty(post.Location)) {

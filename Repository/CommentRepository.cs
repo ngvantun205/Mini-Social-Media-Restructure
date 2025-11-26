@@ -51,6 +51,7 @@ namespace Mini_Social_Media.Repository {
             return await _context.Comments
                 .Where(c => c.ParentCommentId == commentId)
                 .Include(c => c.User)
+                .Include(c => c.Replies)
                 .ToListAsync();
         }
         public async Task<bool> AddReplyAsync(int commentId) {

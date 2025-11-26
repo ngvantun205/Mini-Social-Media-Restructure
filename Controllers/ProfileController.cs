@@ -70,11 +70,11 @@ namespace Mini_Social_Media.Controllers {
                 WebsiteUrl = profile.WebsiteUrl,
                 IsPrivate = profile.IsPrivate,
                 CreatedAt = profile.CreatedAt,
-                FollowersCount = profile.FollowersCount,
+                FollowerCount = profile.FollowersCount,
                 FollowingCount = profile.FollowingCount,
                 IsFollowing = profile.IsFollowing,
                 Gender = profile.Gender,
-                RecentPosts = profile.Posts.Select(p => new PostSummaryViewModel {
+                Posts = profile.Posts.Select(p => new PostSummaryViewModel {
                     PostId = p.PostId,
                     LikeCount = p.LikeCount,
                     CommentCount = p.CommentCount,

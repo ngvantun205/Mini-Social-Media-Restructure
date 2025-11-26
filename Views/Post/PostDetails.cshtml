@@ -16,17 +16,17 @@
 
         <div class="comment-item @indentClass" id="@divId">
             <div class="d-flex gap-2">
-                <img src="/images/avatar.png" class="comment-avatar" alt="@comment.UserName">
+                <img src="@comment.Owner.AvatarUrl" class="comment-avatar" alt="@comment.Owner.UserName">
 
                 <div class="flex-grow-1">
                     <div class="comment-bubble">
-                        <strong class="comment-username">@comment.UserName</strong>
+                        <strong class="comment-username">@comment.Owner.UserName</strong>
                         <p class="comment-text mb-0" id="@textId">@comment.Content</p>
                     </div>
 
                     <div class="comment-actions">
                         <button class="comment-action-btn" onclick="likeComment(@comment.CommentId)">Like</button>
-                        <button class="comment-action-btn" onclick="prepareReply(@comment.CommentId, '@comment.UserName', '@safeContent')">Reply</button>
+                        <button class="comment-action-btn" onclick="prepareReply(@comment.CommentId, '@comment.Owner.UserName', '@safeContent')">Reply</button>
                         <span class="comment-timestamp">@comment.CreatedAt.ToString("HH:mm")</span>
 
                         <div class="comment-dropdown d-inline">
@@ -34,7 +34,7 @@
                                 <i class="bi bi-three-dots"></i>
                             </button>
                             <div class="dropdown-menu">
-                                @if (comment.UserId == currentUserId) {
+                                @if (comment.Owner.UserId == currentUserId) {
                                     <a class="dropdown-item" href="javascript:void(0)" onclick="event.stopPropagation(); prepareEdit(@comment.CommentId, '@safeContent')">
                                         <i class="bi bi-pencil me-2"></i>Edit
                                     </a>
@@ -72,7 +72,7 @@
 
         <!-- HEADER -->
         <div class="post-header">
-            <img src="/images/avatar.png" class="post-avatar" alt="@Model.Owner.UserName">
+            <img src="@Model.Owner.AvatarUrl" class="post-avatar" alt="@Model.Owner.UserName">
             <div class="post-user-info flex-grow-1">
                 <h6>@Model.Owner.UserName</h6>
                 @if (!string.IsNullOrEmpty(Model.Location)) {
@@ -213,11 +213,16 @@
 </form>
 
 
+<input type="hidden" id="loggedInUserId" value="@currentUserId" />
+
 @section Scripts {
     <script src="~/js/post-detail.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            initializePostDetail(@currentUserId);
+            const userIdElement = document.getElementById('loggedInUserId');
+            const userId = userIdElement ? parseInt(userIdElement.value) : 0;
+
+            initializePostDetail(userId);
         });
     </script>
 }

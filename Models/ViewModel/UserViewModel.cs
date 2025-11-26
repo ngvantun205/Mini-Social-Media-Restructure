@@ -8,12 +8,12 @@
         public string? WebsiteUrl { get; set; }
         public bool IsPrivate { get; set; }
         public int PostCount { get; set; }
-        public int FollowersCount { get; set; }
+        public int FollowerCount { get; set; }
         public int FollowingCount { get; set; }
         public bool IsFollowing { get; set; }
         public string? Gender { get; set; }
         public DateTime CreatedAt { get; set; } 
-        public List<PostSummaryViewModel> RecentPosts { get; set; } = new List<PostSummaryViewModel>();
+        public List<PostSummaryViewModel> Posts { get; set; } = new List<PostSummaryViewModel>();
     }
     public class MyProfileViewModel {
         public string? Email { get; set; }

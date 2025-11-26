@@ -1,13 +1,10 @@
 ﻿namespace Mini_Social_Media.Models.ViewModel {
     public class CommentViewModel {
         public int CommentId { get; set; }
-        public int PostId { get; set; }  
-        public int UserId { get; set; }
-        public string? UserName { get; set; }
-        public string? FullName { get; set; }    
+        public int PostId { get; set; }
+        public UserSummaryViewModel Owner { get; set; }
         public string? Content { get; set; }
         public DateTime CreatedAt { get; set; }
-        public string? UserAvatarUrl { get; set; } 
         public int ReplyCount { get; set; }
         public int? ParentCommentId { get; set; }    
         public ICollection<LikeViewModel> Likes { get; set; } = new List<LikeViewModel>();

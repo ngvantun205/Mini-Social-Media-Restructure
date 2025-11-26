@@ -1,4 +1,19 @@
-﻿<nav class="ig-sidebar">
+﻿@using Microsoft.AspNetCore.Identity
+@using Mini_Social_Media.Models.DomainModel
+@inject UserManager<User> UserManager
+@{
+    string userAvatar = "/images/avatar.png";
+    string currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    string currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+    if (User.Identity != null && User.Identity.IsAuthenticated) {
+        var currentUser = await UserManager.GetUserAsync(User);
+        if (currentUser != null && !string.IsNullOrEmpty(currentUser.AvatarUrl)) {
+            userAvatar = currentUser.AvatarUrl;
+        }
+    }
+}
+<nav class="ig-sidebar">
     <div class="ig-sidebar-inner">
 
         <a class="ig-logo" href="/">
@@ -41,7 +56,7 @@
         </a>
 
         <a class="ig-item" asp-controller="Profile" asp-action="MyProfile" data-tooltip="Profile">
-            <img class="ig-avatar" src="/images/avatar.png" alt="Profile" />
+            <img class="ig-avatar" src="@userAvatar" alt="Profile" />
             <span>Profile</span>
         </a>
 

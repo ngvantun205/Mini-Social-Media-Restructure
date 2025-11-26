@@ -1,6 +1,7 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Mini_Social_Media.Models;
+using System.Security.Claims;
 
 namespace Mini_Social_Media.Controllers {
     [Authorize]
@@ -97,7 +98,20 @@ namespace Mini_Social_Media.Controllers {
         [Route("Comment/GetReplies/{commentId}")]
         public async Task<IActionResult> GetReplies(int commentId) {
             var replies = await _commentService.GetRepliesByCommentIdAsync(commentId);
-            return Ok(replies);
+
+            return Ok(replies.Select(r => new CommentViewModel {
+                CommentId = r.CommentId,
+                Content = r.Content,
+                CreatedAt = r.CreatedAt,
+                ReplyCount = r.ReplyCount,
+                Owner = new UserSummaryViewModel {
+                    UserId = r.Owner.UserId,
+                    UserName = r.Owner.UserName,
+                    FullName = r.Owner.FullName,
+                    AvatarUrl = r.Owner.AvatarUrl
+                }
+            }).ToList());
         }
+
     }
 }

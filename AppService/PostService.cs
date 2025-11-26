@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Hosting;
+using Mini_Social_Media.Models;
 using Mini_Social_Media.Models.DomainModel;
 using System.Text.RegularExpressions;
 
@@ -92,10 +93,7 @@ namespace Mini_Social_Media.AppService {
                 Comments = comments.Select(c => new CommentDto {
                     CommentId = c.CommentId,
                     PostId = c.PostId,
-                    UserId = c.UserId,
-                    UserName = c.User?.UserName,
-                    FullName = c.User?.FullName,
-                    UserAvatarUrl = c.User?.AvatarUrl,
+                    Owner = new UserSummaryDto() { UserId = c.User.Id, UserName = c.User.UserName, FullName = c.User.FullName, AvatarUrl = c.User.AvatarUrl },
                     Content = c.Content,
                     CreatedAt = c.CreatedAt
                 }).ToList()
@@ -188,7 +186,7 @@ namespace Mini_Social_Media.AppService {
 
             return posts.Select(p => new PostDto {
                 PostId = p.PostId,
-                Owner = new UserSummaryDto() { UserName = p.User?.UserName, FullName = p.User?.FullName, AvatarUrl = p.User?.AvatarUrl, UserId = userId },
+                Owner = new UserSummaryDto() { UserName = p.User?.UserName, FullName = p.User?.FullName, AvatarUrl = p.User?.AvatarUrl, UserId = p.UserId },
                 Caption = p.Caption,
                 CreatedAt = p.CreatedAt,
                 MediaUrls = p.Medias.Select(m =>  new PostMediaDto() {Url = m.Url, MediaType = m.MediaType }).ToList(),

@@ -1,6 +1,6 @@
-﻿@model MyProfileViewModel
+﻿@model UserProfileViewModel
 @{
-    ViewData["Title"] = "My Profile";
+    ViewData["Title"] = "User Profile";
     Layout = "_Layout";
 }
 
@@ -12,9 +12,6 @@
                      alt="@Model.UserName"
                      class="rounded-circle border border-2"
                      style="width: 150px; height: 150px; object-fit: cover; cursor: pointer;">
-                <button class="btn btn-sm btn-light position-absolute bottom-0 end-0 rounded-circle shadow-sm" title="Change Avatar">
-                    <i class="bi bi-camera-fill"></i>
-                </button>
             </div>
         </div>
 
@@ -86,11 +83,16 @@
             foreach (var post in Model.Posts) {
                 <div class="col-4">
                     <div class="ratio ratio-1x1 position-relative group-hover-overlay">
-                        @if (post.MediaUrl.EndsWith(".mp4")) {
-                            <video src="@post.MediaUrl" class="w-100 h-100 object-fit-cover"></video>
+                        @if (@post.MediaUrl != null) {
+                            @if (post.MediaUrl.EndsWith(".mp4")) {
+                                <video src="@post.MediaUrl" class="w-100 h-100 object-fit-cover"></video>
+                            }
+                            else {
+                                <img src="@post.MediaUrl" class="w-100 h-100 object-fit-cover" alt="Post">
+                            }
                         }
                         else {
-                            <img src="@post.MediaUrl" class="w-100 h-100 object-fit-cover" alt="Post">
+                            <img src="https://duckduckgo.com/?q=insta+post&iar=images&atb=v488-1&iai=https%3A%2F%2Fimg.freepik.com%2Ffree-vector%2Finstagram-post-template_23-2147671656.jpg%3Fw%3D2000" class="w-100 h-100 object-fit-cover" alt="Post">
                         }
 
                         <a href="/Post/PostDetails?id=@post.PostId" class="overlay d-flex justify-content-center align-items-center text-white text-decoration-none">

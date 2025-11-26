@@ -164,12 +164,17 @@ function loadReplies(commentId) {
 // ============================================
 
 function generateCommentHtml(comment, isReply) {
+    const ownerName = comment.owner?.userName || 'Unknown User';
+    const ownerAvatar = comment.owner?.avatarUrl || '/images/avatar.png';
+    const ownerId = parseInt(comment.owner?.userId || 0);
+
     const safeContent = escapeHtml(comment.content);
-    const safeUserName = escapeHtml(comment.userName || 'User');
+    const safeUserName = escapeHtml(ownerName);
     const indentClass = isReply ? "reply-comment" : "";
 
+    // So sánh userId với ép kiểu rõ ràng
     let actionButtons = '';
-    if (comment.userId === currentUserId) {
+    if (ownerId === parseInt(currentUserId)) {
         actionButtons = `
             <div class="comment-dropdown d-inline">
                 <button class="dropdown-toggle-btn" type="button">
@@ -214,19 +219,26 @@ function generateCommentHtml(comment, isReply) {
         `;
     }
 
+    // Timestamp format helper (thêm nếu chưa có)
+    const timestamp = comment.createdAt ? new Date(comment.createdAt).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+    }) : '';
+
     return `
         <div class="comment-item ${indentClass}" id="comment-wrapper-${comment.commentId}">
             <div class="d-flex gap-2">
-                <img src="/images/avatar.png" class="comment-avatar" alt="Avatar">
+                <img src="${ownerAvatar}" class="comment-avatar" alt="${safeUserName}">
+                
                 <div class="flex-grow-1">
                     <div class="comment-bubble">
                         <strong class="comment-username">${safeUserName}</strong>
                         <p class="comment-text mb-0" id="comment-text-${comment.commentId}">${safeContent}</p>
                     </div>
+                    
                     <div class="comment-actions">
-                        <button class="comment-action-btn" onclick="likeComment(${comment.commentId})">Like</button>
                         <button class="comment-action-btn" onclick="prepareReply(${comment.commentId}, '${safeUserName.replace(/'/g, "\\'")}', '${safeContent.replace(/'/g, "\\'")}')">Reply</button>
-                        <span class="comment-timestamp">Just now</span>
+                        <span class="comment-timestamp">${timestamp}</span>
                         ${actionButtons}
                     </div>
                     ${viewRepliesBtn}
