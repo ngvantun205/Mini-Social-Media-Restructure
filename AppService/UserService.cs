@@ -123,11 +123,11 @@ namespace Mini_Social_Media.AppService {
             await _userRepository.UpdateAsync(user);
             var updateduser = await _userRepository.GetByIdAsync(userId);
             return new EditProfileDto() {
-            FullName = updateduser?.FullName,
-            Bio = updateduser?.Bio,
-            AvatarUrl = updateduser?.AvatarUrl,
-            WebsiteUrl = updateduser?.WebsiteUrl,
-            Gender = updateduser?.Gender,
+                FullName = updateduser?.FullName,
+                Bio = updateduser?.Bio,
+                AvatarUrl = updateduser?.AvatarUrl,
+                WebsiteUrl = updateduser?.WebsiteUrl,
+                Gender = updateduser?.Gender,
             };
         }
         public async Task<IdentityResult> ChangePassword(ChangePasswordInputModel changeInput, int userId) {
@@ -138,15 +138,18 @@ namespace Mini_Social_Media.AppService {
             if (changeInput.NewPassword != changeInput.ComfirmNewPassword)
                 return IdentityResult.Failed(new IdentityError { Description = "Passwords do not match" });
 
-            // KIỂM TRA MẬT KHẨU CŨ ĐÚNG HAY KHÔNG
             var correctOldPassword = await _userManager.CheckPasswordAsync(user, changeInput.Password);
             if (!correctOldPassword)
                 return IdentityResult.Failed(new IdentityError { Description = "Current password is incorrect" });
 
-            // ĐỔI MẬT KHẨU
             var result = await _userManager.ChangePasswordAsync(user, changeInput.Password, changeInput.NewPassword);
             return result;
         }
-
+        public async Task ChangeAccountPrivacy(bool isPrivate, int userId) {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+                return;
+            await _userRepository.UpdatePrivacy(isPrivate, userId);
+        }
     }
 }

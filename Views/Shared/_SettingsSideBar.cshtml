@@ -16,6 +16,11 @@
             Change Password
         </a>
 
+        <a asp-controller="Account" asp-action="AccountPrivacy"
+           class="list-group-item list-group-item-action border-0 p-3 @(currentAction == "ChangePassword" ? "active-setting" : "")">
+            Account Privacy
+        </a>
+
         <a href="#" class="list-group-item list-group-item-action border-0 p-3">
             Push Notifications
         </a>

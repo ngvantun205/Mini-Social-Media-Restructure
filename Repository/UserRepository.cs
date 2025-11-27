@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using Mini_Social_Media.Models.DomainModel;
 
 namespace Mini_Social_Media.Repository {
@@ -39,6 +40,12 @@ namespace Mini_Social_Media.Repository {
         public async Task<User?> GetByUserNameOrEmailAsync(string userNameOrEmail) {
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.UserName == userNameOrEmail || u.Email == userNameOrEmail);
+        }
+        public async Task UpdatePrivacy(bool isPrivate, int userId) {
+            var user = await GetByIdAsync(userId);
+            if (user != null) 
+                user.IsPrivate = isPrivate;
+            await _context.SaveChangesAsync();
         }
     }
 }

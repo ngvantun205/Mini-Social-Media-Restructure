@@ -29,5 +29,7 @@ namespace Mini_Social_Media.Models.InputModel {
         [Required]
         public string? ComfirmNewPassword { get; set; }   
     }
-
+    public class PrivacyInputModel {
+        public bool IsPrivate { get; set; }
+    }
 }

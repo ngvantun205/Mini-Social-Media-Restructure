@@ -30,5 +30,6 @@ namespace Mini_Social_Media.IAppService {
         Task<EditProfileDto> GetEditProfile(int userId);    
         Task<EditProfileDto> Edit(EditProfileInputModel model, int userId);
         Task<IdentityResult> ChangePassword(ChangePasswordInputModel changeInput, int userId);
+        Task ChangeAccountPrivacy(bool isPrivate, int userId);
     }
 }

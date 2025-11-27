@@ -9,6 +9,7 @@
     public interface IUserRepository : IRepository<User> {
         Task<bool> UserExist(string userName, string email);
         Task<User?> GetByUserNameOrEmailAsync(string userNameOrEmail);
+        Task UpdatePrivacy(bool isPrivate, int userId);
     }
     public interface IPostRepository : IRepository<Post> {
         Task<IEnumerable<Post>> GetPostsPagedAsync(int page, int pageSize);

@@ -14,7 +14,8 @@ namespace Mini_Social_Media.Controllers {
             string userIdstr = _userManager.GetUserId(User);
             if (userIdstr == null)
                 return 0;
-            else return int.Parse(userIdstr);
+            else
+                return int.Parse(userIdstr);
         }
         [HttpGet]
         public async Task<IActionResult> Edit() {
@@ -32,8 +33,11 @@ namespace Mini_Social_Media.Controllers {
         }
         [HttpPost]
         public async Task<IActionResult> Edit(EditProfileInputModel editProfileInput) {
-            int userId = GetCurrentUserId();    
-            if(userId == 0) return Unauthorized();
+            if (!ModelState.IsValid)
+                return View();
+            int userId = GetCurrentUserId();
+            if (userId == 0)
+                return Unauthorized();
             var updated = await _userService.Edit(editProfileInput, userId);
             return View(new EditProfileViewModel() {
                 FullName = updated.FullName,
@@ -64,6 +68,27 @@ namespace Mini_Social_Media.Controllers {
                 ViewBag.Errors = result.Errors.Select(e => e.Description).ToList();
 
             return View(model);
+        }
+        [HttpGet]
+        public async Task<IActionResult> AccountPrivacy() {
+            var userId = GetCurrentUserId();
+            if (userId == 0)
+                return Unauthorized();
+            var profile = await _userService.GetMyProfileAsync(userId);
+            var IsPrivate = profile?.IsPrivate ?? false;
+            return View(IsPrivate);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AccountPrivacy([FromBody] PrivacyInputModel model) {
+            if (model == null)
+                return BadRequest("model null");
+            var userId = GetCurrentUserId();
+            if (userId == 0)
+                return Unauthorized();
+
+            await _userService.ChangeAccountPrivacy(model.IsPrivate, userId);
+            return Ok(new { success = true });
         }
 
     }
