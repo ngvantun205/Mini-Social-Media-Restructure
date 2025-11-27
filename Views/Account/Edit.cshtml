@@ -1,0 +1,61 @@
+﻿@model EditProfileViewModel
+@{
+    ViewData["Title"] = "Edit Profile";
+    Layout = "~/Views/Shared/_SettingsLayout.cshtml";
+}
+
+<div class="edit-profile-container">
+    <h3 class="mb-4">Edit Profile</h3>
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+        <div class="d-flex align-items-center mb-4 bg-light p-3 rounded-3">
+            <img src="@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/images/avatar.png" : Model.AvatarUrl)"
+                 class="rounded-circle me-3" width="50" height="50" style="object-fit:cover;">
+            <div>
+                <div class="fw-bold">@Model.UserName</div>
+                <label for="avatarUpload" class="text-primary fw-bold small" style="cursor:pointer;">
+                    Change profile photo
+                </label>
+                <input asp-for="AvatarUrl" id="avatarUpload" type="file" class="media-input d-none" accept="image/*" />
+
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="col-sm-3 col-form-label fw-bold text-end">Name</label>
+            <div class="col-sm-9">
+                <input asp-for="FullName" class="form-control" placeholder="Name">
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="col-sm-3 col-form-label fw-bold text-end">Bio</label>
+            <div class="col-sm-9">
+                <textarea asp-for="Bio" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-sm-3 col-form-label fw-bold text-end">WebsiteUrl</label>
+            <div class="col-sm-9">
+                <textarea asp-for="WebsiteUrl" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="col-sm-3 col-form-label fw-bold text-end">Gender</label>
+            <div class="col-sm-9">
+                <select asp-for="Gender" class="form-select">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-sm-9 offset-sm-3">
+                <button type="submit" class="btn btn-primary fw-bold px-4">Submit</button>
+            </div>
+        </div>
+    </form>
+</div>

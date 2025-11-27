@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration.UserSecrets;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration.UserSecrets;
 
 namespace Mini_Social_Media.IAppService {
     public interface IPostService {
@@ -26,5 +27,8 @@ namespace Mini_Social_Media.IAppService {
         Task<UserProfileDto?> GetUserProfileAsync(int userId, int requesterId);
         Task<MyProfileDto?> GetMyProfileAsync(int userId);
         Task<MyProfileDto> UpdateUserAvatar(IFormFile formFile, int userId);
+        Task<EditProfileDto> GetEditProfile(int userId);    
+        Task<EditProfileDto> Edit(EditProfileInputModel model, int userId);
+        Task<IdentityResult> ChangePassword(ChangePasswordInputModel changeInput, int userId);
     }
 }

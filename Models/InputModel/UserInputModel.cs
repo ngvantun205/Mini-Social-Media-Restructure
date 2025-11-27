@@ -21,5 +21,13 @@ namespace Mini_Social_Media.Models.InputModel {
         [Required, MinLength(6)]
         public string? Password { get; set; }
     }
+    public class ChangePasswordInputModel {
+        [Required]
+        public string? Password { get; set; }
+        [Required]
+        public string? NewPassword { get; set; }
+        [Required]
+        public string? ComfirmNewPassword { get; set; }   
+    }
 
 }

@@ -1,6 +1,4 @@
-﻿using System.Security.Principal;
-
-namespace Mini_Social_Media.DTO {
+﻿namespace Mini_Social_Media.DTO {
     public class PostSummaryDto {
         public int PostId { get; set; }
         public int UserId { get; set; }

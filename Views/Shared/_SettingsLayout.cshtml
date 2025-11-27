@@ -1,0 +1,19 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+<div class="container mt-4" style="max-width: 935px;">
+    <div class="card border-1 shadow-sm overflow-hidden" style="border-color: #dbdbdb;">
+        <div class="row g-0">
+            <div class="col-md-3 d-none d-md-block bg-white">
+                <partial name="_SettingsSidebar" />
+            </div>
+            <div class="col-md-9 bg-white">
+                <div class="p-4 p-md-5" style="min-height: 80vh;">
+                    @RenderBody()
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

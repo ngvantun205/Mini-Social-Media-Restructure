@@ -1,13 +1,14 @@
-﻿using Mini_Social_Media.Models.DomainModel;
-using System.Security.Cryptography.X509Certificates;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace Mini_Social_Media.AppService {
     public class UserService : IUserService {
         private readonly IUserRepository _userRepository;
         private readonly IUploadService _uploadService;
-        public UserService(IUserRepository userRepository, IUploadService uploadService) {
+        private readonly UserManager<User> _userManager;
+        public UserService(IUserRepository userRepository, IUploadService uploadService, UserManager<User> userManager) {
             _userRepository = userRepository;
             _uploadService = uploadService;
+            _userManager = userManager;
         }
         public async Task<MyProfileDto?> GetMyProfileAsync(int userId) {
             var user = await _userRepository.GetByIdAsync(userId);
@@ -94,5 +95,58 @@ namespace Mini_Social_Media.AppService {
                 }).ToList()
             };
         }
+        public async Task<EditProfileDto> GetEditProfile(int userId) {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+                return null;
+            return new EditProfileDto() {
+                FullName = user?.FullName,
+                Bio = user?.Bio,
+                AvatarUrl = user?.AvatarUrl,
+                WebsiteUrl = user?.WebsiteUrl,
+                Gender = user?.Gender
+            };
+        }
+        public async Task<EditProfileDto> Edit(EditProfileInputModel editProfileInputModel, int userId) {
+            if (editProfileInputModel == null)
+                return null;
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+                return null;
+            user.FullName = editProfileInputModel.FullName;
+            user.Bio = editProfileInputModel?.Bio;
+            user.WebsiteUrl = editProfileInputModel?.WebsiteUrl;
+            user.Gender = editProfileInputModel?.Gender;
+            var url = await _uploadService.UploadAsync(editProfileInputModel.AvatarUrl);
+            if (url != null)
+                user.AvatarUrl = url;
+            await _userRepository.UpdateAsync(user);
+            var updateduser = await _userRepository.GetByIdAsync(userId);
+            return new EditProfileDto() {
+            FullName = updateduser?.FullName,
+            Bio = updateduser?.Bio,
+            AvatarUrl = updateduser?.AvatarUrl,
+            WebsiteUrl = updateduser?.WebsiteUrl,
+            Gender = updateduser?.Gender,
+            };
+        }
+        public async Task<IdentityResult> ChangePassword(ChangePasswordInputModel changeInput, int userId) {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+                return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+
+            if (changeInput.NewPassword != changeInput.ComfirmNewPassword)
+                return IdentityResult.Failed(new IdentityError { Description = "Passwords do not match" });
+
+            // KIỂM TRA MẬT KHẨU CŨ ĐÚNG HAY KHÔNG
+            var correctOldPassword = await _userManager.CheckPasswordAsync(user, changeInput.Password);
+            if (!correctOldPassword)
+                return IdentityResult.Failed(new IdentityError { Description = "Current password is incorrect" });
+
+            // ĐỔI MẬT KHẨU
+            var result = await _userManager.ChangePasswordAsync(user, changeInput.Password, changeInput.NewPassword);
+            return result;
+        }
+
     }
 }

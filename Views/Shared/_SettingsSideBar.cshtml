@@ -1,0 +1,43 @@
+﻿@{
+    string currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
+<div class="settings-sidebar d-flex flex-column h-100">
+    <h4 class="p-3 fw-bold border-bottom mb-0">Settings</h4>
+
+    <div class="list-group list-group-flush">
+        <a asp-controller="Profile" asp-action="EditProfile"
+           class="list-group-item list-group-item-action border-0 p-3 @(currentAction == "EditProfile" ? "active-setting" : "")">
+            Edit Profile
+        </a>
+
+        <a asp-controller="Account" asp-action="ChangePassword"
+           class="list-group-item list-group-item-action border-0 p-3 @(currentAction == "ChangePassword" ? "active-setting" : "")">
+            Change Password
+        </a>
+
+        <a href="#" class="list-group-item list-group-item-action border-0 p-3">
+            Push Notifications
+        </a>
+        <a href="#" class="list-group-item list-group-item-action border-0 p-3">
+            Privacy and Security
+        </a>
+    </div>
+</div>
+
+<style>
+    .settings-sidebar {
+        border-right: 1px solid #dbdbdb;
+        min-height: 80vh; 
+    }
+    .active-setting {
+        font-weight: bold;
+        border-left: 2px solid black !important;
+        background-color: transparent !important;
+        color: black !important;
+    }
+
+    .list-group-item:hover {
+        background-color: #fafafa;
+    }
+</style>
