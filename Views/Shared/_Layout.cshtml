@@ -15,6 +15,8 @@
     <link rel="stylesheet" href="~/css/post-detail.css" />
     <link rel="stylesheet" href="~/css/newfeed.css" />
     <link rel="stylesheet" href="~/css/profile.css" />
+    <link rel="stylesheet" href="~/css/bar.css"/>
+    <link rel="stylesheet" href="~/css/index.css"/>
 
     <style>
         #toast-container {
@@ -178,7 +180,7 @@
             .catch(err => console.error("Mark read failed", err));
         }
     </script>
-
+    @RenderSection("Styles", required: false)
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

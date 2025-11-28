@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "News Feed";
 }
+@await Html.PartialAsync("_TopBar")
+@await Html.PartialAsync("_RightSidebar")
 
 <div class="newsfeed-container">
     <div id="postContainer">
@@ -24,4 +26,5 @@
 
 @section Scripts {
     <script src="~/js/newfeed.js"></script>
+    <script src="~/js/bar.js"></script>
 }
