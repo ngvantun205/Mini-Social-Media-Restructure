@@ -1,12 +1,21 @@
-﻿
+﻿@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@inject UserManager<User> UserManager
+@{
+    User? currentUser = null;
+    if (User.Identity != null && User.Identity.IsAuthenticated) {
+        currentUser = await UserManager.GetUserAsync(User);
+    }
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+}
 <div class="right-sidebar">
     <!-- Current User Card -->
     <div class="sidebar-section">
         <div class="current-user-card">
-            <img src="/images/default-avatar.jpg" alt="User">
-            <p class="current-user-name">John Doe</p>
-            <p class="current-user-handle">johndoe</p>
-            <button class="view-profile-btn">View Profile</button>
+            <img src="@currentUser.AvatarUrl" alt="User">
+            <p class="current-user-name">@currentUser.FullName</p>
+            <p class="current-user-handle">@currentUser.UserName</p>
+            <a asp-controller="Profile" asp-action="MyProfile" class="view-profile-btn">View Profile</a>
         </div>
     </div>
 

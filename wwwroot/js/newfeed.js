@@ -126,7 +126,6 @@ function deletePost(postId) {
     })
         .then(res => {
             if (res.ok) {
-                // Animation before removal
                 const postCard = document.querySelector(`[data-post-id="${postId}"]`);
                 if (postCard) {
                     postCard.style.animation = 'fadeOutDown 0.4s ease-out';

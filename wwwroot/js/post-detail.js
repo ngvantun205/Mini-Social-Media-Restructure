@@ -1,13 +1,4 @@
-﻿/* ============================================
-   POST DETAIL - ENHANCED JAVASCRIPT
-   ============================================ */
-
-// Biến toàn cục
-let currentUserId = 0;
-
-// ============================================
-// KHỞI TẠO
-// ============================================
+﻿let currentUserId = 0;
 
 function initializePostDetail(userId) {
     currentUserId = userId;
@@ -62,11 +53,6 @@ function setupEventListeners() {
         }
     });
 }
-
-// ============================================
-// QUẢN LÝ GIAO DIỆN
-// ============================================
-
 function toggleInputShape(isOpen) {
     const container = document.getElementById("inputContainer");
     if (!container) return;
@@ -103,9 +89,6 @@ function hideActionPreview() {
     }
 }
 
-// ============================================
-// XỬ LÝ REPLIES
-// ============================================
 
 function loadReplies(commentId) {
     const container = document.getElementById(`replies-container-${commentId}`);
@@ -113,21 +96,18 @@ function loadReplies(commentId) {
 
     if (!container) return;
 
-    // Toggle hiển thị nếu đã load
     if (container.style.display === 'block') {
         container.style.display = 'none';
         if (btn) btn.innerHTML = `<i class="bi bi-arrow-return-right me-1"></i>View replies`;
         return;
     }
 
-    // Hiển thị nếu đã có dữ liệu
     if (container.innerHTML.trim() !== "") {
         container.style.display = 'block';
         if (btn) btn.innerHTML = `<i class="bi bi-arrow-return-right me-1"></i>Hide replies`;
         return;
     }
 
-    // Load dữ liệu từ server
     if (btn) {
         btn.innerHTML = `<i class="spinner-border spinner-border-sm me-1"></i>Loading...`;
     }
@@ -159,9 +139,6 @@ function loadReplies(commentId) {
         });
 }
 
-// ============================================
-// GENERATE HTML
-// ============================================
 
 function generateCommentHtml(comment, isReply) {
     const ownerName = comment.owner?.userName || 'Unknown User';
@@ -458,15 +435,30 @@ function likeComment(commentId) {
 
 function confirmDeletePost(postId) {
     if (confirm("Are you sure you want to delete this post?")) {
-        document.getElementById('deletePostId').value = postId;
-        document.getElementById('deleteForm').submit();
+        deletePost(postId);
     }
 }
 
-// ============================================
-// TOGGLE LIKE POST
-// ============================================
-
+function deletePost(postId) {
+    fetch('/Post/DeletePost', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `postId=${postId}`
+    })
+        .then(res => {
+            if (res.ok) {
+                window.location.href = '/';
+            } else {
+                throw new Error("Failed to delete");
+            }
+        })
+        .catch(err => {
+            console.error("Delete failed:", err);
+            alert("Failed to delete post. Please try again.");
+        });
+}
 function toggleLike(btnElement, postId) {
     const icon = btnElement.querySelector("i");
     const footer = btnElement.closest(".post-footer");

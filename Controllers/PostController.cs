@@ -102,13 +102,20 @@ namespace Mini_Social_Media.Controllers {
 
             return RedirectToAction("PostDetails", new { id = model.PostId });
         }
+        [HttpPost]
         public async Task<IActionResult> DeletePost(int postId) {
-            int userId = int.Parse(_userManager.GetUserId(User));
+            var userIdStr = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userIdStr))
+                return Unauthorized();
+
+            int userId = int.Parse(userIdStr);
+
             bool result = await _postService.DeletePostAsync(postId, userId);
+
             if (!result) {
                 return BadRequest("Cannot delete post.");
             }
-            return RedirectToAction("Index", "Home");
+            return Ok();
         }
 
     }

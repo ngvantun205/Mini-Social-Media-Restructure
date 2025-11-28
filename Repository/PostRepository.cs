@@ -40,7 +40,7 @@ namespace Mini_Social_Media.Repository {
             await _context.SaveChangesAsync();
         }
         public async Task DeleteAsync(int id) {
-            var post = await _context.Posts.FindAsync(id);
+            var post = await GetByIdAsync(id);
             if (post != null) {
                 _context.Posts.Remove(post);
                 await _context.SaveChangesAsync();

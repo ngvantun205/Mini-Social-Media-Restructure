@@ -65,6 +65,7 @@
     </style>
 </head>
 <body>
+    @await Html.PartialAsync("_TopBar")
     @await Component.InvokeAsync("Sidebar")
 
     <main class="ig-main">

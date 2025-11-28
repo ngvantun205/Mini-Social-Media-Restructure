@@ -1,50 +1,63 @@
-﻿<!-- TOP BAR -->
+﻿@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@inject UserManager<User> UserManager
+@{
+    User? currentUser = null;
+    if (User.Identity != null && User.Identity.IsAuthenticated) {
+        currentUser = await UserManager.GetUserAsync(User);
+    }
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+    // Default avatar if user avatar is not available
+    var avatarUrl = currentUser?.AvatarUrl ?? "/images/default-avatar.png";
+    var fullName = currentUser?.FullName ?? "Guest User";
+    var userName = currentUser?.UserName ?? "guest";
+}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
 <div class="top-bar">
     <div class="top-bar-left">
-        <a href="/" class="top-bar-logo">MySocial</a>
-
         <div class="search-container">
             <i class="fas fa-search search-icon"></i>
             <input type="text" class="search-input" placeholder="Search for friends, posts, hashtags...">
         </div>
     </div>
 
-    <div class="top-bar-right">
-        <div class="top-icon" data-page="home" title="Home">
-            <i class="fas fa-home"></i>
-        </div>
+    <div class="top-bar-center">
+        <a href="/" class="top-bar-logo">MySocial</a>
+    </div>
 
-        <div class="top-icon" data-page="messages" title="Messages">
+    <div class="top-bar-right">
+        <a href="/" class="top-icon" data-page="home" title="Home">
+            <i class="fas fa-home"></i>
+        </a>
+
+        <a href="/Message" class="top-icon" data-page="messages" title="Messages">
             <i class="fas fa-comment"></i>
             <span class="badge">3</span>
-        </div>
-
-        <div class="top-icon" data-page="notifications" title="Notifications">
-            <i class="fas fa-bell"></i>
-            <span class="badge">12</span>
-        </div>
+        </a>
 
         <div class="user-dropdown">
-            <img src="/images/default-avatar.jpg" alt="User" class="user-avatar-top">
+            <img src="@avatarUrl" alt="User" class="user-avatar-top">
 
             <div class="dropdown-menu">
                 <div class="dropdown-header">
                     <div class="dropdown-user-info">
-                        <img src="/images/default-avatar.jpg" alt="User">
+                        <img src="@avatarUrl" alt="User">
                         <div class="dropdown-user-details">
-                            <p class="dropdown-user-name">John Doe</p>
-                            <p class="dropdown-user-handle">johndoe</p>
+                            <p class="dropdown-user-name">@fullName</p>
+                            <p class="dropdown-user-handle">@@@userName</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="dropdown-body">
-                    <a href="/profile" class="dropdown-item">
+                    <a asp-controller="Profile" asp-action="MyProfile" class="dropdown-item">
                         <i class="fas fa-user"></i>
                         <span>Profile</span>
                     </a>
 
-                    <a href="/settings" class="dropdown-item">
+                    <a asp-controller="Account" asp-action="Edit" class="dropdown-item">
                         <i class="fas fa-cog"></i>
                         <span>Settings</span>
                     </a>
@@ -59,7 +72,7 @@
                         <span>Help & Support</span>
                     </a>
 
-                    <a href="/logout" class="dropdown-item logout">
+                    <a asp-controller="Auth" asp-action="Logout" class="dropdown-item logout">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Logout</span>
                     </a>
@@ -68,3 +81,5 @@
         </div>
     </div>
 </div>
+
+<script src="~/js/topbar.js"></script>

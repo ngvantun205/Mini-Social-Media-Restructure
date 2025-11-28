@@ -39,8 +39,7 @@
                                         <i class="bi bi-pencil me-2"></i>Edit
                                     </a>
                                     <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="event.stopPropagation(); deleteComment(@comment.CommentId)">
-                                        <i class="bi bi-trash me-2"></i>Delete
-                                    </a>
+                                        <i class="bi bi-trash me-2"></i>Delete</a>
                                 }
                                 else {
                                     <a class="dropdown-item" href="javascript:void(0)" onclick="event.stopPropagation();">
@@ -207,16 +206,14 @@
     </div>
 </div>
 
-<!-- DELETE POST FORM -->
-<form asp-action="DeletePost" method="post" id="deleteForm" style="display: none;">
-    <input type="hidden" name="postId" id="deletePostId" value="@Model.PostId" />
-</form>
 
 
 <input type="hidden" id="loggedInUserId" value="@currentUserId" />
 
+<script src="~/js/post-detail.js"></script>
+<script src="~/js/newfeed.js"></script>
+
 @section Scripts {
-    <script src="~/js/post-detail.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const userIdElement = document.getElementById('loggedInUserId');

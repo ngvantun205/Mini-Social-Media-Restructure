@@ -548,9 +548,10 @@
 .comment-dropdown .dropdown-menu {
     border: none;
     box-shadow: var(--shadow-md);
-    border-radius: 12px;
-    padding: 0.5rem;
-    min-width: 160px;
+    border-radius: 8px;
+    padding: 0.25rem;
+    min-width: auto;
+    width: fit-content;
     animation: fadeInDropdown 0.2s ease-out;
     display: none;
 }

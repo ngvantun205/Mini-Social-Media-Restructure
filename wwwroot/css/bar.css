@@ -21,18 +21,33 @@
     align-items: center;
     gap: 16px;
     flex: 1;
-    max-width: 600px;
+    max-width: 400px;
+}
+
+.top-bar-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
 }
 
 .top-bar-logo {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 800;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
     text-decoration: none;
-    display: none;
+    letter-spacing: -0.5px;
+    transition: all 0.3s ease;
 }
+
+    .top-bar-logo:hover {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
 
 .search-container {
     flex: 1;
@@ -71,6 +86,9 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    flex: 1;
+    justify-content: flex-end;
+    max-width: 400px;
 }
 
 .top-icon {
@@ -84,6 +102,7 @@
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
+    text-decoration: none;
 }
 
     .top-icon:hover {

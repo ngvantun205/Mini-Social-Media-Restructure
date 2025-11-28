@@ -61,10 +61,10 @@
                             </button>
                         }
                         else {
-                            <button class="dropdown-item-custom" onclick="goToPostDetail(@post.PostId)">
+                            <a class="dropdown-item-custom" asp-controller="Post" asp-action="PostDetails" asp-route-id="@post.PostId">
                                 <i class="bi bi-eye"></i>
                                 View Details
-                            </button>
+                            </a>
                             <button class="dropdown-item-custom danger" onclick="reportPost(@post.PostId)">
                                 <i class="bi bi-flag"></i>
                                 Report
@@ -130,7 +130,6 @@
             </div>
         }
 
-        <!-- POST ACTIONS (LIKE, COMMENT, SHARE) -->
         <div class="post-actions-section">
             <div class="post-action-buttons">
                 <button class="action-btn @(post.IsLiked ? "liked" : "")" onclick="toggleLike(this, @post.PostId)" title="@(post.IsLiked ? "Unlike" : "Like")">
@@ -157,7 +156,6 @@
             </div>
         </div>
 
-        <!-- CAPTION -->
         @if (!string.IsNullOrEmpty(post.Caption)) {
             <div class="post-caption">
                 <span class="caption-username">@post.Owner.UserName</span>
@@ -165,7 +163,6 @@
             </div>
         }
 
-        <!-- VIEW COMMENTS -->
         @if (post.CommentCount > 0) {
             <div class="post-comments-preview">
                 <a asp-controller="Post" asp-action="PostDetails" asp-route-id="@post.PostId" class="view-comments-link">
@@ -174,7 +171,6 @@
             </div>
         }
 
-        <!-- HASHTAGS -->
         @if (!string.IsNullOrEmpty(post.Hashtags)) {
             <div class="post-hashtags">
                 @foreach (var tag in post.Hashtags.Split(' ', StringSplitOptions.RemoveEmptyEntries)) {
@@ -184,12 +180,12 @@
             </div>
         }
 
-        <!-- POST FOOTER -->
         <div class="post-footer">
             <div class="post-time-ago">@GetTimeAgo(post.CreatedAt)</div>
         </div>
     </div>
 }
+    <script src="~/js/newfeed.js"/>
 
 @functions {
     string GetTimeAgo(DateTime createdAt) {
