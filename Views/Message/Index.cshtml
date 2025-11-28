@@ -1,0 +1,102 @@
+﻿@{
+    ViewData["Title"] = "Messages";
+    Layout = "_Layout";
+    var currentUserIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var currentUserId = string.IsNullOrEmpty(currentUserIdStr) ? 0 : int.Parse(currentUserIdStr);
+}
+
+<link rel="stylesheet" href="~/css/messages.css" />
+<input type="hidden" id="currentUserId" value="@currentUserId" />
+
+<div class="messages-page">
+    <div class="messages-wrapper">
+        <div class="messages-grid">
+
+            <!-- LEFT SIDEBAR -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h5 class="sidebar-title">Chats</h5>
+                    <div class="header-actions">
+                        <button class="icon-btn" title="New message">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="search-wrapper">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" placeholder="Search Messenger" id="searchInput">
+                    </div>
+                </div>
+
+                <div class="conversations-list" id="conversationList">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MAIN CHAT -->
+            <div class="chat-main">
+
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-icon">
+                        <i class="bi bi-messenger"></i>
+                    </div>
+                    <h3>Your Messages</h3>
+                    <p>Send private messages to friends and start conversations</p>
+                </div>
+
+                <div id="chatContainer" class="chat-container hidden">
+                    <div class="chat-header">
+                        <div class="header-user">
+                            <img id="headerAvatar" src="/images/avatar.png" class="user-avatar" alt="Avatar">
+                            <div class="user-info">
+                                <span id="headerName" class="user-name">Username</span>
+                                <span class="user-status">Active now</span>
+                            </div>
+                        </div>
+                        <div class="header-actions">
+                            <button class="icon-btn" title="Audio call">
+                                <i class="bi bi-telephone-fill"></i>
+                            </button>
+                            <button class="icon-btn" title="Video call">
+                                <i class="bi bi-camera-video-fill"></i>
+                            </button>
+                            <button class="icon-btn" title="Information">
+                                <i class="bi bi-info-circle-fill"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="messageBox" class="message-box"></div>
+
+                    <div class="message-input-wrapper">
+                        <div class="input-actions-left">
+                            <button class="icon-btn" title="Add photo">
+                                <i class="bi bi-plus-circle-fill"></i>
+                            </button>
+                            <button class="icon-btn" title="Attach file">
+                                <i class="bi bi-image-fill"></i>
+                            </button>
+                            <button class="icon-btn" title="Sticker">
+                                <i class="bi bi-sticky-fill"></i>
+                            </button>
+                        </div>
+                        <input type="text" id="messageInput" class="message-input" placeholder="Aa" autocomplete="off">
+                        <button id="sendBtn" class="send-btn" disabled>
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script src="~/js/messages.js"></script>
+}

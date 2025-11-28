@@ -25,5 +25,7 @@ namespace Mini_Social_Media.Models.DomainModel {
         public ICollection<Follow> Following { get; set; } = new List<Follow>();
         public ICollection<Notifications> ReceivedNotifications { get; set; } = new List<Notifications>();
         public ICollection<Notifications> SentNotifications { get; set; } = new List<Notifications>();
+        public ICollection<Messages> SentMessage { get; set; } = new List<Messages>();
+        public ICollection<Messages> ReceivedMessage { get; set; } = new List<Messages>();
     }
 }

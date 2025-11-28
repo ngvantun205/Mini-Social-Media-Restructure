@@ -43,4 +43,13 @@
         Task MarkAsReadAsync(int notificationId);
         Task MarkAllAsReadAsync(int userId);
     }
+    public interface IMessageRepository {
+        Task AddMessageAsync(Messages message);
+        Task<Conversations?> GetConversationAsync(int userId1, int userId2);
+        Task CreateConversationAsync(Conversations conversation);
+        Task UpdateConversationAsync(Conversations conversation);
+        Task<IEnumerable<Messages>> GetMessagesAsync(int conversationId);
+        Task<IEnumerable<Conversations>> GetUserConversationsAsync(int userId);
+        Task MarkAsRead(int userId, int partnerId);
+    }
 }

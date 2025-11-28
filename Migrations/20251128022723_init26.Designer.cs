@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Mini_Social_Media.Data;
 
@@ -10,9 +11,11 @@ using Mini_Social_Media.Data;
 namespace Mini_Social_Media.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251128022723_init26")]
+    partial class init26
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -178,36 +181,6 @@ namespace Mini_Social_Media.Migrations
                     b.ToTable("Comments");
                 });
 
-            modelBuilder.Entity("Mini_Social_Media.Models.DomainModel.Conversations", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("LatestMessageId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("User1Id")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("User2Id")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LatestMessageId")
-                        .IsUnique();
-
-                    b.HasIndex("User1Id");
-
-                    b.HasIndex("User2Id");
-
-                    b.ToTable("Conversations");
-                });
-
             modelBuilder.Entity("Mini_Social_Media.Models.DomainModel.Follow", b =>
                 {
                     b.Property<int>("FollowerId")
@@ -272,15 +245,12 @@ namespace Mini_Social_Media.Migrations
 
             modelBuilder.Entity("Mini_Social_Media.Models.DomainModel.Messages", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("MessageId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Content")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("ConversationId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
@@ -294,23 +264,11 @@ namespace Mini_Social_Media.Migrations
                     b.Property<int>("SenderId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("UserId1")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ConversationId");
+                    b.HasKey("MessageId");
 
                     b.HasIndex("ReceiverId");
 
                     b.HasIndex("SenderId");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("Messages");
                 });
@@ -597,32 +555,6 @@ namespace Mini_Social_Media.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Mini_Social_Media.Models.DomainModel.Conversations", b =>
-                {
-                    b.HasOne("Mini_Social_Media.Models.DomainModel.Messages", "LatestMessage")
-                        .WithOne()
-                        .HasForeignKey("Mini_Social_Media.Models.DomainModel.Conversations", "LatestMessageId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Mini_Social_Media.Models.DomainModel.User", "User1")
-                        .WithMany()
-                        .HasForeignKey("User1Id")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Mini_Social_Media.Models.DomainModel.User", "User2")
-                        .WithMany()
-                        .HasForeignKey("User2Id")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("LatestMessage");
-
-                    b.Navigation("User1");
-
-                    b.Navigation("User2");
-                });
-
             modelBuilder.Entity("Mini_Social_Media.Models.DomainModel.Follow", b =>
                 {
                     b.HasOne("Mini_Social_Media.Models.DomainModel.User", "Followee")
@@ -663,33 +595,17 @@ namespace Mini_Social_Media.Migrations
 
             modelBuilder.Entity("Mini_Social_Media.Models.DomainModel.Messages", b =>
                 {
-                    b.HasOne("Mini_Social_Media.Models.DomainModel.Conversations", "Conversation")
-                        .WithMany("Messages")
-                        .HasForeignKey("ConversationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Mini_Social_Media.Models.DomainModel.User", "Receiver")
-                        .WithMany()
+                        .WithMany("ReceivedMessage")
                         .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Mini_Social_Media.Models.DomainModel.User", "Sender")
-                        .WithMany()
+                        .WithMany("SentMessage")
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("Mini_Social_Media.Models.DomainModel.User", null)
-                        .WithMany("ReceivedMessage")
-                        .HasForeignKey("UserId");
-
-                    b.HasOne("Mini_Social_Media.Models.DomainModel.User", null)
-                        .WithMany("SentMessage")
-                        .HasForeignKey("UserId1");
-
-                    b.Navigation("Conversation");
 
                     b.Navigation("Receiver");
 
@@ -759,11 +675,6 @@ namespace Mini_Social_Media.Migrations
             modelBuilder.Entity("Mini_Social_Media.Models.Comment", b =>
                 {
                     b.Navigation("Replies");
-                });
-
-            modelBuilder.Entity("Mini_Social_Media.Models.DomainModel.Conversations", b =>
-                {
-                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("Mini_Social_Media.Models.DomainModel.Hashtag", b =>

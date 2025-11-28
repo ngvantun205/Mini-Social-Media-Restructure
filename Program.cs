@@ -25,6 +25,7 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<IHashtagRepository, HashtagRepository>();
             builder.Services.AddScoped<IPostMediaRepository, PostMediaRepository>();
             builder.Services.AddScoped<INotificationsRepository, NotificationsRepository>();
+            builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 
             builder.Services.AddScoped<IPostService, PostService>();
             builder.Services.AddScoped<IUploadService, UploadService>();
@@ -32,6 +33,7 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<ICommentService, CommentService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<INotificationsService, NotificationsService>();
+            builder.Services.AddScoped<IMessageService, MessageService>();
 
             builder.Services.AddSignalR();
 
@@ -110,6 +112,7 @@ namespace Mini_Social_Media {
             app.UseAuthorization();
 
             app.MapHub<NotificationsHub>("/notificationsHub");
+            app.MapHub<Mini_Social_Media.Hubs.ChatHub>("/chatHub");
 
             app.MapStaticAssets();
 

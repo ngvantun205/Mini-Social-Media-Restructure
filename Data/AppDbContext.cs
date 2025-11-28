@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Mini_Social_Media.Models.DomainModel;
+using System.Reflection.Emit;
 
 namespace Mini_Social_Media.Data {
     public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int> {
@@ -14,6 +15,8 @@ namespace Mini_Social_Media.Data {
         public DbSet<Hashtag> Hashtags { get; set; }
         public DbSet<PostHashtag> PostHashtags { get; set; }
         public DbSet<Notifications> Notifications { get; set; }
+        public DbSet<Messages> Messages { get; set; }
+        public DbSet<Conversations> Conversations { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) {
@@ -108,6 +111,41 @@ namespace Mini_Social_Media.Data {
                 .HasForeignKey(n => n.ActorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Entity<Messages>()
+                .HasOne(m => m.Conversation)
+                .WithMany(c => c.Messages)
+                .HasForeignKey(m => m.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Messages>()
+                .HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Messages>()
+                .HasOne(m => m.Receiver)
+                .WithMany()
+                .HasForeignKey(m => m.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Conversations>()
+                .HasOne(c => c.User1)
+                .WithMany()
+                .HasForeignKey(c => c.User1Id)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Conversations>()
+                .HasOne(c => c.User2)
+                .WithMany()
+                .HasForeignKey(c => c.User2Id)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Conversations>()
+                .HasOne(c => c.LatestMessage)
+                .WithOne()
+                .HasForeignKey<Conversations>(c => c.LatestMessageId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 

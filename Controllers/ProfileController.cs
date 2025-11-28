@@ -100,5 +100,19 @@ namespace Mini_Social_Media.Controllers {
 
             return Ok(new { newUrl = profileDto.AvatarUrl });
         }
+
+        [HttpGet("Profile/GetUserInfo/{userId}")]
+        public async Task<IActionResult> GetUserInfo(int userId) {
+            var user = await _userService.GetMyProfileAsync(userId); 
+
+            if (user == null)
+                return NotFound();
+
+            return Ok(new {
+                id = userId,
+                userName = user.UserName,
+                avatarUrl = user.AvatarUrl ?? "/images/avatar.png"
+            });
+        }
     }
 }

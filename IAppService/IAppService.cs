@@ -37,4 +37,11 @@ namespace Mini_Social_Media.IAppService {
         Task<IEnumerable<NotificationsDto>> GetUserNotifications(int userId);
         Task MarkAllAsReadAsync(int userId);
     }
+    public interface IMessageService {
+        Task<MessageViewModel> SendMessageAsync(int senderId, int receiverId, string content);
+        Task<IEnumerable<ConversationViewModel>> GetUserConversationsAsync(int userId);
+        Task<IEnumerable<MessageViewModel>> GetMessageHistoryAsync(int currentUserId, int partnerId);
+        Task<ConversationViewModel>? GetOrCreateConversationAsync(int userId, int receiverId);
+        Task MarkConversationAsReadAsync(int userId, int partnerId);
+    }
 }

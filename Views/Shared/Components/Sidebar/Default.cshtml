@@ -10,28 +10,39 @@
             <i class="bi bi-house-door-fill"></i><span>Home</span>
         </a>
 
-        <a class="ig-item" href="#" data-tooltip="Search"><i class="bi bi-search"></i><span>Search</span></a>
-        <a class="ig-item" href="#" data-tooltip="Explore"><i class="bi bi-compass"></i><span>Explore</span></a>
-        <a class="ig-item" href="#" data-tooltip="Reels"><i class="bi bi-play-btn"></i><span>Reels</span></a>
-        <a class="ig-item" href="#" data-tooltip="Messages"><i class="bi bi-chat-dots"></i><span>Messages</span></a>
+        <a class="ig-item" href="#" data-tooltip="Search">
+            <i class="bi bi-search"></i><span>Search</span>
+        </a>
+
+        <a class="ig-item" href="#" data-tooltip="Explore">
+            <i class="bi bi-compass"></i><span>Explore</span>
+        </a>
+
+        <a class="ig-item" href="#" data-tooltip="Reels">
+            <i class="bi bi-play-btn"></i><span>Reels</span>
+        </a>
+
+        <a class="ig-item @(Model.CurrentController == "Message" ? "active" : "")" asp-controller="Message" asp-action="Index" data-tooltip="Messages">
+            <i class="bi bi-chat-dots"></i><span>Messages</span>
+        </a>
 
         <a class="ig-item" href="javascript:void(0)" id="notiBtn" data-tooltip="Notifications">
             <i class="bi bi-heart"></i>
             <span>Notifications</span>
-            <span id="notiBadge" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
-                  style="width: 10px; height: 10px; display: @(Model.HasUnread ? "block" : "none");"></span>
+            <span id="notiBadge" style="display: @(Model.HasUnread ? "block" : "none");"></span>
         </a>
 
-        <div id="notiDrawer" class="noti-drawer shadow-lg">
+        <div id="notiDrawer" class="noti-drawer">
             <div class="d-flex justify-content-between align-items-center border-bottom p-3">
                 <h4 class="fw-bold m-0">Notifications</h4>
-                <button onclick="window.markAllRead()" class="btn btn-link text-primary text-decoration-none fw-bold p-0" style="font-size: 14px;">
+                <button onclick="window.markAllRead()" class="btn btn-link text-decoration-none p-0" style="font-size: 14px;">
                     Mark all as read
                 </button>
             </div>
             <div id="notiList" class="noti-list overflow-auto" style="height: calc(100vh - 60px);">
                 <div class="text-center mt-5 text-muted">
-                    <div class="spinner-border spinner-border-sm" role="status"></div> Loading...
+                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                    <div class="mt-2">Loading...</div>
                 </div>
             </div>
         </div>
@@ -45,135 +56,14 @@
         </a>
 
         <div class="ig-sidebar-bottom">
-            <div class="ig-item" data-tooltip="More"><i class="bi bi-list"></i><span>More</span></div>
-            <a class="ig-item" asp-controller="Auth" asp-action="Logout" data-tooltip="Log out"><i class="bi bi-box-arrow-right"></i><span>Log out</span></a>
+            <div class="ig-item" data-tooltip="More">
+                <i class="bi bi-list"></i><span>More</span>
+            </div>
+            <a class="ig-item" asp-controller="Auth" asp-action="Logout" data-tooltip="Log out">
+                <i class="bi bi-box-arrow-right"></i><span>Log out</span>
+            </a>
         </div>
     </div>
 </nav>
 
-<style>
-    .noti-drawer {
-        position: fixed;
-        top: 0;
-        left: 245px;
-        width: 380px;
-        height: 100vh;
-        background: white;
-        z-index: 2000;
-        border-right: 1px solid #dbdbdb;
-        transform: translateX(-120%);
-        opacity: 0;
-        transition: all 0.3s ease-in-out;
-        display: none;
-    }
-
-        .noti-drawer.open {
-            display: block;
-        }
-
-        .noti-drawer.show {
-            transform: translateX(0);
-            opacity: 1;
-        }
-
-    .noti-item {
-        padding: 12px 16px;
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        border-bottom: 1px solid #f0f0f0;
-    }
-
-        .noti-item:hover {
-            background-color: #fafafa;
-        }
-
-        .noti-item.unread {
-            background-color: #f0f8ff;
-        }
-
-    .unread-dot {
-        width: 8px;
-        height: 8px;
-        background-color: #0d6efd;
-        border-radius: 50%;
-        margin-left: auto;
-        flex-shrink: 0;
-    }
-</style>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const notiBtn = document.getElementById("notiBtn");
-        const notiDrawer = document.getElementById("notiDrawer");
-        const notiList = document.getElementById("notiList");
-        const notiBadge = document.getElementById("notiBadge");
-
-        if (!notiBtn || !notiDrawer) return;
-
-        // 1. Toggle Drawer
-        notiBtn.addEventListener("click", function(e) {
-            e.preventDefault(); e.stopPropagation();
-            if (notiDrawer.classList.contains("show")) closeDrawer();
-            else openDrawer();
-        });
-
-        function openDrawer() {
-            notiDrawer.classList.add("open");
-            setTimeout(() => notiDrawer.classList.add("show"), 10);
-            notiBtn.classList.add("active-icon");
-            loadNotifications();
-        }
-
-        function closeDrawer() {
-            notiDrawer.classList.remove("show");
-            notiBtn.classList.remove("active-icon");
-            setTimeout(() => notiDrawer.classList.remove("open"), 300);
-        }
-
-        // 2. Load Data API
-        function loadNotifications() {
-            fetch('/Notifications/GetNotifications')
-                .then(res => res.json())
-                .then(data => {
-                    if (!data || data.length === 0) {
-                        notiList.innerHTML = '<div class="text-center mt-5 text-muted small">No notifications.</div>';
-                        return;
-                    }
-
-                    let html = '';
-                    let anyUnread = false;
-
-                    data.forEach(noti => {
-                        if(!noti.isRead) anyUnread = true;
-                        const isUnreadClass = noti.isRead ? '' : 'unread';
-                        const dotHtml = !noti.isRead ? '<div class="unread-dot"></div>' : '';
-
-                        html += `
-                            <div class="noti-item ${isUnreadClass}" onclick="window.location.href='/Post/PostDetails?id=${noti.postId}'">
-                                <img src="${noti.actorAvatar}" class="rounded-circle me-3 border" width="44" height="44" style="object-fit: cover;">
-                                <div class="flex-grow-1" style="font-size: 14px; line-height: 1.4; padding-right: 8px;">
-                                    <span class="fw-bold text-dark">${noti.actorName}</span>
-                                    <span class="text-dark">${noti.message}</span>
-                                    <div class="text-muted" style="font-size: 12px; margin-top: 2px;">${noti.timeAgo}</div>
-                                </div>
-                                ${dotHtml}
-                            </div>`;
-                    });
-                    notiList.innerHTML = html;
-
-                    if(notiBadge) notiBadge.style.display = anyUnread ? "block" : "none";
-                })
-                .catch(err => {
-                    console.error(err);
-                    notiList.innerHTML = '<div class="text-center mt-5 text-danger small">Failed to load.</div>';
-                });
-        }
-
-        document.addEventListener("click", function(e) {
-            if (notiDrawer.classList.contains("show") && !notiDrawer.contains(e.target) && !notiBtn.contains(e.target)) {
-                closeDrawer();
-            }
-        });
-    });
-</script>
+<script src="~/js/sidebar.js"></script>

@@ -4,85 +4,114 @@
     ViewData["Title"] = "Create Post";
 }
 
-<div class="create-post-container">
-    <div class="create-post-card">
+<!-- Shared CSS -->
+<link rel="stylesheet" href="~/css/post-form.css" />
+
+<!-- Particles Background -->
+<div id="particles-js"></div>
+
+<div class="create-post-wrapper">
+    <div class="create-post-container">
         <!-- Header -->
         <div class="create-post-header">
-            <h2>Create New Post</h2>
-            <p>Share your moment with the world</p>
+            <div class="header-content">
+                <i class="bi bi-plus-circle-fill"></i>
+                <div>
+                    <h2>Create Post</h2>
+                    <p class="subtitle">Share your moment with the world</p>
+                </div>
+            </div>
+            <a href="/" class="btn-close-header">
+                <i class="bi bi-x-lg"></i>
+            </a>
         </div>
 
         <!-- Form -->
         <form asp-controller="Post" asp-action="CreatePost" method="post" enctype="multipart/form-data" id="createPostForm">
 
-            <!-- Media Upload Section -->
-            <div class="form-group media-upload-section">
-                <label class="form-label">
-                    <i class="bi bi-image"></i>
-                    Photos & Videos
-                </label>
-                <div class="media-upload-area" id="mediaUploadArea">
-                    <input asp-for="MediaFiles" type="file" multiple accept="image/*,video/*" id="mediaInput" class="media-input" />
-                    <div class="upload-placeholder">
-                        <i class="bi bi-cloud-upload"></i>
-                        <h4>Drag photos and videos here</h4>
-                        <p>or click to select from your device</p>
-                        <button type="button" class="btn-select-files">Select Files</button>
+            <div class="form-content">
+                <!-- Left Column: Media Upload -->
+                <div class="left-column">
+                    <div class="form-group media-upload-section">
+                        <label class="form-label">
+                            <i class="bi bi-images"></i>
+                            Add Photos/Videos
+                        </label>
+                        <div class="media-upload-area" id="mediaUploadArea">
+                            <input asp-for="MediaFiles" type="file" multiple accept="image/*,video/*" id="mediaInput" class="media-input" />
+                            <div class="upload-placeholder">
+                                <div class="upload-icon-wrapper">
+                                    <i class="bi bi-cloud-arrow-up"></i>
+                                </div>
+                                <h4>Add Media</h4>
+                                <p>Drag & drop or click to browse</p>
+                                <button type="button" class="btn-select-files">
+                                    <i class="bi bi-folder2-open"></i>
+                                    Browse Files
+                                </button>
+                            </div>
+                            <div class="media-preview-grid" id="mediaPreviewGrid"></div>
+                        </div>
+                        <span asp-validation-for="MediaFiles" class="text-danger"></span>
                     </div>
-                    <div class="media-preview-grid" id="mediaPreviewGrid"></div>
                 </div>
-                <span asp-validation-for="MediaFiles" class="text-danger"></span>
-            </div>
 
-            <!-- Caption Section -->
-            <div class="form-group">
-                <label asp-for="Caption" class="form-label">
-                    <i class="bi bi-pencil"></i>
-                    Caption
-                </label>
-                <textarea asp-for="Caption" class="form-control" rows="4" placeholder="Write a caption..."></textarea>
-                <span asp-validation-for="Caption" class="text-danger"></span>
-                <div class="char-count">
-                    <span id="charCount">0</span>/2000
+                <!-- Right Column: Details -->
+                <div class="right-column">
+                    <!-- Caption -->
+                    <div class="form-group">
+                        <label asp-for="Caption" class="form-label">
+                            <i class="bi bi-chat-left-text"></i>
+                            Caption
+                        </label>
+                        <textarea asp-for="Caption" class="form-control" rows="3" placeholder="What's on your mind?"></textarea>
+                        <div class="char-count">
+                            <span id="charCount">0</span>/2000
+                        </div>
+                        <span asp-validation-for="Caption" class="text-danger"></span>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="form-group">
+                        <label asp-for="Location" class="form-label">
+                            <i class="bi bi-geo-alt"></i>
+                            Location
+                        </label>
+                        <input asp-for="Location" class="form-control" placeholder="Add a location" />
+                        <span asp-validation-for="Location" class="text-danger"></span>
+                    </div>
+
+                    <!-- Hashtags -->
+                    <div class="form-group">
+                        <label asp-for="Hashtags" class="form-label">
+                            <i class="bi bi-hash"></i>
+                            Hashtags
+                        </label>
+                        <input asp-for="Hashtags" class="form-control" placeholder="#lifestyle #moments" />
+                        <span asp-validation-for="Hashtags" class="text-danger"></span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Location Section -->
-            <div class="form-group">
-                <label asp-for="Location" class="form-label">
-                    <i class="bi bi-geo-alt"></i>
-                    Location
-                </label>
-                <input asp-for="Location" class="form-control" placeholder="Add location" />
-                <span asp-validation-for="Location" class="text-danger"></span>
-            </div>
-
-            <!-- Hashtags Section -->
-            <div class="form-group">
-                <label asp-for="Hashtags" class="form-label">
-                    <i class="bi bi-hash"></i>
-                    Hashtags
-                </label>
-                <input asp-for="Hashtags" class="form-control" placeholder="Add hashtags (e.g., #travel #food)" />
-                <span asp-validation-for="Hashtags" class="text-danger"></span>
-                <small class="form-hint">Separate hashtags with spaces</small>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="form-actions">
-                <a href="/" class="btn btn-secondary">
+            <!-- Footer Actions -->
+            <div class="form-footer">
+                <a href="/" class="btn btn-cancel">
                     <i class="bi bi-x-circle"></i>
                     Cancel
                 </a>
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-send"></i>
-                    Share Post
+                <button type="submit" class="btn btn-post">
+                    <i class="bi bi-send-fill"></i>
+                    Post
                 </button>
             </div>
         </form>
     </div>
 </div>
 
+<!-- Particles.js CDN -->
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
 @section Scripts {
-    <script src="~/js/create-post.js"></script>
+    <!-- Shared JS -->
+    <script src="~/js/post-form.js"></script>
 }
