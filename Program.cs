@@ -1,6 +1,7 @@
 using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Mini_Social_Media.Repository;
@@ -23,12 +24,16 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<IFollowRepository, FollowRepository>();
             builder.Services.AddScoped<IHashtagRepository, HashtagRepository>();
             builder.Services.AddScoped<IPostMediaRepository, PostMediaRepository>();
+            builder.Services.AddScoped<INotificationsRepository, NotificationsRepository>();
 
             builder.Services.AddScoped<IPostService, PostService>();
             builder.Services.AddScoped<IUploadService, UploadService>();
             builder.Services.AddScoped<ILikeService, LikeService>();
             builder.Services.AddScoped<ICommentService, CommentService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<INotificationsService, NotificationsService>();
+
+            builder.Services.AddSignalR();
 
             builder.Services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options => {
@@ -71,7 +76,6 @@ namespace Mini_Social_Media {
                 options.AccessDeniedPath = "/Auth/Login";
             });
 
-
             builder.Services.Configure<IdentityOptions>(options =>
             {
                 options.User.AllowedUserNameCharacters =
@@ -79,7 +83,17 @@ namespace Mini_Social_Media {
 
                 options.User.RequireUniqueEmail = true;
             });
-
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigin",
+                    builder => {
+                        builder
+                            .SetIsOriginAllowed(origin => true)
+                            .AllowAnyHeader()
+                            .AllowAnyMethod()
+                            .AllowCredentials();
+                    });
+            });
             var app = builder.Build();
 
             if (!app.Environment.IsDevelopment()) {
@@ -90,10 +104,17 @@ namespace Mini_Social_Media {
             app.UseHttpsRedirection();
             app.UseRouting();
 
+            app.UseCors("SignalRCorsPolicy");
+
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.MapHub<NotificationsHub>("/notificationsHub");
+
             app.MapStaticAssets();
+
+            app.UseStatusCodePagesWithReExecute("/Error/{0}");
+
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")

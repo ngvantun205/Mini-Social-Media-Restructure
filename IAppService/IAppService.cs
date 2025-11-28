@@ -32,4 +32,9 @@ namespace Mini_Social_Media.IAppService {
         Task<IdentityResult> ChangePassword(ChangePasswordInputModel changeInput, int userId);
         Task ChangeAccountPrivacy(bool isPrivate, int userId);
     }
+    public interface INotificationsService {
+        Task CreateNotification(int senderId, int receiverId, string type, int entityId, string message);
+        Task<IEnumerable<NotificationsDto>> GetUserNotifications(int userId);
+        Task MarkAllAsReadAsync(int userId);
+    }
 }

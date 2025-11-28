@@ -5,7 +5,7 @@
 namespace Mini_Social_Media.Migrations
 {
     /// <inheritdoc />
-    public partial class init21 : Migration
+    public partial class init25 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

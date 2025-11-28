@@ -1,12 +1,18 @@
-﻿using System.Runtime.InteropServices;
+﻿using Microsoft.AspNetCore.SignalR;
+using Mini_Social_Media.Models.DomainModel;
+using System.Runtime.InteropServices;
 
 namespace Mini_Social_Media.AppService {
     public class LikeService : ILikeService {
-        private ILikeRepository _likeRepository;
-        private IPostRepository _postRepository;
-        public LikeService(ILikeRepository likeRepository, IPostRepository postRepository) {
+        private readonly ILikeRepository _likeRepository;
+        private readonly IPostRepository _postRepository;
+        private readonly IHubContext<NotificationsHub> _hubContext;
+        private readonly INotificationsRepository _notificationsRepository;
+        public LikeService(ILikeRepository likeRepository, IPostRepository postRepository, IHubContext<NotificationsHub> hubContext, INotificationsRepository notificationsRepository) {
             _likeRepository = likeRepository;
             _postRepository = postRepository;
+            _hubContext = hubContext;
+            _notificationsRepository = notificationsRepository;
         }
         public async Task<LikeDto> ToggleLikeAsync(LikeInputModel likeInputModel, int userId) {
             var post = await _postRepository.GetByIdAsync(likeInputModel.PostId);
@@ -14,6 +20,27 @@ namespace Mini_Social_Media.AppService {
                 if (!await _likeRepository.IsLikedByCurrentUser(likeInputModel.PostId, userId)) {
                     post.Likes.Add(new Like() { UserId = userId, PostId = likeInputModel.PostId, CreatedAt = DateTime.UtcNow });
                     await _postRepository.LikePostAsync(likeInputModel.PostId);
+                    var receiverId = post.UserId;
+                    if (receiverId != userId) {
+                        var noti = new Notifications() {
+                            ActorId = userId,
+                            ReceiverId = receiverId,
+                            EntityId = post.PostId,
+                            Type = "Like",
+                            Content = "liked your post.",
+                            IsRead = false,
+                            CreatedAt = DateTime.UtcNow,
+                        };
+                        await _notificationsRepository.AddAsync(noti);
+
+                        await _hubContext.Clients.User(receiverId.ToString())
+                        .SendAsync("ReceiveNotification", new {
+                            content = noti.Content,
+                            type = noti.Type,
+                            postId = noti.EntityId,
+                            message = $"Some one has just liked post your post."
+                        });
+                    }
                     return new LikeDto();
                 }
                 else {
@@ -22,7 +49,8 @@ namespace Mini_Social_Media.AppService {
                     return new LikeDto();
                 }
             }
-            else return new LikeDto() {ErrorMessage = "Post was deleted or doesn't exist" };
+            else
+                return new LikeDto() { ErrorMessage = "Post was deleted or doesn't exist" };
         }
     }
 }

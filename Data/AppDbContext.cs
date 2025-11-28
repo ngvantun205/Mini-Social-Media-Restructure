@@ -13,6 +13,7 @@ namespace Mini_Social_Media.Data {
         public DbSet<Follow> Follows { get; set; }
         public DbSet<Hashtag> Hashtags { get; set; }
         public DbSet<PostHashtag> PostHashtags { get; set; }
+        public DbSet<Notifications> Notifications { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) {
@@ -20,54 +21,36 @@ namespace Mini_Social_Media.Data {
         protected override void OnModelCreating(ModelBuilder builder) {
             base.OnModelCreating(builder);
 
-            // ============================
-            // USER - POST (1 - N)
-            // ============================
             builder.Entity<Post>()
                 .HasOne(p => p.User)
                 .WithMany(u => u.Posts)
                 .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ============================
-            // POST - POSTMEDIA (1 - N)
-            // ============================
             builder.Entity<PostMedia>()
                 .HasOne(pm => pm.Post)
                 .WithMany(p => p.Medias)
                 .HasForeignKey(pm => pm.PostId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ============================
-            // POST - COMMENT (1 - N)
-            // ============================
             builder.Entity<Comment>()
                 .HasOne(c => c.Post)
                 .WithMany(p => p.Comments)
                 .HasForeignKey(c => c.PostId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ============================
-            // USER - COMMENT (1 - N)
-            // ============================
             builder.Entity<Comment>()
                 .HasOne(c => c.User)
                 .WithMany(u => u.Comments)
                 .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ============================
-            // COMMENT - REPLY SELF (1 - N)
-            // ============================
             builder.Entity<Comment>()
                 .HasOne(c => c.ParentComment)
                 .WithMany(c => c.Replies)
                 .HasForeignKey(c => c.ParentCommentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // ============================
-            // LIKE (USER + POST) (N - N)
-            // ============================
             builder.Entity<Like>()
                 .HasKey(l => new { l.UserId, l.PostId });
 
@@ -83,9 +66,6 @@ namespace Mini_Social_Media.Data {
                 .HasForeignKey(l => l.PostId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ============================
-            // FOLLOW (USER - USER) SELF RELATION (N - N)
-            // ============================
             builder.Entity<Follow>()
                 .HasKey(f => new { f.FollowerId, f.FolloweeId });
 
@@ -101,9 +81,6 @@ namespace Mini_Social_Media.Data {
                 .HasForeignKey(f => f.FolloweeId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ============================
-            // POST - HASHTAG (N - N)
-            // ============================
             builder.Entity<PostHashtag>()
                 .HasKey(ph => new { ph.PostId, ph.HashtagId });
 
@@ -118,6 +95,19 @@ namespace Mini_Social_Media.Data {
                 .WithMany(h => h.PostHashtags)
                 .HasForeignKey(ph => ph.HashtagId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Notifications>()
+                .HasOne(n => n.Receiver)
+                .WithMany(u => u.ReceivedNotifications)
+                .HasForeignKey(n => n.ReceiverId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Notifications>()
+                .HasOne(n => n.Actor)
+                .WithMany(u => u.SentNotifications)
+                .HasForeignKey(n => n.ActorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 

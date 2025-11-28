@@ -11,8 +11,8 @@ using Mini_Social_Media.Data;
 namespace Mini_Social_Media.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251126144105_init20")]
-    partial class init20
+    [Migration("20251127080708_init24")]
+    partial class init24
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -241,6 +241,42 @@ namespace Mini_Social_Media.Migrations
                     b.HasIndex("PostId");
 
                     b.ToTable("Likes");
+                });
+
+            modelBuilder.Entity("Mini_Social_Media.Models.DomainModel.Notifications", b =>
+                {
+                    b.Property<int>("NotiId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ActorId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ReceiverId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("NotiId");
+
+                    b.HasIndex("ActorId");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("Mini_Social_Media.Models.DomainModel.Post", b =>
@@ -527,6 +563,25 @@ namespace Mini_Social_Media.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Mini_Social_Media.Models.DomainModel.Notifications", b =>
+                {
+                    b.HasOne("Mini_Social_Media.Models.DomainModel.User", "Actor")
+                        .WithMany("SentNotifications")
+                        .HasForeignKey("ActorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Mini_Social_Media.Models.DomainModel.User", "Receiver")
+                        .WithMany("ReceivedNotifications")
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Actor");
+
+                    b.Navigation("Receiver");
+                });
+
             modelBuilder.Entity("Mini_Social_Media.Models.DomainModel.Post", b =>
                 {
                     b.HasOne("Mini_Social_Media.Models.DomainModel.User", "User")
@@ -600,6 +655,10 @@ namespace Mini_Social_Media.Migrations
                     b.Navigation("Likes");
 
                     b.Navigation("Posts");
+
+                    b.Navigation("ReceivedNotifications");
+
+                    b.Navigation("SentNotifications");
                 });
 #pragma warning restore 612, 618
         }

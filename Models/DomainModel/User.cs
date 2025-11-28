@@ -23,5 +23,7 @@ namespace Mini_Social_Media.Models.DomainModel {
         public ICollection<Like> Likes { get; set; } = new List<Like>();
         public ICollection<Follow> Followers { get; set; } = new List<Follow>();
         public ICollection<Follow> Following { get; set; } = new List<Follow>();
+        public ICollection<Notifications> ReceivedNotifications { get; set; } = new List<Notifications>();
+        public ICollection<Notifications> SentNotifications { get; set; } = new List<Notifications>();
     }
 }

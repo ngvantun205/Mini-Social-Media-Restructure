@@ -1,0 +1,284 @@
+﻿@{
+    Layout = "_Layout";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Không Tìm Thấy Trang</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .background-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite ease-in-out;
+        }
+
+            .shape:nth-child(1) {
+                width: 80px;
+                height: 80px;
+                left: 10%;
+                top: 20%;
+                animation-delay: 0s;
+            }
+
+            .shape:nth-child(2) {
+                width: 120px;
+                height: 120px;
+                right: 15%;
+                top: 40%;
+                animation-delay: 2s;
+            }
+
+            .shape:nth-child(3) {
+                width: 60px;
+                height: 60px;
+                left: 20%;
+                bottom: 30%;
+                animation-delay: 4s;
+            }
+
+            .shape:nth-child(4) {
+                width: 100px;
+                height: 100px;
+                right: 25%;
+                bottom: 20%;
+                animation-delay: 6s;
+            }
+
+        @@keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+            }
+
+            25% {
+                transform: translateY(-30px) translateX(20px);
+            }
+
+            50% {
+                transform: translateY(-60px) translateX(-20px);
+            }
+
+            75% {
+                transform: translateY(-30px) translateX(20px);
+            }
+        }
+
+        .container {
+            text-align: center;
+            z-index: 1;
+            position: relative;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 60px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @@keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-code {
+            font-size: 120px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .icon-container {
+            margin: 30px 0;
+        }
+
+        .sad-face {
+            font-size: 80px;
+            display: inline-block;
+            animation: swing 2s ease-in-out infinite;
+        }
+
+        @@keyframes swing {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(-10deg);
+            }
+
+            75% {
+                transform: rotate(10deg);
+            }
+        }
+
+        h1 {
+            color: #1e293b;
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        p {
+            color: #64748b;
+            font-size: 18px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        }
+
+            .btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 15px 35px rgba(37, 99, 235, 0.4);
+                background: linear-gradient(135deg, #1d4ed8, #4338ca);
+            }
+
+            .btn:active {
+                transform: translateY(-1px);
+            }
+
+        .links {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .link-item {
+            color: #64748b;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+            .link-item:after {
+                content: '';
+                position: absolute;
+                width: 0;
+                height: 2px;
+                bottom: -2px;
+                left: 0;
+                background: #2563eb;
+                transition: width 0.3s ease;
+            }
+
+            .link-item:hover {
+                color: #2563eb;
+            }
+
+                .link-item:hover:after {
+                    width: 100%;
+                }
+
+        @@media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                padding: 40px 30px;
+            }
+
+            .error-code {
+                font-size: 80px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            p {
+                font-size: 16px;
+            }
+
+            .sad-face {
+                font-size: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <div class="container">
+        <div class="error-code">404</div>
+
+        <div class="icon-container">
+            <div class="sad-face">😔</div>
+        </div>
+
+        <h1>Ối! Không Tìm Thấy Trang</h1>
+        <p>Trang bạn đang tìm kiếm có thể đã bị xóa, đổi tên hoặc tạm thời không khả dụng.</p>
+
+        <a href="/" class="btn">Về Trang Chủ</a>
+
+        <div class="links">
+            <a href="/contact" class="link-item">Liên Hệ</a>
+            <a href="/help" class="link-item">Trợ Giúp</a>
+            <a href="/sitemap" class="link-item">Sơ Đồ Trang</a>
+        </div>
+    </div>
+</body>
+</html>

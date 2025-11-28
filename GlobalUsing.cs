@@ -7,3 +7,4 @@ global using Mini_Social_Media.Data;
 global using Mini_Social_Media.DTO;
 global using Mini_Social_Media.IAppService;
 global using Mini_Social_Media.AppService;
+global using Mini_Social_Media.Hubs;

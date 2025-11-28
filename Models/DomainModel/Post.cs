@@ -5,7 +5,6 @@ namespace Mini_Social_Media.Models.DomainModel {
     public class Post {
         [Key]
         public int PostId { get; set; }
-        [ForeignKey("UserId")]
         public User? User { get; set; }
         public int UserId { get; set; }
         public string? Caption { get; set; }

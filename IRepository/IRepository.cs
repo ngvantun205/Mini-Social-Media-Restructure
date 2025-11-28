@@ -38,4 +38,9 @@
         Task<PostMedia?> GetByUrlAsync(string url);
         Task RemoveRangeAsync(IEnumerable<PostMedia> postMedias);
     }
+    public interface INotificationsRepository : IRepository<Notifications> {
+        Task<IEnumerable<Notifications>> GetByReceiverIdAsync(int receiverId);
+        Task MarkAsReadAsync(int notificationId);
+        Task MarkAllAsReadAsync(int userId);
+    }
 }

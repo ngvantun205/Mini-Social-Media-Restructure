@@ -4,22 +4,181 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Mini_Social_Media</title>
-    <script type="importmap"></script>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Mini_Social_Media.styles.css" asp-append-version="true" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="~/css/sidebar.css" rel="stylesheet" />
     <link href="~/css/create-post.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/post-detail.css" />
     <link rel="stylesheet" href="~/css/newfeed.css" />
     <link rel="stylesheet" href="~/css/profile.css" />
+
+    <style>
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px; /* Góc trái dưới */
+            z-index: 9999; /* Luôn đè lên mọi thứ */
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast-notification {
+            background: white;
+            border-left: 5px solid #dc3545; /* Viền đỏ nổi bật */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            padding: 12px 15px;
+            min-width: 300px;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            animation: slideInUp 0.4s ease-out forwards;
+            cursor: pointer;
+            transition: opacity 0.4s ease;
+        }
+
+            .toast-notification:hover {
+                background-color: #f8f9fa;
+            }
+
+        @@keyframes slideInUp {
+            from
+
+        {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        }
+    </style>
 </head>
 <body>
-    @Html.Partial("_Sidebar")
+    @await Component.InvokeAsync("Sidebar")
+
     <main class="ig-main">
         @RenderBody()
     </main>
-    @RenderSection("Scripts", required: false)
+
+    <div id="toast-container"></div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+    <script>
+        // Kết nối SignalR Server
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/notificationsHub")
+            .withAutomaticReconnect()
+            .build();
+
+        // Lắng nghe sự kiện "ReceiveNotification" từ Server bắn về
+        connection.on("ReceiveNotification", function (noti) {
+            console.log("New Notification:", noti);
+
+            // A. HIỆN POPUP TOAST
+            showGlobalToast(noti);
+
+            // B. BẬT CHẤM ĐỎ Ở SIDEBAR
+            // Tìm thẻ span badge trong _Sidebar.cshtml (dựa vào ID)
+            const badge = document.getElementById("notiBadge");
+            if (badge) {
+                badge.style.display = "block";
+            }
+
+            // C. NẾU ĐANG MỞ DRAWER -> CHÈN VÀO LIST LUÔN
+            const drawerList = document.getElementById("notiList");
+            const drawer = document.getElementById("notiDrawer");
+
+            // Kiểm tra nếu Drawer đang mở (có class 'open' hoặc 'show')
+            if (drawer && drawerList && (drawer.classList.contains("open") || drawer.classList.contains("show"))) {
+                // Xóa dòng 'No notifications' nếu có
+                if (drawerList.querySelector(".text-center")) drawerList.innerHTML = "";
+
+                const html = `
+                    <div class="noti-item unread" style="background-color: #f0f8ff; animation: fadeIn 0.5s;" onclick="window.location.href='/Post/PostDetails?id=${noti.postId}'">
+                        <img src="${noti.actorAvatar}" class="rounded-circle me-3 border" width="44" height="44" style="object-fit: cover;">
+                        <div class="flex-grow-1" style="font-size: 14px; line-height: 1.4;">
+                            <span class="fw-bold text-dark">${noti.actorName}</span>
+                            <span class="text-dark">${noti.message}</span>
+                            <div class="text-muted" style="font-size: 12px; margin-top: 2px;">Just now</div>
+                        </div>
+                        <span class="bg-primary rounded-circle ms-2" style="width: 8px; height: 8px; flex-shrink: 0;"></span>
+                    </div>
+                `;
+                drawerList.insertAdjacentHTML('afterbegin', html);
+            }
+        });
+
+        // Bắt đầu kết nối
+        connection.start().catch(err => console.error("SignalR Error:", err.toString()));
+
+        // Hàm hiển thị Popup Toast
+        function showGlobalToast(noti) {
+            const container = document.getElementById("toast-container");
+
+            // Tạo thẻ HTML cho popup
+            const toast = document.createElement("div");
+            toast.className = "toast-notification";
+            // Click vào popup thì chuyển trang
+            toast.onclick = function() { window.location.href = `/Post/PostDetails?id=${noti.postId}`; };
+
+            toast.innerHTML = `
+                <img src="${noti.actorAvatar}" class="rounded-circle me-3" width="40" height="40" style="object-fit: cover;">
+                <div style="line-height: 1.3;">
+                    <div style="font-size: 14px;">
+                        <span class="fw-bold">${noti.actorName}</span> ${noti.message}
+                    </div>
+                    <div class="text-muted" style="font-size: 11px;">Just now</div>
+                </div>
+            `;
+
+            // Thêm vào màn hình
+            container.appendChild(toast);
+
+            // Tự động biến mất sau 5 giây
+            setTimeout(() => {
+                toast.style.opacity = "0"; // Mờ dần
+                toast.style.transform = "translateY(20px)"; // Trượt xuống
+                setTimeout(() => toast.remove(), 400); // Xóa hẳn khỏi DOM
+            }, 5000);
+        }
+
+                window.markAllRead = function() {
+            fetch('/Notifications/MarkAllRead', { method: 'POST' })
+            .then(res => {
+                if (res.ok) {
+                    // 1. Tắt chấm đỏ ở thanh Sidebar
+                    const badge = document.getElementById("notiBadge");
+                    if (badge) badge.style.display = "none";
+
+                    // 2. Bỏ style 'unread' (nền xanh nhạt) của các item trong danh sách
+                    const unreadItems = document.querySelectorAll('.noti-item.unread');
+                    unreadItems.forEach(item => {
+                        item.classList.remove('unread');
+
+                        // 3. Xóa chấm xanh (.unread-dot) bên trong item
+                        const dot = item.querySelector('.unread-dot');
+                        if (dot) dot.remove();
+                    });
+                }
+            })
+            .catch(err => console.error("Mark read failed", err));
+        }
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

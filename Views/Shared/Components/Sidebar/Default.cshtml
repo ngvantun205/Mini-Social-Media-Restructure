@@ -1,23 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
-@inject UserManager<User> UserManager
-@inject INotificationsService _notificationsService
-@{
-    string userAvatar = "/images/avatar.png";
-    string currentController = ViewContext.RouteData.Values["controller"]?.ToString();
-
-    User? currentUser = null;
-    if (User.Identity != null && User.Identity.IsAuthenticated) {
-        currentUser = await UserManager.GetUserAsync(User);
-        if (currentUser != null && !string.IsNullOrEmpty(currentUser.AvatarUrl)) {
-            userAvatar = currentUser.AvatarUrl;
-        }
-    }
-    bool hasUnread = false;
-    if (currentUser != null) {
-        var notis = await _notificationsService.GetUserNotifications(currentUser.Id);
-        hasUnread = notis.Any(n => !n.IsRead);
-    }
-}
+﻿@model Mini_Social_Media.Models.ViewModel.SidebarViewModel
 
 <nav class="ig-sidebar">
     <div class="ig-sidebar-inner">
@@ -25,9 +6,10 @@
             <span class="ig-logo-text">MiniSocial</span>
         </a>
 
-        <a class="ig-item" href="/" data-tooltip="Home">
+        <a class="ig-item @(Model.CurrentController == "Home" ? "active" : "")" href="/" data-tooltip="Home">
             <i class="bi bi-house-door-fill"></i><span>Home</span>
         </a>
+
         <a class="ig-item" href="#" data-tooltip="Search"><i class="bi bi-search"></i><span>Search</span></a>
         <a class="ig-item" href="#" data-tooltip="Explore"><i class="bi bi-compass"></i><span>Explore</span></a>
         <a class="ig-item" href="#" data-tooltip="Reels"><i class="bi bi-play-btn"></i><span>Reels</span></a>
@@ -37,7 +19,7 @@
             <i class="bi bi-heart"></i>
             <span>Notifications</span>
             <span id="notiBadge" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
-                  style="width: 10px; height: 10px; display: @(hasUnread ? "block" : "none");"></span>
+                  style="width: 10px; height: 10px; display: @(Model.HasUnread ? "block" : "none");"></span>
         </a>
 
         <div id="notiDrawer" class="noti-drawer shadow-lg">
@@ -47,7 +29,6 @@
                     Mark all as read
                 </button>
             </div>
-
             <div id="notiList" class="noti-list overflow-auto" style="height: calc(100vh - 60px);">
                 <div class="text-center mt-5 text-muted">
                     <div class="spinner-border spinner-border-sm" role="status"></div> Loading...
@@ -55,12 +36,12 @@
             </div>
         </div>
 
-        <a class="ig-item  asp-controller="Post" asp-action="CreatePost" data-tooltip="Create">
+        <a class="ig-item @(Model.CurrentController == "Post" ? "active" : "")" asp-controller="Post" asp-action="CreatePost" data-tooltip="Create">
             <i class="bi bi-plus-square"></i><span>Create</span>
         </a>
 
-        <a class="ig-item asp-controller="Profile" asp-action="MyProfile" data-tooltip="Profile">
-            <img class="ig-avatar" src="@userAvatar" alt="Profile" /><span>Profile</span>
+        <a class="ig-item @(Model.CurrentController == "Profile" ? "active" : "")" asp-controller="Profile" asp-action="MyProfile" data-tooltip="Profile">
+            <img class="ig-avatar" src="@Model.AvatarUrl" alt="Profile" /><span>Profile</span>
         </a>
 
         <div class="ig-sidebar-bottom">
@@ -130,6 +111,7 @@
 
         if (!notiBtn || !notiDrawer) return;
 
+        // 1. Toggle Drawer
         notiBtn.addEventListener("click", function(e) {
             e.preventDefault(); e.stopPropagation();
             if (notiDrawer.classList.contains("show")) closeDrawer();
@@ -149,6 +131,7 @@
             setTimeout(() => notiDrawer.classList.remove("open"), 300);
         }
 
+        // 2. Load Data API
         function loadNotifications() {
             fetch('/Notifications/GetNotifications')
                 .then(res => res.json())
@@ -157,6 +140,7 @@
                         notiList.innerHTML = '<div class="text-center mt-5 text-muted small">No notifications.</div>';
                         return;
                     }
+
                     let html = '';
                     let anyUnread = false;
 
@@ -191,18 +175,5 @@
                 closeDrawer();
             }
         });
-        window.markAllRead = function () {
-        fetch('/Notifications/MarkAllRead', {
-            method: 'POST'
-        })
-        .then(res => {
-            if (!res.ok) throw new Error("Failed");
-            document.getElementById("notiBadge").style.display = "none";
-            document.getElementById("notiList").innerHTML =
-                '<div class="text-center mt-5 text-muted small">All caught up.</div>';
-        })
-        .catch(err => console.error(err));
-    };
-
     });
 </script>

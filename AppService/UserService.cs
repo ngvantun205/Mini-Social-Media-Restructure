@@ -1,14 +1,17 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Mini_Social_Media.AppService {
     public class UserService : IUserService {
         private readonly IUserRepository _userRepository;
         private readonly IUploadService _uploadService;
         private readonly UserManager<User> _userManager;
-        public UserService(IUserRepository userRepository, IUploadService uploadService, UserManager<User> userManager) {
+        private readonly IHubContext<NotificationsHub> _hubContext;
+        public UserService(IUserRepository userRepository, IUploadService uploadService, UserManager<User> userManager, IHubContext<NotificationsHub> hubContext) {
             _userRepository = userRepository;
             _uploadService = uploadService;
             _userManager = userManager;
+            _hubContext = hubContext;
         }
         public async Task<MyProfileDto?> GetMyProfileAsync(int userId) {
             var user = await _userRepository.GetByIdAsync(userId);
