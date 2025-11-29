@@ -12,6 +12,8 @@ namespace Mini_Social_Media.Models.DomainModel {
         public string? Gender { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public int FollowerCount { get; set; }
+        public int FollowingCount { get; set; } 
         public int PostId { get; set; }
         [ForeignKey(nameof(PostId))]
         public ICollection<Post> Posts { get; set; } = new List<Post>();

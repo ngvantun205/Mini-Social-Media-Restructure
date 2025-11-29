@@ -10,6 +10,8 @@
         Task<bool> UserExist(string userName, string email);
         Task<User?> GetByUserNameOrEmailAsync(string userNameOrEmail);
         Task UpdatePrivacy(bool isPrivate, int userId);
+        Task<bool> AddFollowAsync(int followeeId, int followerId);
+        Task<bool> DeleteFollowAsync(int followeeId, int followerId);
     }
     public interface IPostRepository : IRepository<Post> {   //Post
         Task<IEnumerable<Post>> GetPostsPagedAsync(int page, int pageSize);
@@ -28,7 +30,10 @@
         Task DeleteByPostIdAndUserIdAsync(int postId, int userId);
         Task<bool> IsLikedByCurrentUser(int postId, int userId); 
     }
-    public interface IFollowRepository : IRepository<Follow> {
+    public interface IFollowRepository : IRepository<Follow> {   //Follow
+        Task<Follow?> GetFollowByUserAsync(int followeeId, int followerId);
+        Task<IEnumerable<Follow>> GetFolloweeAsync(int userId);
+        Task<IEnumerable<Follow>> GetFollowerAsync(int userId);
     }
     public interface IHashtagRepository : IRepository<Hashtag> {   //Hashtag
         Task<bool> IsExist(string hashtagName);

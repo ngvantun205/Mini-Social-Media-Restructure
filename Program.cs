@@ -35,6 +35,7 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<INotificationsService, NotificationsService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IHashtagService, HashtagService>();
+            builder.Services.AddScoped<IFollowService, FollowService>();
 
             builder.Services.AddSignalR();
 

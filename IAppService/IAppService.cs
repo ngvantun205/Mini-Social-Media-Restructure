@@ -27,7 +27,7 @@ namespace Mini_Social_Media.IAppService {
         Task<UserProfileDto?> GetUserProfileAsync(int userId, int requesterId);
         Task<MyProfileDto?> GetMyProfileAsync(int userId);
         Task<MyProfileDto> UpdateUserAvatar(IFormFile formFile, int userId);
-        Task<EditProfileDto> GetEditProfile(int userId);    
+        Task<EditProfileDto> GetEditProfile(int userId);
         Task<EditProfileDto> Edit(EditProfileInputModel model, int userId);
         Task<IdentityResult> ChangePassword(ChangePasswordInputModel changeInput, int userId);
         Task ChangeAccountPrivacy(bool isPrivate, int userId);
@@ -46,5 +46,11 @@ namespace Mini_Social_Media.IAppService {
     }
     public interface IHashtagService {
         Task<IEnumerable<Hashtag>> GetTopHashtag();
+    }
+    public interface IFollowService {
+        Task<FollowDto> Follow(FollowInputModel inputModel, int followerId);
+        Task<FollowDto> Unfollow(FollowInputModel inputModel, int followerId);
+        Task<IEnumerable<FollowViewModel>> GetFollowers(int userId);
+        Task<IEnumerable<FollowViewModel>> GetFollowee(int userId);
     }
 }

@@ -31,3 +31,14 @@
     font-size: 12px;
     letter-spacing: 1px;
 }
+.hover-bg-light:hover {
+    background-color: #fafafa;
+}
+.modal-dialog-scrollable .modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-dialog-scrollable .modal-body::-webkit-scrollbar-thumb {
+    background-color: #dbdbdb;
+    border-radius: 3px;
+}

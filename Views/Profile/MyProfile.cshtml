@@ -1,7 +1,10 @@
 ﻿@model MyProfileViewModel
+@using System.Security.Claims;
 @{
     ViewData["Title"] = "My Profile";
     Layout = "_Layout";
+    var currentUserIdstr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    int userId = currentUserIdstr == null ? 0 : int.Parse(currentUserIdstr);
 }
 <div class="container mt-4" style="max-width: 935px;">
     <header class="row mb-5 align-items-center">
@@ -36,9 +39,17 @@
             </div>
 
             <ul class="list-unstyled d-flex mb-3 gap-4" style="font-size: 16px;">
-                <li><strong>@Model.Posts.Count</strong> posts</li>
-                <li><a href="#" class="text-decoration-none text-dark"><strong>@Model.FollowerCount</strong> followers</a></li>
-                <li><a href="#" class="text-decoration-none text-dark"><strong>@Model.FollowingCount</strong> following</a></li>
+                <ul class="list-unstyled d-flex mb-3 gap-4" style="font-size: 16px;">
+                    <li><strong>@Model.Posts.Count</strong> posts</li>
+
+                    <li style="cursor: pointer;" onclick="openFollowModal('followers', @userId)">
+                        <strong>@Model.FollowerCount</strong> followers
+                    </li>
+
+                    <li style="cursor: pointer;" onclick="openFollowModal('following', @userId)">
+                        <strong>@Model.FollowingCount</strong> following
+                    </li>
+                </ul>
             </ul>
 
             <div>
@@ -123,43 +134,27 @@
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        function triggerFileInput() {
-            document.getElementById('avatarInput').click();
-        }
+<div class="modal fade" id="followModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 400px;">
+        <div class="modal-content rounded-4 border-0">
 
-        function uploadAvatar(inputElement) {
-            const file = inputElement.files[0];
-            if (!file) return;
+            <div class="modal-header border-bottom-0 py-2">
+                <div class="w-100 text-center position-relative">
+                    <h5 class="modal-title fw-bold fs-6" id="followModalTitle">Followers</h5>
+                    <button type="button" class="btn-close position-absolute top-50 end-0 translate-middle-y me-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
 
-            if (!file.type.startsWith('image/')) {
-                alert("Please select an image file.");
-                return;
-            }
+            <div class="modal-body p-0">
+                <div id="followListContainer" class="d-flex flex-column">
+                    <div class="text-center py-5">
+                        <div class="spinner-border spinner-border-sm text-muted"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-            const formData = new FormData();
-            formData.append('avatarFile', file); 
+<script src="~/js/profile.js"></script>
 
-
-            fetch('/Profile/UpdateAvatar', {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => {
-                if (res.ok) return res.json();
-                throw new Error("Upload failed");
-            })
-            .then(data => {
-                if (data.newUrl) {
-                    document.getElementById('avatarImage').src = data.newUrl;
-                }
-                alert("Avatar updated successfully!");
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Failed to update avatar.");
-            });
-        }
-    </script>
-}

@@ -454,6 +454,12 @@ namespace Mini_Social_Media.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("FollowerCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FollowingCount")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("FullName")
                         .HasColumnType("TEXT");
 

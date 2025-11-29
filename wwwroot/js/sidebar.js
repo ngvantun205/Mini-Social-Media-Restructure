@@ -95,7 +95,7 @@ function renderNotifications(data, notiList, notiBadge) {
         const actorAvatar = noti.actorAvatar || '/images/avatar.png';
 
         html += `
-            <div class="noti-item ${isUnreadClass}" onclick="handleNotificationClick('${noti.postId}', event)">
+            <div class="noti-item ${isUnreadClass}" onclick="handleNotificationClick('${noti.postId}', '${noti.type}', event)">
                 <img src="${actorAvatar}" 
                      class="rounded-circle me-3 border" 
                      width="44" 
@@ -136,9 +136,13 @@ function renderErrorState(notiList) {
 }
 
 // ==================== NOTIFICATION CLICK HANDLER ====================
-window.handleNotificationClick = function (postId, event) {
+window.handleNotificationClick = function (entityId, type, event) {
     if (event) event.stopPropagation();
-    window.location.href = `/Post/PostDetails?id=${postId}`;
+    if (type === "Follow") {
+        window.location.href = `/Profile/UserProfile?id=${entityId}`;
+    } else {
+        window.location.href = `/Post/PostDetails?id=${entityId}`;
+    }
 };
 
 // ==================== MARK ALL AS READ ====================

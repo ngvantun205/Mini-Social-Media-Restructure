@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration.UserSecrets;
-using Mini_Social_Media.Models.DomainModel;
 
 namespace Mini_Social_Media.Repository {
     public class UserRepository : IUserRepository {
@@ -14,6 +12,8 @@ namespace Mini_Social_Media.Repository {
         public async Task<User?> GetByIdAsync(int id) {
             return await _context.Users
                 .Include(u => u.Posts).ThenInclude(p => p.Medias)
+                .Include(u => u.Followers)
+                .Include(u => u.Following)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
         public async Task AddAsync(User entity) {
@@ -46,6 +46,30 @@ namespace Mini_Social_Media.Repository {
             if (user != null) 
                 user.IsPrivate = isPrivate;
             await _context.SaveChangesAsync();
+        }
+        public async Task<bool> AddFollowAsync(int followeeId, int followerId) {
+            var followee = await GetByIdAsync(followeeId);
+            var follower = await GetByIdAsync(followerId);
+            if (followee != null && follower != null) {
+                followee.FollowerCount++;
+                follower.FollowingCount++;
+                await UpdateAsync(followee);
+                await UpdateAsync(follower);
+                return true;
+            }
+            return false;
+        }
+        public async Task<bool> DeleteFollowAsync(int followeeId, int followerId) {
+            var followee = await GetByIdAsync(followeeId);
+            var follower = await GetByIdAsync(followerId);
+            if (followee != null && follower != null) {
+                followee.FollowerCount--;
+                follower.FollowingCount--;
+                await UpdateAsync(followee);
+                await UpdateAsync(follower);
+                return true;
+            }
+            return false;
         }
     }
 }

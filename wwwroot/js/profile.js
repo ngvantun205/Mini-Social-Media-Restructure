@@ -1,21 +1,8 @@
-﻿/* ============================================
-   PROFILE - ENHANCED JAVASCRIPT
-   ============================================ */
-
-// ============================================
-// INITIALIZATION
-// ============================================
-
-document.addEventListener('DOMContentLoaded', function () {
+﻿document.addEventListener('DOMContentLoaded', function () {
     initProfileTabs();
     initSettingsDropdown();
     initPostGridInteractions();
 });
-
-// ============================================
-// TABS FUNCTIONALITY
-// ============================================
-
 function initProfileTabs() {
     const tabs = document.querySelectorAll('.profile-tab');
 
@@ -48,9 +35,6 @@ function initProfileTabs() {
     });
 }
 
-// ============================================
-// SETTINGS DROPDOWN
-// ============================================
 
 let settingsDropdown = null;
 
@@ -114,73 +98,86 @@ function navigateToPost(postId) {
 // FOLLOW/UNFOLLOW FUNCTIONALITY
 // ============================================
 
-function toggleFollow(button, userId) {
-    const icon = button.querySelector('i');
-    const text = button.querySelector('.btn-text');
-    const isFollowing = button.classList.contains('following');
+function toggleFollow(userId) {
+    const btn = document.getElementById("followBtn");
+    if (!btn) return;
 
-    // Disable button during request
-    button.disabled = true;
+    const isFollowing = btn.innerText.trim() === "Following";
 
-    fetch('/Follow/Toggle', {
+    // 1. Optimistic UI (Cập nhật giao diện trước)
+    if (isFollowing) {
+        btn.innerText = "Follow";
+        btn.classList.remove("btn-light");
+        btn.classList.add("btn-primary");
+        updateFollowerCount(-1);
+    } else {
+        btn.innerText = "Following";
+        btn.classList.remove("btn-primary");
+        btn.classList.add("btn-light");
+        updateFollowerCount(1);
+    }
+
+    btn.disabled = true;
+
+    // 2. Gọi API (SỬA ĐOẠN NÀY)
+    const url = isFollowing ? '/Follow/Unfollow' : '/Follow/Follow';
+
+    fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ userId: userId })
+        // Đưa followeeId vào Body JSON
+        body: JSON.stringify({ followeeId: userId })
     })
         .then(res => {
-            if (!res.ok) throw new Error("Failed to toggle follow");
+            if (!res.ok) throw new Error("Failed");
             return res.json();
         })
         .then(data => {
-            if (isFollowing) {
-                // Unfollow
-                button.classList.remove('following', 'btn-profile-danger');
-                button.classList.add('btn-profile-primary');
-                if (icon) icon.className = 'bi bi-person-plus';
-                if (text) text.textContent = 'Follow';
-
-                // Update follower count
-                updateFollowerCount(-1);
-            } else {
-                // Follow
-                button.classList.add('following', 'btn-profile-danger');
-                button.classList.remove('btn-profile-primary');
-                if (icon) icon.className = 'bi bi-person-check';
-                if (text) text.textContent = 'Following';
-
-                // Update follower count
-                updateFollowerCount(1);
+            // Nếu Server trả về ErrorMessage trong data (logic cũ của bạn)
+            if (data.errorMessage) {
+                throw new Error(data.errorMessage);
             }
+            // Thành công -> Không làm gì cả vì UI đã đổi rồi
         })
         .catch(err => {
-            console.error("Follow toggle failed:", err);
-            alert("Failed to update follow status. Please try again.");
+            console.error(err);
+            // 3. Rollback (Hoàn tác nếu lỗi)
+            if (isFollowing) {
+                btn.innerText = "Following";
+                btn.classList.remove("btn-primary");
+                btn.classList.add("btn-light");
+                updateFollowerCount(1);
+            } else {
+                btn.innerText = "Follow";
+                btn.classList.remove("btn-light");
+                btn.classList.add("btn-primary");
+                updateFollowerCount(-1);
+            }
         })
         .finally(() => {
-            button.disabled = false;
+            btn.disabled = false;
         });
 }
 
 function updateFollowerCount(change) {
-    const followerElement = document.querySelector('.follower-count');
-    if (followerElement) {
-        let currentCount = parseInt(followerElement.textContent) || 0;
-        currentCount += change;
-        followerElement.textContent = currentCount;
+    const countEl = document.getElementById("followerCount");
 
-        // Add animation
-        followerElement.style.animation = 'pulse 0.4s ease-out';
+    if (countEl) {
+        let currentCount = parseInt(countEl.innerText) || 0;
+        currentCount += change;
+        countEl.innerText = currentCount;
+
+        countEl.style.animation = 'pulse 0.4s ease-out';
         setTimeout(() => {
-            followerElement.style.animation = '';
+            countEl.style.animation = '';
         }, 400);
+    } else {
+        console.error("Không tìm thấy thẻ hiển thị số follower (id='followerCount')");
     }
 }
 
-// ============================================
-// AVATAR UPLOAD (FOR EDIT PROFILE PAGE)
-// ============================================
 
 function initAvatarUpload() {
     const avatarInput = document.getElementById('avatarInput');
@@ -226,7 +223,6 @@ function shareProfile() {
             url: url
         }).catch(err => console.log('Share cancelled'));
     } else {
-        // Fallback: Copy to clipboard
         copyToClipboard(url);
     }
 }
@@ -249,9 +245,6 @@ function copyToClipboard(text) {
     document.body.removeChild(textarea);
 }
 
-// ============================================
-// NOTIFICATIONS
-// ============================================
 
 function showNotification(message) {
     const notification = document.createElement('div');
@@ -281,49 +274,108 @@ function showNotification(message) {
     }, 2500);
 }
 
-// ============================================
-// LOAD MORE POSTS (IF NEEDED)
-// ============================================
 
 let postsPage = 1;
 let isLoadingPosts = false;
 let hasMorePosts = true;
 
-function initInfiniteScrollPosts() {
-    window.addEventListener('scroll', function () {
-        if (isLoadingPosts || !hasMorePosts) return;
 
-        const scrollPosition = window.innerHeight + window.scrollY;
-        const threshold = document.body.offsetHeight - 500;
-
-        if (scrollPosition >= threshold) {
-            loadMorePosts();
-        }
-    });
+function triggerFileInput() {
+    document.getElementById('avatarInput').click();
 }
 
-function loadMorePosts() {
-    isLoadingPosts = true;
-    postsPage++;
+function uploadAvatar(inputElement) {
+    const file = inputElement.files[0];
+    if (!file) return;
 
-    const userId = document.querySelector('.profile-page-container').dataset.userId;
+    if (!file.type.startsWith('image/')) {
+        alert("Please select an image file.");
+        return;
+    }
 
-    fetch(`/Profile/LoadMorePosts?userId=${userId}&page=${postsPage}`)
+    const formData = new FormData();
+    formData.append('avatarFile', file);
+
+
+    fetch('/Profile/UpdateAvatar', {
+        method: 'POST',
+        body: formData
+    })
         .then(res => {
-            if (res.status === 204) {
-                hasMorePosts = false;
-                return null;
-            }
-            return res.json();
+            if (res.ok) return res.json();
+            throw new Error("Upload failed");
         })
-        .then(posts => {
-            if (posts && posts.length > 0) {
-                appendPosts(posts);
+        .then(data => {
+            if (data.newUrl) {
+                document.getElementById('avatarImage').src = data.newUrl;
             }
+            alert("Avatar updated successfully!");
         })
-        .catch(err => console.error("Failed to load more posts:", err))
-        .finally(() => {
-            isLoadingPosts = false;
+        .catch(err => {
+            console.error(err);
+            alert("Failed to update avatar.");
+        });
+}
+function openFollowModal(type, userId) {
+    const modalTitle = document.getElementById('followModalTitle');
+    const listContainer = document.getElementById('followListContainer');
+
+    // 1. Set Title & Reset List
+    if (type === 'followers') {
+        modalTitle.innerText = "Followers";
+    } else {
+        modalTitle.innerText = "Following";
+    }
+    listContainer.innerHTML = '<div class="text-center py-5"><div class="spinner-border spinner-border-sm text-muted"></div></div>';
+
+    // 2. Hiển thị Modal
+    const myModal = new bootstrap.Modal(document.getElementById('followModal'));
+    myModal.show();
+
+    let url = '';
+    if (type === 'followers') {
+        url = `/Follow/FollowerList?requesterId=${userId}`;
+    } else {
+        url = `/Follow/FolloweeList?requesterId=${userId}`;
+    }
+    // 4. Gọi API
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            if (!data || data.length === 0) {
+                listContainer.innerHTML = '<div class="text-center py-4 text-muted small">No users found.</div>';
+                return;
+            }
+
+            let html = '';
+            data.forEach(item => {
+                // item.user là object chứa thông tin user (xem lại FollowViewModel của bạn)
+                const user = item.user;
+
+                html += `
+                            <div class="d-flex align-items-center px-3 py-2 hover-bg-light">
+                                <a href="/Profile/UserProfile/${user.userId}">
+                                    <img src="${user.avatarUrl || '/images/default-avatar.png'}"
+                                         class="rounded-circle border me-3"
+                                         width="44" height="44" style="object-fit: cover;">
+                                </a>
+
+                                <div class="flex-grow-1" style="min-width: 0;">
+                                    <a href="/Profile/UserProfile/${user.userId}" class="text-decoration-none text-dark fw-bold d-block text-truncate">
+                                        ${user.userName}
+                                    </a>
+                                    <div class="text-muted small text-truncate">${user.fullName || ''}</div>
+                                </div>
+
+                                <button class="btn btn-light btn-sm border fw-bold px-3">Remove</button>
+                            </div>
+                        `;
+            });
+            listContainer.innerHTML = html;
+        })
+        .catch(err => {
+            console.error(err);
+            listContainer.innerHTML = '<div class="text-center py-4 text-danger small">Failed to load.</div>';
         });
 }
 
@@ -362,9 +414,6 @@ function createPostGridItem(post) {
     return item;
 }
 
-// ============================================
-// ANIMATION HELPERS
-// ============================================
 
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `

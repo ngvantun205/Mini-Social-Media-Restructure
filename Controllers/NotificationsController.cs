@@ -28,6 +28,7 @@ namespace Mini_Social_Media.Controllers {
                 Message = n.Message,
                 PostId = n.PostId,
                 IsRead = n.IsRead,
+                Type = n.Type,
                 TimeAgo = CalculateTimeAgo(n.CreatedAt)
             }).ToList();
 

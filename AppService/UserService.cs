@@ -25,8 +25,8 @@ namespace Mini_Social_Media.AppService {
                 WebsiteUrl = user.WebsiteUrl,
                 IsPrivate = user.IsPrivate,
                 Gender = user.Gender,
-                FollowersCount = user.Followers.Count,
-                FollowingCount = user.Following.Count,
+                FollowersCount = user.FollowerCount,
+                FollowingCount = user.FollowingCount,
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt,
                 Posts = user.Posts.Select(p => new PostSummaryDto {
@@ -85,8 +85,8 @@ namespace Mini_Social_Media.AppService {
                 WebsiteUrl = user.WebsiteUrl,
                 IsPrivate = user.IsPrivate,
                 Gender = user.Gender,
-                FollowersCount = user.Followers.Count,
-                FollowingCount = user.Following.Count,
+                FollowersCount = user.FollowerCount,
+                FollowingCount = user.FollowingCount,
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt,
                 Posts = user.Posts.Select(p => new PostSummaryDto {

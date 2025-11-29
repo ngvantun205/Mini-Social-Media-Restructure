@@ -45,7 +45,8 @@ namespace Mini_Social_Media.AppService {
                 Message = n.Content,
                 PostId = n.EntityId,
                 IsRead = n.IsRead,
-                CreatedAt = n.CreatedAt
+                CreatedAt = n.CreatedAt,
+                Type = n.Type,
             }).ToList();
         }
 
