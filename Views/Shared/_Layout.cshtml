@@ -22,8 +22,8 @@
         #toast-container {
             position: fixed;
             bottom: 20px;
-            left: 20px; /* Góc trái dưới */
-            z-index: 9999; /* Luôn đè lên mọi thứ */
+            left: 20px;
+            z-index: 9999;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -31,7 +31,7 @@
 
         .toast-notification {
             background: white;
-            border-left: 5px solid #dc3545; /* Viền đỏ nổi bật */
+            border-left: 5px solid #dc3545; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             border-radius: 8px;
             padding: 12px 15px;
@@ -65,6 +65,8 @@
     </style>
 </head>
 <body>
+    <div id="toast-container"></div>
+
     @await Html.PartialAsync("_TopBar")
     @await Component.InvokeAsync("Sidebar")
 
@@ -72,7 +74,6 @@
         @RenderBody()
     </main>
 
-    <div id="toast-container"></div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

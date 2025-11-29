@@ -1,12 +1,14 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using System.Security.Claims
 @inject UserManager<User> UserManager
+@inject IHashtagService _hashtagService
 @{
     User? currentUser = null;
     if (User.Identity != null && User.Identity.IsAuthenticated) {
         currentUser = await UserManager.GetUserAsync(User);
     }
     var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    var topHashtag = await _hashtagService.GetTopHashtag();
 }
 <div class="right-sidebar">
     <!-- Current User Card -->
@@ -69,31 +71,12 @@
             <h3 class="sidebar-section-title">Trending Now</h3>
             <a href="/explore/trending" class="see-all">See All</a>
         </div>
-
-        <div class="hashtag-item">
-            <p class="hashtag-name">#love</p>
-            <p class="hashtag-count">12.5K posts</p>
+        @foreach (var hashtag in topHashtag) {
+            <div class="hashtag-item">
+                <p class="hashtag-name">@hashtag.HashtagName</p>
+            <p class="hashtag-count">@hashtag.UsageCount posts</p>
         </div>
-
-        <div class="hashtag-item">
-            <p class="hashtag-name">#study</p>
-            <p class="hashtag-count">5.2K posts</p>
-        </div>
-
-        <div class="hashtag-item">
-            <p class="hashtag-name">#music</p>
-            <p class="hashtag-count">9.8K posts</p>
-        </div>
-
-        <div class="hashtag-item">
-            <p class="hashtag-name">#travel</p>
-            <p class="hashtag-count">7.3K posts</p>
-        </div>
-
-        <div class="hashtag-item">
-            <p class="hashtag-name">#fitness</p>
-            <p class="hashtag-count">4.6K posts</p>
-        </div>
+        }
     </div>
 
     <!-- Trending Reels -->

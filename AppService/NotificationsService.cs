@@ -52,5 +52,6 @@ namespace Mini_Social_Media.AppService {
         public async Task MarkAllAsReadAsync(int userId) {
             await _notiRepo.MarkAllAsReadAsync(userId);
         }
+        
     }
 }

@@ -44,4 +44,7 @@ namespace Mini_Social_Media.IAppService {
         Task<ConversationViewModel>? GetOrCreateConversationAsync(int userId, int receiverId);
         Task MarkConversationAsReadAsync(int userId, int partnerId);
     }
+    public interface IHashtagService {
+        Task<IEnumerable<Hashtag>> GetTopHashtag();
+    }
 }

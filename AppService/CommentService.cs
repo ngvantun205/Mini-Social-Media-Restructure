@@ -1,10 +1,17 @@
-﻿namespace Mini_Social_Media.AppService {
+﻿using Microsoft.AspNetCore.SignalR;
+using Mini_Social_Media.Models.DomainModel;
+
+namespace Mini_Social_Media.AppService {
     public class CommentService : ICommentService {
-        private ICommentRepository _commentRepository;
-        private IPostRepository _postRepository;
-        public CommentService(ICommentRepository commentRepository, IPostRepository postRepository) {
+        private readonly ICommentRepository _commentRepository;
+        private readonly IPostRepository _postRepository;
+        private readonly INotificationsRepository _notificationsRepository;
+        private readonly IHubContext<NotificationsHub> _hubContext;
+        public CommentService(ICommentRepository commentRepository, IPostRepository postRepository, INotificationsRepository notificationsRepository, IHubContext<NotificationsHub> hubContext) {
             _commentRepository = commentRepository;
             _postRepository = postRepository;
+            _notificationsRepository = notificationsRepository;
+            _hubContext = hubContext;
         }
         public async Task<CommentDto>? AddCommentAsync(CommentInputModel model, int userId) {
             var comment = new Comment {
@@ -20,6 +27,26 @@
             var result = await _postRepository.AddCommentAsync(model.PostId);
             if (!result)
                 return null;
+            var post = await _postRepository.GetByIdAsync(model.PostId);
+            if (userId != post.UserId) {
+                var noti = new Notifications() {
+                    ActorId = userId,
+                    ReceiverId = post.User.Id,
+                    EntityId = post.PostId,
+                    Type = "Comment",
+                    Content = "commented on your post.",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow,
+                };
+                await _notificationsRepository.AddAsync(noti);
+                await _hubContext.Clients.User(post.UserId.ToString())
+                            .SendAsync("ReceiveNotification", new {
+                                content = noti.Content,
+                                type = noti.Type,
+                                postId = noti.EntityId,
+                                message = $"Some one has just commented on your post."
+                            });
+            }
             var createdComment = await _commentRepository.GetByIdAsync(comment.CommentId);
             return new CommentDto {
                 CommentId = createdComment.CommentId,
@@ -39,6 +66,12 @@
                     return false;
             }
             await _commentRepository.DeleteAsync(commentId);
+
+            var post = await _postRepository.GetByIdAsync(comment.PostId);
+            var noti = await _notificationsRepository.GetNotification(userId, post.UserId, "Comment", comment.PostId);
+            if (noti != null)
+                await _notificationsRepository.DeleteAsync(noti.NotiId);
+
             var result = await _postRepository.RemoveCommentAsync(comment.PostId);
             if (!result)
                 return false;

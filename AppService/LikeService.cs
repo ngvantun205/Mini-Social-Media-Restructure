@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using Mini_Social_Media.Models.DomainModel;
-using System.Runtime.InteropServices;
 
 namespace Mini_Social_Media.AppService {
     public class LikeService : ILikeService {
@@ -46,6 +44,9 @@ namespace Mini_Social_Media.AppService {
                 else {
                     await _likeRepository.DeleteByPostIdAndUserIdAsync(likeInputModel.PostId, userId);
                     await _postRepository.UnLikePostAsync(likeInputModel.PostId);
+                    var noti = await _notificationsRepository.GetNotification(userId, post.UserId, "Like", post.PostId);
+                    if(noti != null)
+                    await _notificationsRepository.DeleteAsync(noti.NotiId);
                     return new LikeDto();
                 }
             }

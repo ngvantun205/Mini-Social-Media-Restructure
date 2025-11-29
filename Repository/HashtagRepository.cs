@@ -34,5 +34,8 @@ namespace Mini_Social_Media.Repository {
             return await _context.Hashtags
                 .FirstOrDefaultAsync(h => h.HashtagName == hashtagName.ToLower());
         }
+        public async Task<IEnumerable<Hashtag>> GetTopHashtag() {
+            return await _context.Hashtags.Take(5).OrderByDescending(h => h.UsageCount).ToListAsync();
+        }
     }
 }

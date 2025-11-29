@@ -58,5 +58,8 @@ namespace Mini_Social_Media.Repository {
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task<Notifications?> GetNotification(int actorId, int receiverId, string type, int entityId) {
+            return await _context.Notifications.FirstOrDefaultAsync(n => n.ActorId == actorId && n.ReceiverId == receiverId && n.Type == type && n.EntityId == entityId);
+        }
     }
 }
