@@ -12,6 +12,7 @@
         Task UpdatePrivacy(bool isPrivate, int userId);
         Task<bool> AddFollowAsync(int followeeId, int followerId);
         Task<bool> DeleteFollowAsync(int followeeId, int followerId);
+        Task<IEnumerable<User>> SearchUsersAsync(string searchinfo);
     }
     public interface IPostRepository : IRepository<Post> {   //Post
         Task<IEnumerable<Post>> GetPostsPagedAsync(int page, int pageSize);
@@ -19,6 +20,7 @@
         Task UnLikePostAsync(int postId);
         Task<bool> AddCommentAsync(int postId);
         Task<bool> RemoveCommentAsync(int postId);
+        Task<IEnumerable<Post>> SearchPost(string searchinfo);   
     }
     public interface ICommentRepository : IRepository<Comment> {  //Comment
         Task<IEnumerable<Comment>> GetCommentsByPostIdAsync(int postId);
@@ -58,5 +60,9 @@
         Task<IEnumerable<Messages>> GetMessagesAsync(int conversationId);
         Task<IEnumerable<Conversations>> GetUserConversationsAsync(int userId);
         Task MarkAsRead(int userId, int partnerId);
+    }
+    public interface IReportRepository : IRepository<Report> {
+        Task<IEnumerable<Report>> FilterReportByType(string type);
+        Task<IEnumerable<Report>> FilterReportsByStatus(ReportStatus status);
     }
 }

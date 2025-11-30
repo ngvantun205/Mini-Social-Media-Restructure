@@ -71,5 +71,9 @@ namespace Mini_Social_Media.Repository {
             }
             return false;
         }
+        public async Task<IEnumerable<User>> SearchUsersAsync(string searchinfo) {
+            searchinfo.ToLower().Trim();
+            return await _context.Users.Where(u => u.FullName.ToLower().Contains(searchinfo) || u.UserName.ToLower().Contains(searchinfo)).ToListAsync();
+        }
     }
 }

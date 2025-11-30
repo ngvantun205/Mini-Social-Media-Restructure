@@ -86,5 +86,8 @@ namespace Mini_Social_Media.Repository {
             else
                 return false;
         }
+        public async Task<IEnumerable<Post>> SearchPost(string searchinfo) {
+            return await _context.Posts.Where(p => p.Caption.ToLower().Contains(searchinfo.ToLower().Trim())).ToListAsync();
+        }
     }
 }

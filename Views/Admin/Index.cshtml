@@ -1,0 +1,179 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_Layout1";
+}
+
+<link rel="stylesheet" href="~/css/admin-dashboard.css" />
+
+<div class="dashboard-container">
+    @await Html.PartialAsync("_Topbar")
+
+    <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <p class="subtitle">Manage users, posts, and reports</p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+        <button class="tab-btn active" onclick="showTab('usersTab')" data-tab="users">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            Users
+        </button>
+        <button class="tab-btn" onclick="showTab('postsTab')" data-tab="posts">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            Posts
+        </button>
+        <button class="tab-btn" onclick="showTab('reportsTab')" data-tab="reports">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            Reports
+        </button>
+    </div>
+
+    <!-- ================= USERS TAB ================= -->
+    <div id="usersTab" class="tab-content active">
+        <div class="tab-header">
+            <h2>User Management</h2>
+            <div class="search-bar">
+                <input id="searchUserInput" type="text" placeholder="Search by name or username..." />
+                <button class="btn btn-primary" onclick="searchUser()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    Search
+                </button>
+                <button class="btn btn-secondary" onclick="loadUsers()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                    Reload
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Avatar</th>
+                        <th>Full Name</th>
+                        <th>Username</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ================= POSTS TAB ================= -->
+    <div id="postsTab" class="tab-content">
+        <div class="tab-header">
+            <h2>Post Management</h2>
+            <div class="search-bar">
+                <input id="searchPostInput" type="text" placeholder="Search posts..." />
+                <button class="btn btn-primary" onclick="searchPost()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    Search
+                </button>
+                <button class="btn btn-secondary" onclick="loadPosts()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                    Reload
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table" id="postsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User ID</th>
+                        <th>Likes</th>
+                        <th>Comments</th>
+                        <th>Media</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ================= REPORTS TAB ================= -->
+    <div id="reportsTab" class="tab-content">
+        <div class="tab-header">
+            <h2>Report Management</h2>
+            <div class="search-bar">
+                <select id="reportFilter" class="filter-select" onchange="filterReport()">
+                    <option value="Pending">Pending</option>
+                    <option value="Executed">Executed</option>
+                </select>
+                <button class="btn btn-secondary" onclick="loadReports()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                    Reload
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table" id="reportsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Reporter</th>
+                        <th>Type</th>
+                        <th>Entity ID</th>
+                        <th>Content</th>
+                        <th>Created At</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirm Delete</h3>
+        </div>
+        <div class="modal-body">
+            <p id="deleteMessage">Are you sure you want to delete this item?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+            <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/admin-dashboard.js"></script>

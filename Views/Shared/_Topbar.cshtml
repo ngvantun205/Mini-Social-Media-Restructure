@@ -28,6 +28,11 @@
     </div>
 
     <div class="top-bar-right">
+        @if (User.IsInRole("Admin")) {
+            <a href="/Admin/Index" class="top-icon" data-page="index" title="Admin">
+                <i class="fas fa-admin"></i>
+            </a>
+        }
         <a href="/" class="top-icon" data-page="home" title="Home">
             <i class="fas fa-home"></i>
         </a>

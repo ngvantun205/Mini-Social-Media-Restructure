@@ -53,4 +53,19 @@ namespace Mini_Social_Media.IAppService {
         Task<IEnumerable<FollowViewModel>> GetFollowers(int userId);
         Task<IEnumerable<FollowViewModel>> GetFollowee(int userId);
     }
+    public interface IAdminService {
+        Task<IEnumerable<UserSummaryViewModel>> GetAllUser();
+        Task<IEnumerable<UserSummaryViewModel>> SearchUser(string searchinfo);
+        Task DeleteUser(int userId);
+        Task<IEnumerable<PostSummaryViewModel>> GetAllPosts();
+        Task<IEnumerable<PostSummaryViewModel>> SearchPosts(string searchinfo);
+        Task DeletePost(int postId);
+        Task<IEnumerable<ReportViewModel>> GetAllReports();
+        Task<ReportViewModel> ViewReportDetail(int reportId);
+        Task ExecuteReport(int reportId);
+        Task<IEnumerable<ReportViewModel>> FilterReportsByStatus(ReportStatus status);
+    }
+    public interface IReportService {
+        Task<ReportViewModel> AddReport(ReportInputModel inputModel, int userId);
+    }
 }

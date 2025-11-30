@@ -1,4 +1,4 @@
-using CloudinaryDotNet;
+﻿using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Mini_Social_Media {
     public class Program {
-        public static void Main(string[] args) {
+        public static async Task Main(string[] args) {
             var builder = WebApplication.CreateBuilder(args);
             var cloudinarySettings = builder.Configuration.GetSection("CloudinarySettings");
 
@@ -26,6 +26,7 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<IPostMediaRepository, PostMediaRepository>();
             builder.Services.AddScoped<INotificationsRepository, NotificationsRepository>();
             builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+            builder.Services.AddScoped<IReportRepository, ReportRepository>();
 
             builder.Services.AddScoped<IPostService, PostService>();
             builder.Services.AddScoped<IUploadService, UploadService>();
@@ -36,6 +37,8 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IHashtagService, HashtagService>();
             builder.Services.AddScoped<IFollowService, FollowService>();
+            builder.Services.AddScoped<IAdminService, AdminService>();
+            builder.Services.AddScoped<IReportService, ReportService>();
 
             builder.Services.AddSignalR();
 
@@ -73,6 +76,7 @@ namespace Mini_Social_Media {
             builder.Services.AddIdentity<User, IdentityRole<int>>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
+            // .AddRoles<IdentityRole<int>>()
 
             builder.Services.ConfigureApplicationCookie(options =>
             {
@@ -99,6 +103,16 @@ namespace Mini_Social_Media {
                     });
             });
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope()) {
+                var services = scope.ServiceProvider;
+                try {
+                    await DbSeeder.SeedRolesAndAdminAsync(services);
+                }
+                catch (Exception ex) {
+                    Console.WriteLine("Lỗi tạo Admin: " + ex.Message);
+                }
+            }
 
             if (!app.Environment.IsDevelopment()) {
                 app.UseExceptionHandler("/Home/Error");

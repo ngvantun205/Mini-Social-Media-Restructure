@@ -17,6 +17,7 @@ namespace Mini_Social_Media.Data {
         public DbSet<Notifications> Notifications { get; set; }
         public DbSet<Messages> Messages { get; set; }
         public DbSet<Conversations> Conversations { get; set; }
+        public DbSet<Report> Reports { get; set; } 
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) {
