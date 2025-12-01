@@ -143,10 +143,6 @@ function deletePost(postId) {
         });
 }
 
-
-
-
-
 function toggleLike(button, postId) {
     const icon = button.querySelector("i");
     const container = button.closest(".post-actions-section");

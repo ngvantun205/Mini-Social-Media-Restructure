@@ -512,6 +512,55 @@ function toggleLike(btnElement, postId) {
             countEl.innerText = currentCount + " " + (currentCount === 1 ? "like" : "likes");
         });
 }
+function openReportModal(postId) {
+    // Gán ID vào thẻ input ẩn
+    document.getElementById('hiddenReportPostId').value = postId;
+
+    var myModal = new bootstrap.Modal(document.getElementById('reportModal'));
+    myModal.show();
+}
+
+// 2. Hàm gửi báo cáo
+function submitReport(reason) {
+    // Lấy ID từ thẻ input ẩn
+    const postIdVal = document.getElementById('hiddenReportPostId').value;
+    const postId = parseInt(postIdVal);
+
+    if (!postId || postId === 0) {
+        alert("Error: Cannot find Post ID");
+        return;
+    }
+
+    // Đóng modal trước cho mượt
+    var modalEl = document.getElementById('reportModal');
+    var modal = bootstrap.Modal.getInstance(modalEl);
+    modal.hide();
+
+    // In ra console để kiểm tra xem dữ liệu có đúng không
+    console.log("Sending Report:", { entityId: postId, content: reason, type: 'Post' });
+
+    fetch('/Report/AddReport', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            entityId: postId,
+            content: reason,
+            type: 'Post'
+        })
+    })
+        .then(res => {
+            if (res.ok) {
+                alert("Report sent successfully.");
+            } else {
+                console.error("Server Error:", res.status, res.statusText);
+                alert("Failed to send report. Check console for details.");
+            }
+        })
+        .catch(err => {
+            console.error("Fetch Error:", err);
+            alert("Network error.");
+        });
+}
 
 // ============================================
 // CSS ANIMATION HELPER

@@ -67,7 +67,6 @@ namespace Mini_Social_Media.Controllers {
                     ReplyCount = c.ReplyCount
                 }).OrderBy(c => c.CreatedAt).ToList() ?? new List<CommentViewModel>()
             };
-
             return View(postviewmodel);
         }
         [HttpGet]

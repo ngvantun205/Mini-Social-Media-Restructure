@@ -76,12 +76,11 @@ namespace Mini_Social_Media.AppService {
             var post = await _postRepository.GetByIdAsync(postId);
             if (post == null)
                 return null;
-
             var hashtagNames = post.PostHashtags.Select(ph => ph.Hashtag.HashtagName).ToList();
             var comments = await _commentRepository.GetCommentsByPostIdAsync(postId);
             return new PostDto {
                 PostId = post.PostId,
-                Owner = new UserSummaryDto() {UserName = post.User?.UserName, FullName = post.User ?.FullName, AvatarUrl = post.User ?.AvatarUrl, UserId = userId  },
+                Owner = new UserSummaryDto() {UserName = post.User?.UserName, FullName = post.User ?.FullName, AvatarUrl = post.User ?.AvatarUrl, UserId = post.User.Id  },
                 Caption = post.Caption,
                 Location = post.Location,
                 CreatedAt = post.CreatedAt,
