@@ -37,10 +37,10 @@ async function loadUsers() {
             const row = document.createElement('tr');
             row.style.animation = 'fadeInUp 0.5s ease';
             row.innerHTML = `
-                <td><a href="/Profile/Index/${u.userId}" target="_blank">#${u.userId}</a></td>
+                <td><a href="/Profile/UserProfile/${u.userId}" target="_blank">#${u.userId}</a></td>
                 <td><img src="${u.avatarUrl || '/images/default-avatar.png'}" class="avatar-img" alt="${u.fullName}"></td>
-                <td><a href="/Profile/Index/${u.userId}" target="_blank">${u.fullName || 'N/A'}</a></td>
-                <td><a href="/Profile/Index/${u.userId}" target="_blank">@${u.userName}</a></td>
+                <td><a href="/Profile/UserProfile/${u.userId}" target="_blank">${u.fullName || 'N/A'}</a></td>
+                <td><a href="/Profile/UserProfile/${u.userId}" target="_blank">@${u.userName}</a></td>
                 <td>
                     <button class="btn btn-danger btn-sm" onclick="showDeleteModal('user', ${u.userId}, '${u.userName}')">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -86,10 +86,10 @@ async function searchUser() {
             const row = document.createElement('tr');
             row.style.animation = 'fadeInUp 0.5s ease';
             row.innerHTML = `
-                <td><a href="/Profile/Index/${u.userId}" target="_blank">#${u.userId}</a></td>
+                <td><a href="/Profile/UserProfile/${u.userId}" target="_blank">#${u.userId}</a></td>
                 <td><img src="${u.avatarUrl || '/images/default-avatar.png'}" class="avatar-img" alt="${u.fullName}"></td>
-                <td><a href="/Profile/Index/${u.userId}" target="_blank">${u.fullName || 'N/A'}</a></td>
-                <td><a href="/Profile/Index/${u.userId}" target="_blank">@${u.userName}</a></td>
+                <td><a href="/Profile/UserProfile/${u.userId}" target="_blank">${u.fullName || 'N/A'}</a></td>
+                <td><a href="/Profile/UserProfile/${u.userId}" target="_blank">@${u.userName}</a></td>
                 <td>
                     <button class="btn btn-danger btn-sm" onclick="showDeleteModal('user', ${u.userId}, '${u.userName}')">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -143,8 +143,8 @@ async function loadPosts() {
             const row = document.createElement('tr');
             row.style.animation = 'fadeInUp 0.5s ease';
             row.innerHTML = `
-                <td><a href="/Post/Detail/${p.postId}" target="_blank">#${p.postId}</a></td>
-                <td><a href="/Profile/Index/${p.userId}" target="_blank">#${p.userId}</a></td>
+                <td><a href="/Post/PostDetails/${p.postId}" target="_blank">#${p.postId}</a></td>
+                <td><a href="/Profile/UserProfile/${p.userId}" target="_blank">#${p.userId}</a></td>
                 <td>${p.likeCount || 0}</td>
                 <td>${p.commentCount || 0}</td>
                 <td>${p.mediaUrl ? `<a href="${p.mediaUrl}" target="_blank">View Media</a>` : 'No media'}</td>
@@ -193,8 +193,8 @@ async function searchPost() {
             const row = document.createElement('tr');
             row.style.animation = 'fadeInUp 0.5s ease';
             row.innerHTML = `
-                <td><a href="/Post/Detail/${p.postId}" target="_blank">#${p.postId}</a></td>
-                <td><a href="/Profile/Index/${p.userId}" target="_blank">#${p.userId}</a></td>
+                <td><a href="/Post/PostDetails/${p.postId}" target="_blank">#${p.postId}</a></td>
+                <td><a href="/Profile/UserProfile/${p.userId}" target="_blank">#${p.userId}</a></td>
                 <td>${p.likeCount || 0}</td>
                 <td>${p.commentCount || 0}</td>
                 <td>${p.mediaUrl ? `<a href="${p.mediaUrl}" target="_blank">View Media</a>` : 'No media'}</td>
@@ -277,12 +277,12 @@ function renderReports(reports) {
         row.style.animation = 'fadeInUp 0.5s ease';
 
         const entityLink = r.type === 'Post'
-            ? `/Post/Detail/${r.entityId}`
-            : `/Profile/Index/${r.entityId}`;
+            ? `/Post/PostDetails/${r.entityId}`
+            : `/Profile/UserProfile/${r.entityId}`;
 
         row.innerHTML = `
             <td>#${r.reportId}</td>
-            <td><a href="/Profile/Index/${r.reporterId}" target="_blank">#${r.reporterId}</a></td>
+            <td><a href="/Profile/UserProfile/${r.reporterId}" target="_blank">#${r.reporterId}</a></td>
             <td><span class="badge ${r.type === 'Post' ? 'badge-pending' : 'badge-executed'}">${r.type}</span></td>
             <td><a href="${entityLink}" target="_blank">#${r.entityId}</a></td>
             <td>${r.content || 'No content'}</td>

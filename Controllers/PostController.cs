@@ -27,13 +27,6 @@ namespace Mini_Social_Media.Controllers {
         [HttpPost]
         public async Task<IActionResult> CreatePost(PostInputModel model) {
             if (!ModelState.IsValid) {
-                //var errors = ModelState.Values.SelectMany(v => v.Errors);
-                //foreach (var error in errors) {
-                //    Console.WriteLine("Lỗi: " + error.ErrorMessage);
-                //    if (error.Exception != null) {
-                //        Console.WriteLine("Exception: " + error.Exception.Message);
-                //    }
-                //}
                 return View();
             }
             int userId = int.Parse(_userManager.GetUserId(User));
