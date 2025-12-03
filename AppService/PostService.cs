@@ -1,9 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
-using Mini_Social_Media.Models;
-using Mini_Social_Media.Models.DomainModel;
-using System.Text.RegularExpressions;
-
-namespace Mini_Social_Media.AppService {
+﻿namespace Mini_Social_Media.AppService {
     public class PostService : IPostService {
         private readonly IPostRepository _postRepository;
         private readonly IUploadService _uploadService;
@@ -21,7 +16,7 @@ namespace Mini_Social_Media.AppService {
             _commentRepository = commentRepository;
         }
 
-        public async Task<CreatePostDto> CreatePost(PostInputModel model, int userId) {
+        public async Task<PostViewModel> CreatePost(PostInputModel model, int userId) {
 
             var post = new Post {
                 UserId = userId,
@@ -66,40 +61,48 @@ namespace Mini_Social_Media.AppService {
                 }
             }
             await _postRepository.AddAsync(post);
-            return new CreatePostDto {
+            return new PostViewModel {
                 PostId = post.PostId,
-                MediaUrls = post.Medias.Select(x => x.Url).ToList()
+                Owner = new UserSummaryViewModel() { UserName = post.User?.UserName, FullName = post.User?.FullName, AvatarUrl = post.User?.AvatarUrl, UserId = userId },
+                Caption = post.Caption,
+                Location = post.Location,
+                CreatedAt = post.CreatedAt,
+                LikeCount = post.LikeCount,
+                CommentCount = post.CommentCount,
+                Medias = post.Medias.Select(m => new PostMediaViewModel { Url = m.Url, MediaType = m.MediaType }).ToList(),
+                Hashtags = string.Join(' ', post.PostHashtags.Select(x => x.Hashtag.HashtagName))
             };
         }
 
-        public async Task<PostDto?> GetByIdAsync(int postId, int userId) {
+        public async Task<PostViewModel?> GetByIdAsync(int postId, int userId) {
             var post = await _postRepository.GetByIdAsync(postId);
             if (post == null)
                 return null;
             var hashtagNames = post.PostHashtags.Select(ph => ph.Hashtag.HashtagName).ToList();
             var comments = await _commentRepository.GetCommentsByPostIdAsync(postId);
-            return new PostDto {
+            return new PostViewModel {
                 PostId = post.PostId,
-                Owner = new UserSummaryDto() {UserName = post.User?.UserName, FullName = post.User ?.FullName, AvatarUrl = post.User ?.AvatarUrl, UserId = post.User.Id  },
+                Owner = new UserSummaryViewModel() { UserName = post.User?.UserName, FullName = post.User?.FullName, AvatarUrl = post.User?.AvatarUrl, UserId = post.User.Id },
                 Caption = post.Caption,
                 Location = post.Location,
                 CreatedAt = post.CreatedAt,
                 LikeCount = post.LikeCount,
                 IsLiked = post.Likes.Any(l => l.UserId == userId),
                 CommentCount = post.CommentCount,
-                MediaUrls = post.Medias.Select(m => new PostMediaDto { Url = m.Url, MediaType = m.MediaType }).ToList(),
-                Hashtags = string.Join(" ", hashtagNames) ,
-                Comments = comments.Select(c => new CommentDto {
+                Medias = post.Medias.Select(m => new PostMediaViewModel { Url = m.Url, MediaType = m.MediaType }).ToList(),
+                Hashtags = string.Join(" ", hashtagNames),
+                Comments = comments.Select(c => new CommentViewModel {
                     CommentId = c.CommentId,
-                    PostId = c.PostId,
-                    Owner = new UserSummaryDto() { UserId = c.User.Id, UserName = c.User.UserName, FullName = c.User.FullName, AvatarUrl = c.User.AvatarUrl },
+                    Owner = new UserSummaryViewModel() { UserId = c.User.Id, UserName = c.User.UserName, FullName = c.User.FullName, AvatarUrl = c.User.AvatarUrl },
                     Content = c.Content,
-                    CreatedAt = c.CreatedAt
-                }).ToList()
+                    ParentCommentId = c.ParentCommentId,
+                    CreatedAt = c.CreatedAt,
+                    ReplyCount = c.ReplyCount
+                }).OrderBy(c => c.CreatedAt).ToList() ?? new List<CommentViewModel>()
             };
         }
 
-        public async Task<PostDto?> EditPostAsync(EditPostInputModel model, int userId) {
+        public async Task<PostViewModel?> EditPostAsync(EditPostInputModel model, int userId) {
             var post = await _postRepository.GetByIdAsync(model.PostId);
             if (post == null || post.UserId != userId) {
                 return null;
@@ -156,15 +159,15 @@ namespace Mini_Social_Media.AppService {
 
             await _postRepository.UpdateAsync(post);
 
-            return new PostDto {
+            return new PostViewModel {
                 PostId = post.PostId,
-                Owner = new UserSummaryDto() { UserName = post.User?.UserName, FullName = post.User?.FullName, AvatarUrl = post.User?.AvatarUrl, UserId = userId },
+                Owner = new UserSummaryViewModel() { UserName = post.User?.UserName, FullName = post.User?.FullName, AvatarUrl = post.User?.AvatarUrl, UserId = userId },
                 Caption = post.Caption,
                 Location = post.Location,
                 CreatedAt = post.CreatedAt,
                 LikeCount = post.LikeCount,
                 CommentCount = post.CommentCount,
-                MediaUrls = post.Medias.Select(m => new PostMediaDto { Url = m.Url, MediaType = m.MediaType }).ToList(),
+                Medias = post.Medias.Select(m => new PostMediaViewModel { Url = m.Url, MediaType = m.MediaType }).ToList(),
                 Hashtags = string.Join(' ', post.PostHashtags.Select(x => x.Hashtag.HashtagName))
             };
         }
@@ -180,21 +183,21 @@ namespace Mini_Social_Media.AppService {
             return true;
         }
 
-        public async Task<IEnumerable<PostDto>> GetPostsPagedAsync(int page, int pageSize, int userId) {
+        public async Task<IEnumerable<PostViewModel>> GetPostsPagedAsync(int page, int pageSize, int userId) {
             var posts = await _postRepository.GetPostsPagedAsync(page, pageSize);
 
-            return posts.Select(p => new PostDto {
+            return posts.Select(p => new PostViewModel {
                 PostId = p.PostId,
-                Owner = new UserSummaryDto() { UserName = p.User?.UserName, FullName = p.User?.FullName, AvatarUrl = p.User?.AvatarUrl, UserId = p.UserId },
+                Owner = new UserSummaryViewModel() { UserName = p.User?.UserName, FullName = p.User?.FullName, AvatarUrl = p.User?.AvatarUrl, UserId = p.UserId },
                 Caption = p.Caption,
                 CreatedAt = p.CreatedAt,
-                MediaUrls = p.Medias.Select(m =>  new PostMediaDto() {Url = m.Url, MediaType = m.MediaType }).ToList(),
+                Medias = p.Medias.Select(m => new PostMediaViewModel() { Url = m.Url, MediaType = m.MediaType }).ToList(),
                 LikeCount = p.LikeCount,
                 CommentCount = p.CommentCount,
                 IsLiked = p.Likes.Any(l => l.UserId == userId),
                 Hashtags = string.Join(" ", p.PostHashtags.Select(ph => ph.Hashtag.HashtagName))
             }).ToList();
         }
-        
+
     }
 }

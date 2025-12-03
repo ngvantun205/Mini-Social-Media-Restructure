@@ -3,11 +3,11 @@ using Microsoft.Extensions.Configuration.UserSecrets;
 
 namespace Mini_Social_Media.IAppService {
     public interface IPostService {
-        Task<CreatePostDto> CreatePost(PostInputModel model, int userId);
-        Task<PostDto?> GetByIdAsync(int postId, int userId);
-        Task<PostDto?> EditPostAsync(EditPostInputModel model, int userId);
+        Task<PostViewModel> CreatePost(PostInputModel model, int userId);
+        Task<PostViewModel?> GetByIdAsync(int postId, int userId);
+        Task<PostViewModel?> EditPostAsync(EditPostInputModel model, int userId);
         Task<bool> DeletePostAsync(int postId, int userId);
-        Task<IEnumerable<PostDto>> GetPostsPagedAsync(int pageNumber, int pageSize, int userId);
+        Task<IEnumerable<PostViewModel>> GetPostsPagedAsync(int pageNumber, int pageSize, int userId);
     }
     public interface IUploadService {
         Task<string> UploadAsync(IFormFile file);
@@ -16,25 +16,25 @@ namespace Mini_Social_Media.IAppService {
         Task<LikeDto> ToggleLikeAsync(LikeInputModel inputModel, int userId);
     }
     public interface ICommentService {
-        Task<CommentDto>? AddCommentAsync(CommentInputModel model, int userId);
+        Task<CommentViewModel>? AddCommentAsync(CommentInputModel model, int userId);
         Task<bool> DeleteCommentAsync(int commentId, int userId);
-        Task<CommentDto?> EditCommentAsync(EditCommentInputModel model, int userId);
-        Task<IEnumerable<CommentDto>> GetCommentsByPostIdAsync(int postId);
-        Task<IEnumerable<CommentDto>> GetRepliesByCommentIdAsync(int commentId);
-        Task<CommentDto?> AddReplyAsync(ReplyCommentInputModel model, int userId);
+        Task<CommentViewModel?> EditCommentAsync(EditCommentInputModel model, int userId);
+        Task<IEnumerable<CommentViewModel>> GetCommentsByPostIdAsync(int postId);
+        Task<IEnumerable<CommentViewModel>> GetRepliesByCommentIdAsync(int commentId);
+        Task<CommentViewModel?> AddReplyAsync(ReplyCommentInputModel model, int userId);
     }
     public interface IUserService {
-        Task<UserProfileDto?> GetUserProfileAsync(int userId, int requesterId);
-        Task<MyProfileDto?> GetMyProfileAsync(int userId);
-        Task<MyProfileDto> UpdateUserAvatar(IFormFile formFile, int userId);
-        Task<EditProfileDto> GetEditProfile(int userId);
-        Task<EditProfileDto> Edit(EditProfileInputModel model, int userId);
+        Task<UserProfileViewModel?> GetUserProfileAsync(int userId, int requesterId);
+        Task<MyProfileViewModel?> GetMyProfileAsync(int userId);
+        Task<MyProfileViewModel> UpdateUserAvatar(IFormFile formFile, int userId);
+        Task<EditProfileViewModel> GetEditProfile(int userId);
+        Task<EditProfileViewModel> Edit(EditProfileInputModel model, int userId);
         Task<IdentityResult> ChangePassword(ChangePasswordInputModel changeInput, int userId);
         Task ChangeAccountPrivacy(bool isPrivate, int userId);
     }
     public interface INotificationsService {
         Task CreateNotification(int senderId, int receiverId, string type, int entityId, string message);
-        Task<IEnumerable<NotificationsDto>> GetUserNotifications(int userId);
+        Task<IEnumerable<NotificationsViewModel>> GetUserNotifications(int userId);
         Task MarkAllAsReadAsync(int userId);
     }
     public interface IMessageService {

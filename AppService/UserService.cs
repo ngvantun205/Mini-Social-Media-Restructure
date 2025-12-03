@@ -13,11 +13,11 @@ namespace Mini_Social_Media.AppService {
             _userManager = userManager;
             _hubContext = hubContext;
         }
-        public async Task<MyProfileDto?> GetMyProfileAsync(int userId) {
+        public async Task<MyProfileViewModel?> GetMyProfileAsync(int userId) {
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
                 return null;
-            return new MyProfileDto {
+            return new MyProfileViewModel {
                 UserName = user.UserName,
                 FullName = user.FullName,
                 Bio = user.Bio,
@@ -25,11 +25,11 @@ namespace Mini_Social_Media.AppService {
                 WebsiteUrl = user.WebsiteUrl,
                 IsPrivate = user.IsPrivate,
                 Gender = user.Gender,
-                FollowersCount = user.FollowerCount,
+                FollowerCount = user.FollowerCount,
                 FollowingCount = user.FollowingCount,
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt,
-                Posts = user.Posts.Select(p => new PostSummaryDto {
+                Posts = user.Posts.Select(p => new PostSummaryViewModel {
                     PostId = p.PostId,
                     LikeCount = p.LikeCount,
                     CommentCount = p.CommentCount,
@@ -38,12 +38,12 @@ namespace Mini_Social_Media.AppService {
                 }).ToList()
             };
         }
-        public async Task<UserProfileDto?> GetUserProfileAsync(int userId, int requesterId) {
+        public async Task<UserProfileViewModel?> GetUserProfileAsync(int userId, int requesterId) {
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
                 return null;
             bool isFollowing = user.Followers.Any(f => f.FollowerId == requesterId);
-            return new UserProfileDto {
+            return new UserProfileViewModel {
                 UserId = user.Id,
                 UserName = user.UserName,
                 FullName = user.FullName,
@@ -52,11 +52,11 @@ namespace Mini_Social_Media.AppService {
                 WebsiteUrl = user.WebsiteUrl,
                 IsPrivate = user.IsPrivate,
                 CreatedAt = user.CreatedAt,
-                FollowersCount = user.Followers.Count,
+                FollowerCount = user.Followers.Count,
                 FollowingCount = user.Following.Count,
                 IsFollowing = isFollowing,
                 Gender = user.Gender,
-                Posts = user.Posts.Select(p => new PostSummaryDto {
+                Posts = user.Posts.Select(p => new PostSummaryViewModel {
                     PostId = p.PostId,
                     LikeCount = p.LikeCount,
                     CommentCount = p.CommentCount,
@@ -65,7 +65,7 @@ namespace Mini_Social_Media.AppService {
                 }).ToList(),
             };
         }
-        public async Task<MyProfileDto> UpdateUserAvatar(IFormFile file, int userId) {
+        public async Task<MyProfileViewModel> UpdateUserAvatar(IFormFile file, int userId) {
             if (file == null)
                 return null;
             var url = await _uploadService.UploadAsync(file);
@@ -77,7 +77,7 @@ namespace Mini_Social_Media.AppService {
                 return null;
             user.AvatarUrl = url;
             await _userRepository.UpdateAsync(user);
-            return new MyProfileDto {
+            return new MyProfileViewModel {
                 UserName = user.UserName,
                 FullName = user.FullName,
                 Bio = user.Bio,
@@ -85,11 +85,11 @@ namespace Mini_Social_Media.AppService {
                 WebsiteUrl = user.WebsiteUrl,
                 IsPrivate = user.IsPrivate,
                 Gender = user.Gender,
-                FollowersCount = user.FollowerCount,
+                FollowerCount = user.FollowerCount,
                 FollowingCount = user.FollowingCount,
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt,
-                Posts = user.Posts.Select(p => new PostSummaryDto {
+                Posts = user.Posts.Select(p => new PostSummaryViewModel {
                     PostId = p.PostId,
                     LikeCount = p.LikeCount,
                     CommentCount = p.CommentCount,
@@ -98,11 +98,11 @@ namespace Mini_Social_Media.AppService {
                 }).ToList()
             };
         }
-        public async Task<EditProfileDto> GetEditProfile(int userId) {
+        public async Task<EditProfileViewModel> GetEditProfile(int userId) {
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
                 return null;
-            return new EditProfileDto() {
+            return new EditProfileViewModel() {
                 FullName = user?.FullName,
                 Bio = user?.Bio,
                 AvatarUrl = user?.AvatarUrl,
@@ -110,7 +110,7 @@ namespace Mini_Social_Media.AppService {
                 Gender = user?.Gender
             };
         }
-        public async Task<EditProfileDto> Edit(EditProfileInputModel editProfileInputModel, int userId) {
+        public async Task<EditProfileViewModel> Edit(EditProfileInputModel editProfileInputModel, int userId) {
             if (editProfileInputModel == null)
                 return null;
             var user = await _userRepository.GetByIdAsync(userId);
@@ -125,12 +125,14 @@ namespace Mini_Social_Media.AppService {
                 user.AvatarUrl = url;
             await _userRepository.UpdateAsync(user);
             var updateduser = await _userRepository.GetByIdAsync(userId);
-            return new EditProfileDto() {
+            return new EditProfileViewModel() {
                 FullName = updateduser?.FullName,
                 Bio = updateduser?.Bio,
                 AvatarUrl = updateduser?.AvatarUrl,
                 WebsiteUrl = updateduser?.WebsiteUrl,
                 Gender = updateduser?.Gender,
+                UserName = updateduser?.UserName,
+                UpdatedAt = updateduser.UpdatedAt,
             };
         }
         public async Task<IdentityResult> ChangePassword(ChangePasswordInputModel changeInput, int userId) {

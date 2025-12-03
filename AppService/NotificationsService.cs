@@ -9,7 +9,14 @@ namespace Mini_Social_Media.AppService {
             _notiRepo = notiRepo;
             _hubContext = hubContext;
         }
-
+        private string CalculateTimeAgo(DateTime date) {
+            var span = DateTime.UtcNow - date;
+            if (span.TotalMinutes < 60)
+                return $"{(int)span.TotalMinutes}m";
+            if (span.TotalHours < 24)
+                return $"{(int)span.TotalHours}h";
+            return $"{(int)span.TotalDays}d";
+        }
         public async Task CreateNotification(int senderId, int receiverId, string type, int entityId, string message) {
             if (senderId == receiverId)
                 return;
@@ -36,16 +43,16 @@ namespace Mini_Social_Media.AppService {
             await _notiRepo.AddAsync(noti);
         }
 
-        public async Task<IEnumerable<NotificationsDto>> GetUserNotifications(int userId) {
+        public async Task<IEnumerable<NotificationsViewModel>> GetUserNotifications(int userId) {
             var notis = await _notiRepo.GetByReceiverIdAsync(userId);
-            return notis.Select(n => new NotificationsDto {
+            return notis.Select(n => new NotificationsViewModel {
                 NotiId = n.NotiId,
                 ActorName = n.Actor?.UserName ?? "Someone",
                 ActorAvatar = n.Actor?.AvatarUrl ?? "/images/default-avatar.png",
                 Message = n.Content,
                 PostId = n.EntityId,
                 IsRead = n.IsRead,
-                CreatedAt = n.CreatedAt,
+                TimeAgo = CalculateTimeAgo(n.CreatedAt),
                 Type = n.Type,
             }).ToList();
         }

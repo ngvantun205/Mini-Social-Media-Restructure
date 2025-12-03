@@ -49,11 +49,13 @@ namespace Mini_Social_Media.AppService {
             var follow = await _followRepository.GetFollowByUserAsync(inputModel.FolloweeId, followerId);
             if (follow == null)
                 return new FollowDto { ErrorMessage = "Follow record not found" };
-            var result = await _userRepository.DeleteFollowAsync(inputModel.FolloweeId, followerId);
-            if (!result )
-                return new FollowDto() { ErrorMessage = "Cannot follow this user" };
+            Console.WriteLine("==================================================================================================================================================================================================================");
+            Console.WriteLine($"Follow Id: {follow.FollowId}");
+
+            await _userRepository.DeleteFollowAsync(inputModel.FolloweeId, followerId);
             await _followRepository.DeleteAsync(follow.FollowId);
             var noti = await _notificationsRepository.GetNotification(followerId, followerId, "Follow", followerId);
+
             if (noti != null)
                 await _notificationsRepository.DeleteAsync(noti.NotiId);
             return new FollowDto();

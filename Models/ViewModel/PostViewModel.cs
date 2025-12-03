@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Mini_Social_Media.Models.ViewModel {
+﻿namespace Mini_Social_Media.Models.ViewModel {
     public class PostViewModel {
         public int PostId { get; set; }
         public UserSummaryViewModel Owner { get; set; }

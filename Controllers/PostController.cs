@@ -43,31 +43,7 @@ namespace Mini_Social_Media.Controllers {
             var post = await _postService.GetByIdAsync(id, userId);
             if (post == null)
                 return NotFound();
-            var postviewmodel = new PostViewModel {
-                Owner = new UserSummaryViewModel() { UserId = post.Owner.UserId, UserName = post.Owner.UserName, AvatarUrl = post.Owner.AvatarUrl, FullName = post.Owner.FullName },
-                PostId = post.PostId,
-                Caption = post.Caption,
-                Location = post.Location,
-                LikeCount = post.LikeCount,
-                CommentCount = post.CommentCount,
-                CreatedAt = post.CreatedAt,
-                IsLiked = post.IsLiked,
-                Medias = post.MediaUrls.Select(m => new PostMediaViewModel {
-                    Url = m.Url,
-                    MediaType = m.MediaType
-                }).ToList(),
-                Hashtags = post.Hashtags,
-
-                Comments = (await _commentService.GetCommentsByPostIdAsync(post.PostId)).Select(c => new CommentViewModel {
-                    CommentId = c.CommentId,
-                    Owner = new UserSummaryViewModel() {UserId = c.Owner.UserId, AvatarUrl = c.Owner.AvatarUrl, FullName = c.Owner.FullName, UserName = c.Owner.UserName },
-                    Content = c.Content,
-                    ParentCommentId = c.ParentCommentId,
-                    CreatedAt = c.CreatedAt,
-                    ReplyCount = c.ReplyCount
-                }).OrderBy(c => c.CreatedAt).ToList() ?? new List<CommentViewModel>()
-            };
-            return View(postviewmodel);
+            return View(post);
         }
         [HttpGet]
         public async Task<IActionResult> EditPost(int postId) {
@@ -77,7 +53,7 @@ namespace Mini_Social_Media.Controllers {
                 Caption = post.Caption,
                 Location = post.Location,
                 Hashtags = post.Hashtags,
-                MediaFiles = post.MediaUrls.Select(m => new PostMediaViewModel {
+                MediaFiles = post.Medias.Select(m => new PostMediaViewModel {
                     Url = m.Url,
                     MediaType = m.MediaType
                 }).ToList()
@@ -89,21 +65,15 @@ namespace Mini_Social_Media.Controllers {
             if (!ModelState.IsValid) {
                 return RedirectToAction("PostDetails", new { id = model.PostId });
             }
-            int userId = int.Parse(_userManager.GetUserId(User));
+            int userId = GetCurrentUserId();
             await _postService.EditPostAsync(model, userId);
 
             return RedirectToAction("PostDetails", new { id = model.PostId });
         }
         [HttpPost]
         public async Task<IActionResult> DeletePost(int postId) {
-            var userIdStr = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userIdStr))
-                return Unauthorized();
-
-            int userId = int.Parse(userIdStr);
-
+            var userId = GetCurrentUserId();
             bool result = await _postService.DeletePostAsync(postId, userId);
-
             if (!result) {
                 return BadRequest("Cannot delete post.");
             }

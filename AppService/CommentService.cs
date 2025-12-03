@@ -13,7 +13,7 @@ namespace Mini_Social_Media.AppService {
             _notificationsRepository = notificationsRepository;
             _hubContext = hubContext;
         }
-        public async Task<CommentDto>? AddCommentAsync(CommentInputModel model, int userId) {
+        public async Task<CommentViewModel>? AddCommentAsync(CommentInputModel model, int userId) {
             var comment = new Comment {
                 UserId = userId,
                 Content = model.Content,
@@ -48,11 +48,11 @@ namespace Mini_Social_Media.AppService {
                             });
             }
             var createdComment = await _commentRepository.GetByIdAsync(comment.CommentId);
-            return new CommentDto {
+            return new CommentViewModel {
                 CommentId = createdComment.CommentId,
                 Content = createdComment.Content,
                 CreatedAt = createdComment.CreatedAt,
-                Owner = new UserSummaryDto() {UserId = createdComment.User.Id, UserName = createdComment.User.UserName, FullName = createdComment.User.FullName, AvatarUrl = createdComment.User.AvatarUrl  }
+                Owner = new UserSummaryViewModel() {UserId = createdComment.User.Id, UserName = createdComment.User.UserName, FullName = createdComment.User.FullName, AvatarUrl = createdComment.User.AvatarUrl  }
             };
         }
         public async Task<bool> DeleteCommentAsync(int commentId, int userId) {
@@ -77,45 +77,45 @@ namespace Mini_Social_Media.AppService {
                 return false;
             return true;
         }
-        public async Task<CommentDto?> EditCommentAsync(EditCommentInputModel model, int userId) {
+        public async Task<CommentViewModel?> EditCommentAsync(EditCommentInputModel model, int userId) {
             var comment = await _commentRepository.GetByIdAsync(model.CommentId);
             if (comment == null || comment.UserId != userId) {
                 return null;
             }
             comment.Content = model.Content;
             await _commentRepository.UpdateAsync(comment);
-            return new CommentDto {
+            return new CommentViewModel {
                 CommentId = comment.CommentId,
                 Content = comment.Content,
                 CreatedAt = comment.CreatedAt,
-                Owner = new UserSummaryDto() { UserId = comment.User.Id, UserName = comment.User.UserName, FullName = comment.User.FullName, AvatarUrl = comment.User.AvatarUrl }
+                Owner = new UserSummaryViewModel() { UserId = comment.User.Id, UserName = comment.User.UserName, FullName = comment.User.FullName, AvatarUrl = comment.User.AvatarUrl }
             };
         }
-        public async Task<IEnumerable<CommentDto>> GetCommentsByPostIdAsync(int postId) {
+        public async Task<IEnumerable<CommentViewModel>> GetCommentsByPostIdAsync(int postId) {
             var comments = await _commentRepository.GetCommentsByPostIdAsync(postId);
-            return comments.Select(c => new CommentDto {
+            return comments.Select(c => new CommentViewModel {
                 CommentId = c.CommentId,
                 Content = c.Content,
                 CreatedAt = c.CreatedAt,
                 ReplyCount = c.ReplyCount,
-                Owner = new UserSummaryDto() { UserId = c.User.Id, UserName = c.User.UserName, FullName = c.User.FullName, AvatarUrl = c.User.AvatarUrl }
+                Owner = new UserSummaryViewModel() { UserId = c.User.Id, UserName = c.User.UserName, FullName = c.User.FullName, AvatarUrl = c.User.AvatarUrl }
             });
         }
-        public async Task<IEnumerable<CommentDto>> GetRepliesByCommentIdAsync(int commentId) {
+        public async Task<IEnumerable<CommentViewModel>> GetRepliesByCommentIdAsync(int commentId) {
             var comment = await _commentRepository.GetByIdAsync(commentId);
             if (comment == null) {
-                return Enumerable.Empty<CommentDto>();
+                return Enumerable.Empty<CommentViewModel>();
             }
             var replies = await _commentRepository.GetRepliesByCommentIdAsync(commentId);
-            return replies.Select(r => new CommentDto {
+            return replies.Select(r => new CommentViewModel {
                 CommentId = r.CommentId,
                 Content = r.Content,
                 CreatedAt = r.CreatedAt,
                 ReplyCount = r.ReplyCount,
-                Owner = new UserSummaryDto() { UserId = r.User.Id, UserName = r.User.UserName, FullName = r.User.FullName, AvatarUrl = r.User.AvatarUrl }
+                Owner = new UserSummaryViewModel() { UserId = r.User.Id, UserName = r.User.UserName, FullName = r.User.FullName, AvatarUrl = r.User.AvatarUrl }
             });
         }
-        public async Task<CommentDto?> AddReplyAsync(ReplyCommentInputModel model, int userId) {
+        public async Task<CommentViewModel?> AddReplyAsync(ReplyCommentInputModel model, int userId) {
             var reply = new Comment {
                 UserId = userId,
                 Content = model.Content,
@@ -131,13 +131,13 @@ namespace Mini_Social_Media.AppService {
                 return null;
             await _commentRepository.AddAsync(reply);
             var createdreply = await _commentRepository.GetByIdAsync(reply.CommentId);
-            return new CommentDto {
+            return new CommentViewModel {
                 CommentId = createdreply.CommentId,
                 Content = createdreply.Content,
                 CreatedAt = createdreply.CreatedAt,
                 ReplyCount = createdreply.ReplyCount,
                 ParentCommentId = createdreply.ParentCommentId,
-                Owner = new UserSummaryDto() { UserId = createdreply.User.Id, UserName = createdreply.User.UserName, FullName = createdreply.User.FullName, AvatarUrl = createdreply.User.AvatarUrl }
+                Owner = new UserSummaryViewModel() { UserId = createdreply.User.Id, UserName = createdreply.User.UserName, FullName = createdreply.User.FullName, AvatarUrl = createdreply.User.AvatarUrl }
             };
         }
     }

@@ -51,28 +51,6 @@ function initSettingsDropdown() {
     });
 }
 
-function toggleSettingsDropdown(button) {
-    const dropdown = button.nextElementSibling;
-
-    if (!dropdown) return;
-
-    const isOpen = dropdown.classList.contains('show');
-
-    closeSettingsDropdown();
-
-    if (!isOpen) {
-        dropdown.classList.add('show');
-        settingsDropdown = dropdown;
-    }
-}
-
-function closeSettingsDropdown() {
-    if (settingsDropdown) {
-        settingsDropdown.classList.remove('show');
-        settingsDropdown = null;
-    }
-}
-
 // ============================================
 // POST GRID INTERACTIONS
 // ============================================

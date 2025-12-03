@@ -25,7 +25,7 @@ namespace Mini_Social_Media.Controllers {
                 IsLiked = post.IsLiked,
                 CommentCount = post.CommentCount,
                 CreatedAt = post.CreatedAt,                
-                Medias = post.MediaUrls.Select(m => new PostMediaViewModel {
+                Medias = post.Medias.Select(m => new PostMediaViewModel {
                     Url = m.Url,
                     MediaType = m.MediaType
                 }).ToList(),
@@ -54,7 +54,7 @@ namespace Mini_Social_Media.Controllers {
                 CommentCount = post.CommentCount,
                 CreatedAt = post.CreatedAt,
                 IsLiked = post.IsLiked,
-                Medias = post.MediaUrls.Select(m => new PostMediaViewModel {
+                Medias = post.Medias.Select(m => new PostMediaViewModel {
                     Url = m.Url,
                     MediaType = m.MediaType
                 }).ToList(),

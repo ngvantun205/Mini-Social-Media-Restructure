@@ -29,7 +29,7 @@ namespace Mini_Social_Media.Controllers {
                 PostId = n.PostId,
                 IsRead = n.IsRead,
                 Type = n.Type,
-                TimeAgo = CalculateTimeAgo(n.CreatedAt)
+                TimeAgo = n.TimeAgo,
             }).ToList();
 
             return Ok(result);
@@ -40,15 +40,6 @@ namespace Mini_Social_Media.Controllers {
             var userId = GetCurrentUserId();
             await _notiService.MarkAllAsReadAsync(userId);
             return Ok(new { success = true });
-        }
-
-        private string CalculateTimeAgo(DateTime date) {
-            var span = DateTime.UtcNow - date;
-            if (span.TotalMinutes < 60)
-                return $"{(int)span.TotalMinutes}m";
-            if (span.TotalHours < 24)
-                return $"{(int)span.TotalHours}h";
-            return $"{(int)span.TotalDays}d";
         }
     }
 }

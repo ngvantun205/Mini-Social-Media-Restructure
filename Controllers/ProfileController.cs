@@ -29,27 +29,7 @@ namespace Mini_Social_Media.Controllers {
             if (profile == null) {
                 return NotFound();
             }
-            return View(new MyProfileViewModel() {
-                AvatarUrl = profile.AvatarUrl,
-                Email = profile.Email,
-                UserName = profile.UserName,
-                FullName = profile.FullName,
-                Bio = profile.Bio,
-                WebsiteUrl = profile.WebsiteUrl,
-                IsPrivate = profile.IsPrivate,
-                Gender = profile.Gender,
-                FollowerCount = profile.FollowersCount,
-                FollowingCount = profile.FollowingCount,
-                IsOwner = profile.IsOwner,
-                CreatedAt = profile.CreatedAt,
-                UpdatedAt = profile.UpdatedAt,
-                Posts = profile.Posts.Select(p => new PostSummaryViewModel {
-                    PostId = p.PostId,
-                    LikeCount = p.LikeCount,
-                    CommentCount = p.CommentCount,
-                    MediaUrl = p.MediaUrl
-                }).ToList()
-            });
+            return View(profile);
         }
         [HttpGet]
         public async Task<IActionResult> UserProfile(int id) {
@@ -61,26 +41,7 @@ namespace Mini_Social_Media.Controllers {
             if (profile == null) {
                 return NotFound();
             }
-            return View(new UserProfileViewModel() {
-                UserId = profile.UserId,
-                UserName = profile.UserName,
-                FullName = profile.FullName,
-                Bio = profile.Bio,
-                AvatarUrl = profile.AvatarUrl,
-                WebsiteUrl = profile.WebsiteUrl,
-                IsPrivate = profile.IsPrivate,
-                CreatedAt = profile.CreatedAt,
-                FollowerCount = profile.FollowersCount,
-                FollowingCount = profile.FollowingCount,
-                IsFollowing = profile.IsFollowing,
-                Gender = profile.Gender,
-                Posts = profile.Posts.Select(p => new PostSummaryViewModel {
-                    PostId = p.PostId,
-                    LikeCount = p.LikeCount,
-                    CommentCount = p.CommentCount,
-                    MediaUrl = p.MediaUrl
-                }).ToList()
-            });
+            return View(profile);
         }
         [HttpPost]
         public async Task<IActionResult> UpdateAvatar(IFormFile avatarFile) {

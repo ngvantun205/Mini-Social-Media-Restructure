@@ -98,19 +98,7 @@ namespace Mini_Social_Media.Controllers {
         [Route("Comment/GetReplies/{commentId}")]
         public async Task<IActionResult> GetReplies(int commentId) {
             var replies = await _commentService.GetRepliesByCommentIdAsync(commentId);
-
-            return Ok(replies.Select(r => new CommentViewModel {
-                CommentId = r.CommentId,
-                Content = r.Content,
-                CreatedAt = r.CreatedAt,
-                ReplyCount = r.ReplyCount,
-                Owner = new UserSummaryViewModel {
-                    UserId = r.Owner.UserId,
-                    UserName = r.Owner.UserName,
-                    FullName = r.Owner.FullName,
-                    AvatarUrl = r.Owner.AvatarUrl
-                }
-            }).ToList());
+            return Ok(replies);
         }
 
     }
