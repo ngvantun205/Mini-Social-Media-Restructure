@@ -16,9 +16,7 @@ namespace Mini_Social_Media.Controllers {
         }
         private int GetCurrentUserId() {
             var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdStr))
-                return 0;
-            return int.Parse(userIdStr);
+            return userIdStr == null ? 0 : int.Parse(userIdStr);
         }
         [HttpGet]
         public IActionResult CreatePost() {

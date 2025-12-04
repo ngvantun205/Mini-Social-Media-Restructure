@@ -49,7 +49,18 @@
         opacity: 0.8;
     }
 
+.search-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-right: 8px; /* Căn chỉnh lại khoảng cách */
+    cursor: pointer;
+    color: inherit; /* Giữ màu icon cũ */
+}
+
 .search-container {
+    display: flex;
+    align-items: center;
     flex: 1;
     position: relative;
 }

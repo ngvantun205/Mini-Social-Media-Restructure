@@ -8,6 +8,7 @@ namespace Mini_Social_Media.IAppService {
         Task<PostViewModel?> EditPostAsync(EditPostInputModel model, int userId);
         Task<bool> DeletePostAsync(int postId, int userId);
         Task<IEnumerable<PostViewModel>> GetPostsPagedAsync(int pageNumber, int pageSize, int userId);
+        Task<List<PostViewModel>> SearchPosts(string searchinfo, int userId);
     }
     public interface IUploadService {
         Task<string> UploadAsync(IFormFile file);
@@ -31,6 +32,7 @@ namespace Mini_Social_Media.IAppService {
         Task<EditProfileViewModel> Edit(EditProfileInputModel model, int userId);
         Task<IdentityResult> ChangePassword(ChangePasswordInputModel changeInput, int userId);
         Task ChangeAccountPrivacy(bool isPrivate, int userId);
+        Task<IEnumerable<UserSummaryViewModel>> SearchUsers(string searchinfo);
     }
     public interface INotificationsService {
         Task CreateNotification(int senderId, int receiverId, string type, int entityId, string message);

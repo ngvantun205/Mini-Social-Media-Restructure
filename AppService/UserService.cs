@@ -156,5 +156,16 @@ namespace Mini_Social_Media.AppService {
                 return;
             await _userRepository.UpdatePrivacy(isPrivate, userId);
         }
+        public async Task<IEnumerable<UserSummaryViewModel>> SearchUsers(string searchinfo) {
+            var users = await _userRepository.SearchUsersAsync(searchinfo);
+            if (users == null)
+                return new List<UserSummaryViewModel>();
+            return users.Select(u => new UserSummaryViewModel {
+                UserId = u.Id,
+                FullName = u.FullName,
+                AvatarUrl = u.AvatarUrl,
+                UserName = u.UserName
+            }).ToList();
+        }
     }
 }

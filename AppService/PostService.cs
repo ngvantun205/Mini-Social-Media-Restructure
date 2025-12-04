@@ -198,6 +198,21 @@
                 Hashtags = string.Join(" ", p.PostHashtags.Select(ph => ph.Hashtag.HashtagName))
             }).ToList();
         }
+        public async Task<List<PostViewModel>> SearchPosts(string searchinfo, int userId) {
+            var posts = await _postRepository.SearchPost(searchinfo);
+            if(posts == null ) return new List<PostViewModel>();
+            return posts.Select(p => new PostViewModel {
+                PostId = p.PostId,
+                Owner = new UserSummaryViewModel() { UserName = p.User?.UserName, FullName = p.User?.FullName, AvatarUrl = p.User?.AvatarUrl, UserId = p.UserId },
+                Caption = p.Caption,
+                CreatedAt = p.CreatedAt,
+                Medias = p.Medias.Select(m => new PostMediaViewModel() { Url = m.Url, MediaType = m.MediaType }).ToList(),
+                LikeCount = p.LikeCount,
+                CommentCount = p.CommentCount,
+                IsLiked = p.Likes.Any(l => l.UserId == userId),
+                Hashtags =  string.Join(" ", p.PostHashtags.Select(ph => ph.Hashtag.HashtagName))
+            }).ToList();
+        }
 
     }
 }

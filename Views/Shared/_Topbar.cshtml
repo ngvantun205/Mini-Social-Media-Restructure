@@ -18,8 +18,11 @@
 <div class="top-bar">
     <div class="top-bar-left">
         <div class="search-container">
-            <i class="fas fa-search search-icon"></i>
-            <input type="text" class="search-input" placeholder="Search for friends, posts, hashtags...">
+            <i class="fas fa-search search-icon" onclick="performSearch()" style="cursor: pointer;"></i>
+
+            <input id="globalSearchInput" type="text" class="search-input"
+                   placeholder="Search for friends, posts..."
+                   autocomplete="off">
         </div>
     </div>
 
@@ -88,3 +91,34 @@
 </div>
 
 <script src="~/js/topbar.js"></script>
+
+<script>
+    // 1. Lắng nghe sự kiện khi trang đã load
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchInput = document.getElementById("globalSearchInput");
+
+        if (searchInput) {
+            // 2. Bắt sự kiện phím Enter (Key Code 13)
+            searchInput.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault(); // Ngăn chặn hành vi mặc định (nếu có form)
+                    performSearch();
+                }
+            });
+        }
+    });
+
+    // 3. Hàm thực hiện tìm kiếm (Chuyển hướng)
+    function performSearch() {
+        const input = document.getElementById("globalSearchInput");
+        const query = input.value.trim();
+
+        if (query) {
+            // Chuyển hướng sang trang Search Controller kèm tham số
+            // encodeURIComponent để xử lý các ký tự đặc biệt như dấu cách, &, ?
+            window.location.href = `/Search/Search?searchinfo=${encodeURIComponent(query)}`;
+        } else {
+            input.focus(); // Nếu rỗng thì focus lại để nhập
+        }
+    }
+</script>
