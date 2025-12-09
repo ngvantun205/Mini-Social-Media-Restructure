@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Mini_Social_Media.Repository;
+using Mini_Social_Media.Services.Background;
 using System.Text;
 
 namespace Mini_Social_Media {
@@ -27,6 +28,8 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<INotificationsRepository, NotificationsRepository>();
             builder.Services.AddScoped<IMessageRepository, MessageRepository>();
             builder.Services.AddScoped<IReportRepository, ReportRepository>();
+            builder.Services.AddScoped<IStoryRepository,  StoryRepository>();
+            builder.Services.AddScoped<IStoryArchiveRepository,  StoryArchiveRepository>();
 
             builder.Services.AddScoped<IPostService, PostService>();
             builder.Services.AddScoped<IUploadService, UploadService>();
@@ -39,6 +42,9 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<IFollowService, FollowService>();
             builder.Services.AddScoped<IAdminService, AdminService>();
             builder.Services.AddScoped<IReportService, ReportService>();
+            builder.Services.AddScoped<IStoryService, StoryService>();
+
+            builder.Services.AddHostedService<StoryArchiverService>();
 
             builder.Services.AddSignalR();
 

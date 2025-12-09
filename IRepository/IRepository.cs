@@ -65,4 +65,14 @@
         Task<IEnumerable<Report>> FilterReportByType(string type);
         Task<IEnumerable<Report>> FilterReportsByStatus(ReportStatus status);
     }
+    public interface IStoryRepository : IRepository<Story> {
+        Task<IEnumerable<Story>> GetCurrentStories(int userId);
+        Task<IEnumerable<Story>> GetFriendsStories(int currentUserId);
+
+    }
+    public interface IStoryArchiveRepository {
+        Task<IEnumerable<StoryArchive>> GetUserStoryArchive(int userId);
+        Task DeleteAsync(int id);
+        Task AddAsync(StoryArchive entity);
+    }
 }

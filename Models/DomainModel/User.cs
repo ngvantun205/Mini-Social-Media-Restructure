@@ -29,5 +29,6 @@ namespace Mini_Social_Media.Models.DomainModel {
         public ICollection<Notifications> SentNotifications { get; set; } = new List<Notifications>();
         public ICollection<Messages> SentMessage { get; set; } = new List<Messages>();
         public ICollection<Messages> ReceivedMessage { get; set; } = new List<Messages>();
+        public ICollection<Story> Stories { get; set; } = new List<Story>();
     }
 }

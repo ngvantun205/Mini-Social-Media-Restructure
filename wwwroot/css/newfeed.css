@@ -731,3 +731,226 @@ button, a {
     .dropdown-overlay.show {
         display: block;
     }
+
+
+
+.stories-tray {
+    background: #fff;
+    border: 1px solid #dbdbdb;
+    border-radius: 8px;
+    padding: 16px 0 16px 16px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+}
+
+    .stories-tray::-webkit-scrollbar {
+        display: none;
+    }
+
+.story-item {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 14px;
+    cursor: pointer;
+    width: 74px;
+    vertical-align: top;
+    text-decoration: none !important;
+    transition: transform 0.2s;
+}
+
+    .story-item:active {
+        transform: scale(0.95);
+    }
+
+.story-ring {
+    width: 66px;
+    height: 66px;
+    padding: 2px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+    /* Viền màu gradient (Chưa xem) */
+    .story-ring.unseen {
+        background: linear-gradient(45deg, #f09433 0%, #dc2743 50%, #bc1888 100%);
+    }
+    /* Viền xám (Đã xem) */
+    .story-ring.seen {
+        background: #dbdbdb;
+    }
+
+.story-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    object-fit: cover;
+}
+
+.story-username {
+    font-size: 11px;
+    margin-top: 4px;
+    color: #262626;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+.add-story-icon {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: #0095f6;
+    color: white;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+/* --- 2. STORY VIEWER OVERLAY --- */
+#storyViewer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #1a1a1a;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2147483647 !important;
+}
+
+.story-content-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    height: 100%;
+    max-height: 90vh;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+/* Progress Bar */
+.progress-bar-container {
+    position: absolute;
+    top: 10px;
+    left: 5px;
+    right: 5px;
+    display: flex;
+    gap: 4px;
+    z-index: 10;
+}
+
+.progress-segment {
+    flex: 1;
+    height: 2px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #fff;
+    width: 0%;
+}
+
+/* Header Info */
+.story-viewer-header {
+    position: absolute;
+    top: 20px;
+    left: 10px;
+    right: 10px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.user-info-area {
+    display: flex;
+    align-items: center;
+}
+
+.story-media {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+}
+
+.story-caption-overlay {
+    position: absolute;
+    bottom: 50px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: #fff;
+    background: rgba(0,0,0,0.5);
+    padding: 10px;
+    font-size: 14px;
+    z-index: 8;
+}
+
+/* Navigation Zones */
+.nav-zone {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 30%;
+    z-index: 9;
+    cursor: pointer;
+}
+
+.nav-prev {
+    left: 0;
+}
+
+.nav-next {
+    right: 0;
+}
+
+/* Buttons */
+.close-story-btn {
+    position: absolute;
+    top: 20px;
+    right: 15px;
+    color: white;
+    font-size: 24px;
+    z-index: 20;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+.delete-story-btn {
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 5px;
+    opacity: 0.8;
+}
+
+    .delete-story-btn:hover {
+        opacity: 1;
+        color: #ff4d4d;
+    }

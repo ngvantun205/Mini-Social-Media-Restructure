@@ -1,29 +1,83 @@
 ﻿@model List<Mini_Social_Media.Models.ViewModel.PostViewModel>
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<User> _userManager
 @{
     ViewData["Title"] = "News Feed";
+    var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    var currentUser = await _userManager.GetUserAsync(User); 
 }
+
+
 @await Html.PartialAsync("_RightSidebar")
 
 <div class="newsfeed-container">
+    <div class="stories-tray d-flex align-items-start">
+        <a asp-controller="Story" asp-action="Create" class="story-item">
+            <div class="story-ring">
+                <img src="@currentUser.AvatarUrl" class="story-avatar" onerror="this.onerror=null; this.src='/images/default-avatar.png';">
+                <div class="add-story-icon"><i class="fas fa-plus"></i></div>
+            </div>
+            <span class="story-username fw-bold text-dark">Your story</span>
+        </a>
+
+        <div id="friendsStoryList" class="d-flex"></div>
+    </div>
+
     <div id="postContainer">
         @await Html.PartialAsync("_PostListPartial", Model)
     </div>
 
     <div id="loading" class="loading-spinner" style="display:none;">
-        <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-        <p style="margin-top: 12px; color: #8e8e8e; font-size: 14px;">Loading more posts...</p>
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted small">Loading more posts...</p>
     </div>
-
     <div id="endOfFeed" class="end-of-feed" style="display:none;">
-        <i class="bi bi-check-circle"></i>
-        <p>You're all caught up!</p>
-        <small style="font-size: 13px;">You've seen all new posts</small>
+        <i class="bi bi-check-circle-fill text-success fs-1"></i>
+        <p class="mt-2">You're all caught up!</p>
     </div>
 </div>
+
+<div id="storyViewer" style="display:none;">
+    <button class="close-story-btn" onclick="closeStoryViewer()"><i class="bi bi-x-lg"></i></button>
+    
+    <div class="story-content-wrapper">
+        <div class="progress-bar-container" id="storyProgressBar"></div>
+
+        <div class="story-viewer-header">
+            <div class="user-info-area">
+                <img id="viewerAvatar" src="" class="rounded-circle me-2 border" width="32" height="32" onerror="this.onerror=null; this.src='/images/default-avatar.png';">
+                <div>
+                    <div id="viewerUsername" class="fw-bold fs-6">Username</div>
+                    <small id="viewerTime" class="opacity-75" style="font-size: 11px;">Just now</small>
+                </div>
+            </div>
+            
+            <button id="btnDeleteStory" class="delete-story-btn" onclick="deleteCurrentStory()" style="display:none;" title="Delete this story">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+
+        <img id="storyImage" class="story-media" style="display:none;">
+        <video id="storyVideo" class="story-media" style="display:none;" playsinline></video>
+        
+        <div id="storyCaptionOverlay" class="story-caption-overlay" style="display:none;"></div>
+
+        <div class="nav-zone nav-prev" onclick="prevStory()"></div>
+        <div class="nav-zone nav-next" onclick="nextStory()"></div>
+    </div>
+</div>
+
 
 @section Scripts {
     <script src="~/js/newfeed.js"></script>
     <script src="~/js/bar.js"></script>
+    <script src="~/js/story.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var userId = @(currentUserId ?? "0");
+            initStoryModule(userId);
+        });
+    </script>
 }

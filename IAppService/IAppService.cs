@@ -70,4 +70,11 @@ namespace Mini_Social_Media.IAppService {
     public interface IReportService {
         Task<ReportViewModel> AddReport(ReportInputModel inputModel, int userId);
     }
+    public interface IStoryService {
+        Task<StoryViewModel> AddStory(StoryInputModel inputModel, int userId);
+        Task DeleteStory(int storyId);
+        Task<IEnumerable<UserStoryViewModel>> GetCurrentStories(int userId);
+        Task<IEnumerable<StoryArchiveViewModel>> GetUserStoryArchives(int userId);
+        Task DeleteArchive(int archiveId);
+    }
 }

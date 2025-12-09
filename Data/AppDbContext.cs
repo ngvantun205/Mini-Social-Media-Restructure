@@ -17,7 +17,9 @@ namespace Mini_Social_Media.Data {
         public DbSet<Notifications> Notifications { get; set; }
         public DbSet<Messages> Messages { get; set; }
         public DbSet<Conversations> Conversations { get; set; }
-        public DbSet<Report> Reports { get; set; } 
+        public DbSet<Report> Reports { get; set; }
+        public DbSet<Story> Stories { get; set; }
+        public DbSet<StoryArchive> StoryArchives { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) {
@@ -147,6 +149,30 @@ namespace Mini_Social_Media.Data {
                 .WithOne()
                 .HasForeignKey<Conversations>(c => c.LatestMessageId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<Story>()
+                .HasOne(s => s.User)
+                .WithMany(u => u.Stories)
+                .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<StoryView>()
+                .HasOne(v => v.Story)
+                .WithMany(s => s.Views)
+                .HasForeignKey(v => v.StoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<StoryView>()
+                .HasOne(v => v.Viewer)
+                .WithMany()
+                .HasForeignKey(v => v.ViewerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<StoryArchive>()
+                .HasOne(s => s.User)
+                .WithMany()
+                .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 
