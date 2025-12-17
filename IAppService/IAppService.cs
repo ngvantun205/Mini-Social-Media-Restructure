@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration.UserSecrets;
 
 namespace Mini_Social_Media.IAppService {
     public interface IPostService {
@@ -11,7 +10,6 @@ namespace Mini_Social_Media.IAppService {
         Task<List<PostViewModel>> SearchPosts(string searchinfo, int userId);
         Task<List<MemoryViewModel>> GetMemoriesAsync(int userId);
         Task<IEnumerable<FeedItemViewModel>> GetNewsFeed(int userId, int page, int pageSize, int seed);
-        Task<IEnumerable<PostViewModel>> GetRandomizedNewsFeed(int userId, int page, int pageSize, int seed);
     }
     public interface IUploadService {
         Task<string> UploadAsync(IFormFile file);

@@ -68,6 +68,61 @@
     </div>
 </div>
 
+@if (ViewBag.TodayMemory != null)
+{
+    var memory = (Mini_Social_Media.Models.ViewModel.MemoryViewModel)ViewBag.TodayMemory;
+    
+    <div class="modal fade" id="memoryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                
+                <div class="modal-header border-0 text-white" 
+                     style="background: linear-gradient(135deg, #FF512F 0%, #DD2476 100%);">
+                    <div>
+                        <h5 class="modal-title fw-bold"><i class="bi bi-clock-history"></i> On This Day</h5>
+                        <p class="mb-0 small opacity-75">Bạn có một kỷ niệm vào @memory.YearsAgo năm trước</p>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" id="btnCloseMemory"></button>
+                </div>
+
+                <div class="modal-body p-0 bg-light position-relative">
+                    @if (memory.Medias != null && memory.Medias.Any())
+                    {
+                        var media = memory.Medias.First();
+                        if (media.MediaType == "video")
+                        {
+                            <video controls autoplay muted class="w-100 d-block" style="max-height: 400px; object-fit: contain; background:black;">
+                                <source src="@media.Url">
+                            </video>
+                        }
+                        else
+                        {
+                            <img src="@media.Url" class="w-100 d-block" style="max-height: 400px; object-fit: cover;">
+                        }
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(memory.Caption))
+                    {
+                        <div class="p-3 bg-white border-top">
+                            <small class="text-muted fw-bold">@memory.CreatedAt.ToString("dd/MM/yyyy")</small>
+                            <p class="mb-0 fst-italic text-dark">"@memory.Caption"</p>
+                        </div>
+                    }
+                </div>
+
+                <div class="modal-footer justify-content-center border-0 bg-white pb-4">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                        Đóng lại
+                    </button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold" 
+                            onclick="shareMemoryFromPopup(@memory.PostId, @memory.YearsAgo)">
+                        <i class="bi bi-share-fill me-2"></i> Chia sẻ Kỷ niệm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @section Scripts {
     <script src="~/js/newfeed.js"></script>
@@ -80,5 +135,76 @@
             initStoryModule(userId);
         });
         window.FEED_SESSION_SEED = @ViewBag.SessionSeed;
+        document.addEventListener("DOMContentLoaded", function() {
+        // Kiểm tra xem Server có gửi Memory sang không
+        var hasMemory = @(ViewBag.TodayMemory != null ? "true" : "false");
+        
+        if (hasMemory) {
+            checkAndShowMemory();
+        }
+
+        // Xử lý sự kiện khi bấm nút X (Đóng)
+        var closeBtn = document.getElementById('btnCloseMemory');
+        if(closeBtn){
+            closeBtn.addEventListener('click', function(){
+                markMemoryAsSeen();
+            });
+        }
+        
+        // Cả khi bấm nút "Đóng lại" ở footer cũng tính là đã xem
+        var modalEl = document.getElementById('memoryModal');
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            markMemoryAsSeen();
+        });
+    });
+
+    function checkAndShowMemory() {
+        // Tạo Key duy nhất theo ngày: VD "memory_seen_2025-12-17_user123"
+        // Để đảm bảo sang ngày hôm sau nó lại hiện
+        var today = new Date().toISOString().slice(0, 10); // Lấy chuỗi YYYY-MM-DD
+        var userId = @currentUserId; // Biến từ Razor
+        var storageKey = "memory_seen_" + today + "_" + userId;
+
+        // Kiểm tra trong LocalStorage của trình duyệt
+        var isSeen = localStorage.getItem(storageKey);
+
+        if (!isSeen) {
+            // Nếu chưa xem -> Hiện Modal
+            var myModal = new bootstrap.Modal(document.getElementById('memoryModal'));
+            myModal.show();
+        }
+    }
+
+    function markMemoryAsSeen() {
+        var today = new Date().toISOString().slice(0, 10);
+        var userId = @currentUserId;
+        var storageKey = "memory_seen_" + today + "_" + userId;
+
+        // Lưu vào LocalStorage: "Đã xem rồi, đừng hiện nữa"
+        localStorage.setItem(storageKey, "true");
+    }
+
+    function shareMemoryFromPopup(postId, yearsAgo) {
+        // 1. Đánh dấu là đã xem (để tắt popup lần sau)
+        markMemoryAsSeen();
+
+        // 2. Ẩn modal Memory đi
+        var memoryModal = bootstrap.Modal.getInstance(document.getElementById('memoryModal'));
+        memoryModal.hide();
+
+        // 3. Gọi hàm Share (đã có ở bài trước)
+        // Set timeout nhỏ để đợi Modal cũ tắt hẳn
+        setTimeout(function() {
+            if (typeof openShareModal === 'function') {
+                openShareModal(postId);
+                
+                // Tự điền caption gợi ý
+                setTimeout(() => {
+                    var captionInput = document.getElementById('shareCaptionInput');
+                    if(captionInput) captionInput.value = `Kỷ niệm ${yearsAgo} năm trước! ❤️ #OnThisDay`;
+                }, 300);
+            }
+        }, 500);
+    }
     </script>
 }

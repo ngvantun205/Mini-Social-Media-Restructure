@@ -244,76 +244,7 @@ namespace Mini_Social_Media.AppService {
             }).ToList();
         }
 
-        public async Task<IEnumerable<PostViewModel>> GetRandomizedNewsFeed(int userId, int page, int pageSize, int seed) {
-            var friendPosts = await _postRepository.GetNewsFeedPosts(userId);
-
-            var suggestedPosts = await _postRepository.GetSuggestedPosts(userId, 50);
-            var allPosts = friendPosts.Concat(suggestedPosts)
-                                      .GroupBy(p => p.PostId).Select(g => g.First())
-                                      .ToList();
-
-            if (allPosts == null || !allPosts.Any())
-                return new List<PostViewModel>();
-
-            var random = new Random(seed);
-
-            var sortedPosts = allPosts
-                .Select(post => new {
-                    Post = post,
-                    Score = CalculateScore(post, userId, random, !friendPosts.Contains(post))
-                })
-                .OrderByDescending(x => x.Score)
-                .Select(x => x.Post)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize);
-
-            return sortedPosts.Select(p => new PostViewModel {
-                PostId = p.PostId,
-                Owner = new UserSummaryViewModel {
-                    UserId = p.User.Id,
-                    UserName = p.User.UserName,
-                    FullName = p.User.FullName,
-                    AvatarUrl = p.User.AvatarUrl
-                },
-                Caption = p.Caption,
-                Location = p.Location,
-                CreatedAt = p.CreatedAt,
-                LikeCount = p.Likes.Count,
-                CommentCount = p.Comments.Count,
-                IsLiked = p.Likes.Any(l => l.UserId == userId),
-                Medias = p.Medias.Select(m => new PostMediaViewModel {
-                    Url = m.Url,
-                    MediaType = m.MediaType
-                }).ToList(),
-                Hashtags = string.Join(" ", p.PostHashtags.Select(ph => ph.Hashtag.HashtagName)),
-            }).ToList();
-        }
-
-        private int CalculateScore(Post p, int userId, Random random, bool isSuggested) {
-
-            int score = 0;
-            if (isSuggested) {
-                score += 20;
-                if (p.Likes.Count > 50)
-                    score += 40;
-                else if (p.Likes.Count > 20)
-                    score += 20;
-            }
-            else {
-                score += 80;
-                bool hasInteracted = p.Likes.Any(l => l.UserId == userId) ||
-                                     p.Comments.Any(c => c.UserId == userId);
-                if (!hasInteracted)
-                    score += 40;
-                if (p.CreatedAt >= DateTime.UtcNow.AddHours(-24))
-                    score += 30;
-                else if (p.CreatedAt >= DateTime.UtcNow.AddDays(-3))
-                    score += 10;
-            }
-            score += random.Next(0, 30);
-            return score;
-
-        }
+        
 
         private int CalculateFeedScore(FeedItemViewModel item, int userId, Random random) {
             int score = 0;

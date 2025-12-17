@@ -19,8 +19,10 @@ namespace Mini_Social_Media.Controllers {
             int sessionSeed = Environment.TickCount;
             ViewBag.SessionSeed = sessionSeed;
             var posts = await _postService.GetNewsFeed(userId, 1, 10, sessionSeed);
-            Console.WriteLine(posts.Count());
-            Console.WriteLine("=======================================================================================================================================================================================");
+            var memories = await _postService.GetMemoriesAsync(userId);
+            Console.WriteLine("===============================================================================================================================================================");
+            Console.WriteLine(memories.Count);
+            ViewBag.TodayMemory = memories.FirstOrDefault();
             return View(posts.ToList());
         }
 
