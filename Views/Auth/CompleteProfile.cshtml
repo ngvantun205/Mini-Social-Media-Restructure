@@ -1,0 +1,33 @@
+﻿@{
+    Layout = "_AuthLayout";
+}
+@model Mini_Social_Media.Models.InputModel.RegisterFinalStepModel
+<h2>Hoàn tất hồ sơ</h2>
+<form asp-action="CompleteProfile" method="post">
+    <div class="mb-3">
+        <label>Tên đăng nhập (Username)</label>
+        <input asp-for="UserName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Mật khẩu</label>
+        <input asp-for="Password" type="password" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Nhập lại mật khẩu</label>
+        <input asp-for="ConfirmPassword" type="password" class="form-control" />
+    </div>
+
+    <hr />
+    <h5>Thông tin bổ sung (Tùy chọn)</h5>
+
+    <div class="mb-3">
+        <label>Họ và tên</label>
+        <input asp-for="FullName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Tiểu sử (Bio)</label>
+        <textarea asp-for="Bio" class="form-control"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">Hoàn tất đăng ký</button>
+</form>

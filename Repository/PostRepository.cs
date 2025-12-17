@@ -93,5 +93,60 @@ namespace Mini_Social_Media.Repository {
                 .Include(p => p.User)
                 .ToListAsync();
         }
+        public async Task<List<Post>> GetNewsFeedPosts(int userId) {
+            var followingIds = await _context.Follows
+                .Where(f => f.FollowerId == userId)
+                .Select(f => f.FolloweeId)
+                .ToListAsync();
+            followingIds.Add(userId);
+            var posts = await _context.Posts
+                .Include(p => p.User)
+                .Include(p => p.Medias)
+                .Include(p => p.Likes)
+                .Include(p => p.PostHashtags)
+                    .ThenInclude(ph => ph.Hashtag)
+                .Where(p => followingIds.Contains(p.UserId) &&
+                            p.CreatedAt >= DateTime.UtcNow.AddDays(-30))
+                .ToListAsync();
+
+            return posts;
+        }
+        public async Task<List<Post>> GetSuggestedPosts(int userId, int limit) {
+            // 1. Lấy danh sách ID người đang follow
+            var followingIds = await _context.Follows
+                .Where(f => f.FollowerId == userId)
+                .Select(f => f.FolloweeId)
+                .ToListAsync();
+            followingIds.Add(userId);
+            var posts = await _context.Posts
+                .Include(p => p.User)
+                .Include(p => p.Medias)
+                .Include(p => p.Likes)
+                .Include(p => p.Comments)
+                .Where(p => !followingIds.Contains(p.UserId) && 
+                            p.CreatedAt >= DateTime.UtcNow.AddDays(-15))
+                .OrderByDescending(p => p.Likes.Count) 
+                .ThenByDescending(p => p.CreatedAt)
+                .Take(limit)
+                .ToListAsync();
+
+            return posts;
+        }
+
+        public async Task<IEnumerable<Post>> GetMemoriesAsync(int userId) {
+            var today = DateTime.UtcNow;
+
+            return await _context.Posts
+                .Include(p => p.User)
+                .Include(p => p.Medias)
+                .Include(p => p.Likes)
+                .Include(p => p.Comments)
+                .Where(p => p.UserId == userId
+                            && p.CreatedAt.Month == today.Month
+                            && p.CreatedAt.Day == today.Day
+                            && p.CreatedAt.Year < today.Year) 
+                .OrderByDescending(p => p.CreatedAt) 
+                .ToListAsync();
+        }
     }
 }

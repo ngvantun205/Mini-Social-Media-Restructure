@@ -1,45 +1,13 @@
-﻿@model Mini_Social_Media.Models.InputModel.RegisterInputModel
-
-@{
+﻿@{
     Layout = "_AuthLayout";
-    ViewData["Title"] = "Register";
 }
-
-<h2>Create Account</h2>
-
-@Html.ValidationSummary(false, "", new { @class = "text-danger" })
-
+@model Mini_Social_Media.Models.InputModel.RegisterEmailStepModel
+<h2>Đăng ký tài khoản</h2>
 <form asp-action="Register" method="post">
-    <div>
-        <label asp-for="UserName">Username</label>
-        <input asp-for="UserName" placeholder="Choose a username" />
-        <span asp-validation-for="UserName" class="text-danger"></span>
-    </div>
-    <div>
-        <label asp-for="Email">Email</label>
-        <input asp-for="Email" placeholder="Enter your email" />
+    <div class="mb-3">
+        <label>Nhập Email của bạn</label>
+        <input asp-for="Email" class="form-control" placeholder="example@gmail.com" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
-    <div>
-        <label asp-for="Password">Password</label>
-        <input asp-for="Password" type="password" placeholder="Create a password" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <div>
-        <label asp-for="ConfirmPassword">Confirm Password</label>
-        <input asp-for="ConfirmPassword" type="password" placeholder="Confirm your password" />
-        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-    </div>
-    <div>
-        <button type="submit" class="btn btn-primary">Register</button>
-    </div>
+    <button type="submit" class="btn btn-primary">Gửi mã OTP</button>
 </form>
-
-<div>
-    <span>Already have an account?</span>
-    <a asp-action="Login" class="text-link">Login</a>
-</div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}

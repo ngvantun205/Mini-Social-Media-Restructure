@@ -1,66 +1,58 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Mini_Social_Media.Controllers {
     [Authorize]
     public class HomeController : Controller {
         private readonly IPostService _postService;
-        private readonly UserManager<User> _userManager;
-        public HomeController(IPostService postService, UserManager<User> userManager) {
+
+        public HomeController(IPostService postService) {
             _postService = postService;
-            _userManager = userManager;
         }
+
         public async Task<IActionResult> Index() {
-            var userid = _userManager.GetUserId(User);
-            if (userid == null) return Unauthorized();
-            int userId = int.Parse(userid);
-            var posts = await _postService.GetPostsPagedAsync(1, 10, userId);
-            return View(new List<PostViewModel>(posts.Select(post => new PostViewModel {
-                Owner = new UserSummaryViewModel() {UserId = post.Owner.UserId, UserName = post.Owner.UserName, AvatarUrl = post.Owner.AvatarUrl, FullName = post.Owner.FullName },
-                PostId = post.PostId,
-                Caption = post.Caption,
-                Location = post.Location,
-                LikeCount = post.LikeCount,
-                IsLiked = post.IsLiked,
-                CommentCount = post.CommentCount,
-                CreatedAt = post.CreatedAt,                
-                Medias = post.Medias.Select(m => new PostMediaViewModel {
-                    Url = m.Url,
-                    MediaType = m.MediaType
-                }).ToList(),
-                Hashtags = post.Hashtags,
-            }).ToList()));
+            var userId = GetCurrentUserId();
+            if (userId == 0)
+                return Unauthorized();
+            int sessionSeed = Environment.TickCount;
+            ViewBag.SessionSeed = sessionSeed;
+            var posts = await _postService.GetNewsFeed(userId, 1, 10, sessionSeed);
+            Console.WriteLine(posts.Count());
+            Console.WriteLine("=======================================================================================================================================================================================");
+            return View(posts.ToList());
         }
 
         [HttpGet]
-        public async Task<IActionResult> LoadMore(int page) {
-            var userid = _userManager.GetUserId(User);
-            if (userid == null)
+        public async Task<IActionResult> LoadMore(int page, int seed) {
+            var userId = GetCurrentUserId();
+            if (userId == 0)
                 return Unauthorized();
-            int userId = int.Parse(userid);
-            var posts = await _postService.GetPostsPagedAsync(page, 10, userId);
+            var posts = await _postService.GetNewsFeed(userId, page, 10, seed);
 
             if (posts == null || !posts.Any()) {
-                return NoContent();
+                return NoContent(); 
             }
 
-            return PartialView("_PostListPartial", new List<PostViewModel>(posts.Select(post => new PostViewModel {
-                Owner = new UserSummaryViewModel() { UserId = post.Owner.UserId, UserName = post.Owner.UserName, AvatarUrl = post.Owner.AvatarUrl, FullName = post.Owner.FullName },
-                PostId = post.PostId,
-                Caption = post.Caption,
-                Location = post.Location,
-                LikeCount = post.LikeCount,
-                CommentCount = post.CommentCount,
-                CreatedAt = post.CreatedAt,
-                IsLiked = post.IsLiked,
-                Medias = post.Medias.Select(m => new PostMediaViewModel {
-                    Url = m.Url,
-                    MediaType = m.MediaType
-                }).ToList(),
-                Hashtags = post.Hashtags,
-            }).ToList()));
+            return PartialView("_PostListPartial", posts.ToList());
         }
 
+        private int GetCurrentUserId() {
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return string.IsNullOrEmpty(userIdStr) ? 0 : int.Parse(userIdStr);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Memories() {
+            var userId = GetCurrentUserId();
+            var memories = await _postService.GetMemoriesAsync(userId);
+            return View(memories);
+        }
+
+        [HttpGet("api/unread-counts")]
+        public IActionResult GetUnreadCounts() {
+            return Ok(new { notifications = 0, messages = 0 });
+        }
     }
 }

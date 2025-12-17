@@ -16,5 +16,6 @@ namespace Mini_Social_Media.Models.DomainModel {
         public List<Comment>? Comments { get; set; } = new List<Comment>();
         public List<Like>? Likes { get; set; } = new List<Like>();
         public List<PostHashtag>? PostHashtags { get; set; } = new List<PostHashtag>();
+        public List<Share> Shares { get; set; } = new List<Share>();
     }
 }

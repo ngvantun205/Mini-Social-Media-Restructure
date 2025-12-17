@@ -1,6 +1,6 @@
 ﻿namespace Mini_Social_Media.Models.ViewModel {
     public class StoryArchiveViewModel {
-        public int StoryId { get; set; }
+        public int StoryArchiveId { get; set; }
         public UserSummaryViewModel Owner { get; set; }
         public string MediaUrl { get; set; }
         public string MediaType { get; set; }

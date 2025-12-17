@@ -42,15 +42,25 @@
     }
     else {
         <!-- 2. TABS CHUYỂN ĐỔI -->
-        <ul class="nav nav-tabs nav-fill mb-4 border-bottom-0" id="searchTabs" role="tablist">
+        <ul class="nav nav-tabs nav-fill mb-4" id="searchTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active fw-bold text-dark" id="accounts-tab" data-bs-toggle="tab" data-bs-target="#accounts" type="button" role="tab">
-                    Accounts
+                <button class="nav-link active" id="accounts-tab" data-bs-toggle="tab" data-bs-target="#accounts" type="button" role="tab">
+                    <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span>Accounts</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold text-muted" id="posts-tab" data-bs-toggle="tab" data-bs-target="#posts" type="button" role="tab">
-                    Posts
+                <button class="nav-link" id="posts-tab" data-bs-toggle="tab" data-bs-target="#posts" type="button" role="tab">
+                    <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>Posts</span>
                 </button>
             </li>
         </ul>
@@ -317,56 +327,6 @@
 </style>
 
 <script src="~/js/newfeed.js" />
-
-
-@section Styles {
-    <style>
-        /* Tabs Style */
-        .nav-tabs .nav-link {
-            border: none;
-            border-bottom: 2px solid transparent;
-            color: #8e8e8e;
-        }
-
-            .nav-tabs .nav-link.active {
-                border-bottom: 2px solid black;
-                color: black !important;
-            }
-
-        /* Hover Effect cho User List */
-        .hover-bg-light:hover {
-            background-color: #fafafa;
-        }
-
-        /* Overlay Effect cho Post Grid (Giống Profile) */
-        .group-hover-overlay .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .group-hover-overlay:hover .overlay {
-            opacity: 1;
-        }
-
-        .cursor-pointer {
-            cursor: pointer;
-        }
-
-        .object-fit-cover {
-            object-fit: cover;
-        }
-
-        .drop-shadow {
-            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
-        }
-    </style>
-}
 
 @functions {
     string GetTimeAgo(DateTime createdAt) {

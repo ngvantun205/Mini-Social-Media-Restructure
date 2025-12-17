@@ -1,0 +1,48 @@
+﻿@model Mini_Social_Media.Models.InputModel.SocialRegisterInputModel
+
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Hoàn tất đăng ký";
+}
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-4">
+        <div class="text-center mb-4">
+            @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+            {
+                <img src="@Model.AvatarUrl" class="rounded-circle mb-2" width="80" height="80" style="object-fit: cover; border: 3px solid #eee;">
+            }
+            <h4 class="fw-bold">Welcome, @Model.FullName!</h4>
+            <p class="text-muted small">Vui lòng chọn tên đăng nhập để hoàn tất.</p>
+        </div>
+
+        <form asp-action="SocialRegister" method="post">
+            <input type="hidden" asp-for="AvatarUrl" />
+
+            <div class="mb-3">
+                <label class="form-label fw-bold small">Username <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light">Username</span>
+                    <input asp-for="UserName" class="form-control" placeholder="username" />
+                </div>
+                <span asp-validation-for="UserName" class="text-danger small"></span>
+                <div class="form-text small">Dùng để định danh bạn trên mạng xã hội (VD: @Model.UserName).</div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold small">Full Name</label>
+                <input asp-for="FullName" class="form-control" />
+            </div>
+
+            <hr class="my-4 text-muted">
+            <h6 class="text-muted small mb-3">Thông tin thêm (Tùy chọn)</h6>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold small">Bio</label>
+                <input asp-for="Bio" class="form-control" placeholder="Giới thiệu ngắn về bạn..." />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Hoàn tất & Bắt đầu</button>
+        </form>
+    </div>
+</div>

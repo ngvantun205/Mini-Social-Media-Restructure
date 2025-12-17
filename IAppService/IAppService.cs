@@ -9,9 +9,15 @@ namespace Mini_Social_Media.IAppService {
         Task<bool> DeletePostAsync(int postId, int userId);
         Task<IEnumerable<PostViewModel>> GetPostsPagedAsync(int pageNumber, int pageSize, int userId);
         Task<List<PostViewModel>> SearchPosts(string searchinfo, int userId);
+        Task<List<MemoryViewModel>> GetMemoriesAsync(int userId);
+        Task<IEnumerable<FeedItemViewModel>> GetNewsFeed(int userId, int page, int pageSize, int seed);
+        Task<IEnumerable<PostViewModel>> GetRandomizedNewsFeed(int userId, int page, int pageSize, int seed);
     }
     public interface IUploadService {
         Task<string> UploadAsync(IFormFile file);
+    }
+    public interface IEmailService {
+        Task SendEmailAsync(string toEmail, string subject, string message);
     }
     public interface ILikeService {
         Task<LikeDto> ToggleLikeAsync(LikeInputModel inputModel, int userId);
@@ -76,5 +82,10 @@ namespace Mini_Social_Media.IAppService {
         Task<IEnumerable<UserStoryViewModel>> GetCurrentStories(int userId);
         Task<IEnumerable<StoryArchiveViewModel>> GetUserStoryArchives(int userId);
         Task DeleteArchive(int archiveId);
+    }
+    public interface IShareService {
+        Task AddShare(ShareInputModel shareInputModel, int userId);
+        Task DeleteShare(int shareId);
+        Task EditShare(EditShareInputModel inputModel, int userId);
     }
 }

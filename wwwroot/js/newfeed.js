@@ -275,3 +275,55 @@ function submitReport(reason) {
             alert("Network error.");
         });
 }
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    let page = 1;
+    let isLoading = false;
+    let hasMore = true;
+
+    // Lấy seed (nếu không có thì random tạm)
+    const currentSeed = window.FEED_SESSION_SEED || Math.floor(Math.random() * 100000);
+
+    window.addEventListener('scroll', () => {
+        if (isLoading || !hasMore) return;
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 300) {
+            loadMorePosts();
+        }
+    });
+
+    function loadMorePosts() {
+        isLoading = true;
+        document.getElementById('loading').style.display = 'block';
+        page++;
+
+        // GỬI KÈM SEED LÊN SERVER
+        fetch(`/Home/LoadMore?page=${page}&seed=${currentSeed}`)
+            .then(response => {
+                if (response.status === 204) {
+                    hasMore = false;
+                    document.getElementById('endOfFeed').style.display = 'block';
+                    return null;
+                }
+                return response.text();
+            })
+            .then(html => {
+                if (html) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    const container = document.getElementById('postContainer');
+                    while (tempDiv.firstChild) {
+                        container.appendChild(tempDiv.firstChild);
+                    }
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                page--;
+            })
+            .finally(() => {
+                isLoading = false;
+                document.getElementById('loading').style.display = 'none';
+            });
+    }
+});

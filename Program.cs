@@ -1,4 +1,5 @@
 ﻿using CloudinaryDotNet;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Mini_Social_Media.Repository;
 using Mini_Social_Media.Services.Background;
+using System.Security.Claims;
 using System.Text;
 
 namespace Mini_Social_Media {
@@ -28,8 +30,9 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<INotificationsRepository, NotificationsRepository>();
             builder.Services.AddScoped<IMessageRepository, MessageRepository>();
             builder.Services.AddScoped<IReportRepository, ReportRepository>();
-            builder.Services.AddScoped<IStoryRepository,  StoryRepository>();
-            builder.Services.AddScoped<IStoryArchiveRepository,  StoryArchiveRepository>();
+            builder.Services.AddScoped<IStoryRepository, StoryRepository>();
+            builder.Services.AddScoped<IStoryArchiveRepository, StoryArchiveRepository>();
+            builder.Services.AddScoped<IShareRepository, ShareRepository>();
 
             builder.Services.AddScoped<IPostService, PostService>();
             builder.Services.AddScoped<IUploadService, UploadService>();
@@ -43,8 +46,23 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<IAdminService, AdminService>();
             builder.Services.AddScoped<IReportService, ReportService>();
             builder.Services.AddScoped<IStoryService, StoryService>();
+            builder.Services.AddScoped<IShareService, ShareService>();
+            builder.Services.AddTransient<IEmailService, EmailService>();
 
             builder.Services.AddHostedService<StoryArchiverService>();
+
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options => {
+                options.IdleTimeout = TimeSpan.FromMinutes(15);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
+
+            //builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+            //{
+            //    options.ValidationInterval = TimeSpan.Zero;
+            //});
 
             builder.Services.AddSignalR();
 
@@ -63,15 +81,13 @@ namespace Mini_Social_Media {
                         )
                     };
                     options.Events = new JwtBearerEvents {
-                        OnMessageReceived = context =>
-                        {
+                        OnMessageReceived = context => {
                             context.Token = context.Request.Cookies["jwt"];
                             return Task.CompletedTask;
                         }
                     };
                 });
-            builder.Services.AddSingleton(x =>
-            {
+            builder.Services.AddSingleton(x => {
                 var config = cloudinarySettings.Get<CloudinarySettings>();
                 return new Cloudinary(new Account(
                     config.CloudName,
@@ -84,21 +100,18 @@ namespace Mini_Social_Media {
                 .AddDefaultTokenProviders();
             // .AddRoles<IdentityRole<int>>()
 
-            builder.Services.ConfigureApplicationCookie(options =>
-            {
-                options.LoginPath = "/Auth/Login"; 
+            builder.Services.ConfigureApplicationCookie(options => {
+                options.LoginPath = "/Auth/Login";
                 options.AccessDeniedPath = "/Auth/Login";
             });
 
-            builder.Services.Configure<IdentityOptions>(options =>
-            {
+            builder.Services.Configure<IdentityOptions>(options => {
                 options.User.AllowedUserNameCharacters =
                     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.";
 
                 options.User.RequireUniqueEmail = true;
             });
-            builder.Services.AddCors(options =>
-            {
+            builder.Services.AddCors(options => {
                 options.AddPolicy("AllowSpecificOrigin",
                     builder => {
                         builder
@@ -125,10 +138,29 @@ namespace Mini_Social_Media {
                 app.UseHsts();
             }
 
+            //app.Use(async (context, next) =>
+            //{
+            //    if (context.User.Identity != null && context.User.Identity.IsAuthenticated) {
+            //        var userManager = context.RequestServices.GetRequiredService<UserManager<User>>();
+            //        var user = await userManager.GetUserAsync(context.User);
+            //        if (user == null) {
+            //            var signInManager = context.RequestServices.GetRequiredService<SignInManager<User>>();
+            //            await signInManager.SignOutAsync();
+            //            context.Session.Clear();
+            //            context.Response.Redirect("/Auth/Login");
+            //            return; 
+            //        }
+            //    }
+
+            //    await next();
+            //});
+
             app.UseHttpsRedirection();
             app.UseRouting();
 
             app.UseCors("SignalRCorsPolicy");
+
+            app.UseSession();
 
             app.UseAuthentication();
             app.UseAuthorization();

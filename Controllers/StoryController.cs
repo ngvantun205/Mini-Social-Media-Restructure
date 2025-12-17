@@ -50,10 +50,9 @@ namespace Mini_Social_Media.Controllers {
         public async Task<IActionResult> StoryArchives() {
             var userId = GetCurrentUserId();
             if (userId == 0)
-                return Unauthorized();
-
+                return RedirectToAction("Login", "Account");
             var archives = await _storyService.GetUserStoryArchives(userId);
-            return Ok(archives ?? new List<StoryArchiveViewModel>());
+            return View(archives ?? new List<Mini_Social_Media.Models.ViewModel.StoryArchiveViewModel>());
         }
 
         [HttpPost]

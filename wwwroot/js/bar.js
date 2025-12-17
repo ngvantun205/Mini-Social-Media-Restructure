@@ -48,24 +48,8 @@
 
     function performSearch(query) {
         console.log('Searching for:', query);
-
-        // Example: redirect to search page
-        // window.location.href = `/search?q=${encodeURIComponent(query)}`;
-
-        // Or: fetch search results via AJAX
-        /*
-        fetch(`/api/search?q=${encodeURIComponent(query)}`)
-            .then(response => response.json())
-            .then(data => {
-                displaySearchResults(data);
-            })
-            .catch(error => {
-                console.error('Search error:', error);
-            });
-        */
     }
 
-    // ==================== FOLLOW BUTTON ====================
     const followButtons = document.querySelectorAll('.follow-btn');
 
     followButtons.forEach(button => {

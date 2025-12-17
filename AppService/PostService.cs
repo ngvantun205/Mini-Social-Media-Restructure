@@ -1,4 +1,6 @@
-﻿namespace Mini_Social_Media.AppService {
+﻿using Mini_Social_Media.Models.DomainModel;
+
+namespace Mini_Social_Media.AppService {
     public class PostService : IPostService {
         private readonly IPostRepository _postRepository;
         private readonly IUploadService _uploadService;
@@ -6,14 +8,16 @@
         private readonly IPostMediaRepository _postMediaRepository;
         private readonly ILikeRepository _likeRepository;
         private readonly ICommentRepository _commentRepository;
+        private readonly IShareRepository _shareRepository;
 
-        public PostService(IPostRepository postRepository, IUploadService uploadService, IHashtagRepository hashtagRepository, IPostMediaRepository postMediaRepository, ILikeRepository likeRepository, ICommentRepository commentRepository) {
+        public PostService(IPostRepository postRepository, IUploadService uploadService, IHashtagRepository hashtagRepository, IPostMediaRepository postMediaRepository, ILikeRepository likeRepository, ICommentRepository commentRepository, IShareRepository shareRepository) {
             _postRepository = postRepository;
             _uploadService = uploadService;
             _hashtagRepository = hashtagRepository;
             _postMediaRepository = postMediaRepository;
             _likeRepository = likeRepository;
             _commentRepository = commentRepository;
+            _shareRepository = shareRepository;
         }
 
         public async Task<PostViewModel> CreatePost(PostInputModel model, int userId) {
@@ -214,5 +218,202 @@
             }).ToList();
         }
 
+        public async Task<List<MemoryViewModel>> GetMemoriesAsync(int userId) {
+            var posts = await _postRepository.GetMemoriesAsync(userId);
+            var currentYear = DateTime.UtcNow.Year;
+
+            return posts.Select(p => new MemoryViewModel {
+                PostId = p.PostId,
+                Owner = new UserSummaryViewModel {
+                    UserId = p.User.Id,
+                    UserName = p.User.UserName,
+                    FullName = p.User.FullName,
+                    AvatarUrl = p.User.AvatarUrl
+                },
+                Caption = p.Caption,
+                CreatedAt = p.CreatedAt,
+                LikeCount = p.LikeCount,
+                CommentCount = p.CommentCount,
+                IsLiked = p.Likes.Any(l => l.UserId == userId),
+                Medias = p.Medias.Select(m => new PostMediaViewModel {
+                    Url = m.Url,
+                    MediaType = m.MediaType
+                }).ToList(),
+
+                YearsAgo = currentYear - p.CreatedAt.Year
+            }).ToList();
+        }
+
+        public async Task<IEnumerable<PostViewModel>> GetRandomizedNewsFeed(int userId, int page, int pageSize, int seed) {
+            var friendPosts = await _postRepository.GetNewsFeedPosts(userId);
+
+            var suggestedPosts = await _postRepository.GetSuggestedPosts(userId, 50);
+            var allPosts = friendPosts.Concat(suggestedPosts)
+                                      .GroupBy(p => p.PostId).Select(g => g.First())
+                                      .ToList();
+
+            if (allPosts == null || !allPosts.Any())
+                return new List<PostViewModel>();
+
+            var random = new Random(seed);
+
+            var sortedPosts = allPosts
+                .Select(post => new {
+                    Post = post,
+                    Score = CalculateScore(post, userId, random, !friendPosts.Contains(post))
+                })
+                .OrderByDescending(x => x.Score)
+                .Select(x => x.Post)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize);
+
+            return sortedPosts.Select(p => new PostViewModel {
+                PostId = p.PostId,
+                Owner = new UserSummaryViewModel {
+                    UserId = p.User.Id,
+                    UserName = p.User.UserName,
+                    FullName = p.User.FullName,
+                    AvatarUrl = p.User.AvatarUrl
+                },
+                Caption = p.Caption,
+                Location = p.Location,
+                CreatedAt = p.CreatedAt,
+                LikeCount = p.Likes.Count,
+                CommentCount = p.Comments.Count,
+                IsLiked = p.Likes.Any(l => l.UserId == userId),
+                Medias = p.Medias.Select(m => new PostMediaViewModel {
+                    Url = m.Url,
+                    MediaType = m.MediaType
+                }).ToList(),
+                Hashtags = string.Join(" ", p.PostHashtags.Select(ph => ph.Hashtag.HashtagName)),
+            }).ToList();
+        }
+
+        private int CalculateScore(Post p, int userId, Random random, bool isSuggested) {
+
+            int score = 0;
+            if (isSuggested) {
+                score += 20;
+                if (p.Likes.Count > 50)
+                    score += 40;
+                else if (p.Likes.Count > 20)
+                    score += 20;
+            }
+            else {
+                score += 80;
+                bool hasInteracted = p.Likes.Any(l => l.UserId == userId) ||
+                                     p.Comments.Any(c => c.UserId == userId);
+                if (!hasInteracted)
+                    score += 40;
+                if (p.CreatedAt >= DateTime.UtcNow.AddHours(-24))
+                    score += 30;
+                else if (p.CreatedAt >= DateTime.UtcNow.AddDays(-3))
+                    score += 10;
+            }
+            score += random.Next(0, 30);
+            return score;
+
+        }
+
+        private int CalculateFeedScore(FeedItemViewModel item, int userId, Random random) {
+            int score = 0;
+            if (item.Type == "Share") {
+                score += 70;
+            }
+            else {
+                score += 80;
+            }
+            var originalPost = item.OriginalPost;
+
+            if (originalPost != null) {
+                if (!originalPost.IsLiked) {
+                    score += 40;
+                }
+                else {
+                    score -= 20;
+                }
+
+                if (originalPost.LikeCount > 50)
+                    score += 30;
+                else if (originalPost.LikeCount > 10)
+                    score += 10;
+            }
+            var timeDiff = DateTime.UtcNow - item.DisplayTime;
+            if (timeDiff.TotalHours < 2) {
+                score += 40;
+            }
+            else if (timeDiff.TotalHours < 24) {
+                score += 20;
+            }
+            else if (timeDiff.TotalDays < 2) {
+                score += 10;
+            }
+            score += random.Next(0, 20);
+
+            return score;
+        }
+
+        public async Task<IEnumerable<FeedItemViewModel>> GetNewsFeed(int userId, int page, int pageSize, int seed) {
+            var posts = await _postRepository.GetNewsFeedPosts(userId);
+            var shares = await _shareRepository.GetFriendsShare(userId);
+            var suggested = await _postRepository.GetSuggestedPosts(userId, 100);
+
+            posts.AddRange(suggested);
+            Console.WriteLine("=======================================================================================================================================================================================");
+            Console.WriteLine(shares.Count());
+
+            var postItems = posts.Select(p => new FeedItemViewModel {
+                Type = "Post",
+                ItemId = p.PostId,
+                DisplayTime = p.CreatedAt,
+                Author = new UserSummaryViewModel { UserName = p.User?.UserName, FullName = p.User?.FullName, AvatarUrl = p.User?.AvatarUrl, UserId = p.UserId },
+                OriginalPost = new PostViewModel {
+                    PostId = p.PostId,
+                    Owner = new UserSummaryViewModel() { UserName = p.User?.UserName, FullName = p.User?.FullName, AvatarUrl = p.User?.AvatarUrl, UserId = p.UserId },
+                    Caption = p.Caption,
+                    CreatedAt = p.CreatedAt,
+                    Medias = p.Medias.Select(m => new PostMediaViewModel() { Url = m.Url, MediaType = m.MediaType }).ToList(),
+                    LikeCount = p.LikeCount,
+                    CommentCount = p.CommentCount,
+                    IsLiked = p.Likes.Any(l => l.UserId == userId),
+                    Hashtags = string.Join(" ", p.PostHashtags.Select(ph => ph.Hashtag.HashtagName))
+                },
+                ShareCaption = null
+            });
+
+            var shareItems = shares.Select(s => new FeedItemViewModel {
+                Type = "Share",
+                ItemId = s.Id,
+                DisplayTime = s.SharedAt,
+                Author = new UserSummaryViewModel { UserName = s.User?.UserName, FullName = s.User?.FullName, AvatarUrl = s.User?.AvatarUrl, UserId = s.UserId },
+                OriginalPost = new PostViewModel {
+                    PostId = s.PostId,
+                    Owner = new UserSummaryViewModel() { UserName = s.Post.User?.UserName, FullName = s.Post.User?.FullName, AvatarUrl = s.Post.User?.AvatarUrl, UserId = s.Post.UserId },
+                    Caption = s.Post.Caption,
+                    CreatedAt = s.Post.CreatedAt,
+                    Medias = s.Post.Medias.Select(m => new PostMediaViewModel() { Url = m.Url, MediaType = m.MediaType }).ToList(),
+                    LikeCount = s.Post.LikeCount,
+                    CommentCount = s.Post.CommentCount,
+                    IsLiked = s.Post.Likes.Any(l => l.UserId == userId),
+                    Hashtags = string.Join(" ", s.Post.PostHashtags.Select(ph => ph.Hashtag.HashtagName))
+                },
+                ShareCaption = s.Caption
+            });
+            var allFeed = postItems.Concat(shareItems).ToList();
+            var random = new Random(seed);
+
+            var sortedFeed = allFeed
+                .Select(item => new {
+                    Item = item,
+                    Score = CalculateFeedScore(item, userId, random)
+                })
+                .OrderByDescending(x => x.Score)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(x => x.Item)
+                .ToList();
+
+            return sortedFeed;
+        }
     }
 }

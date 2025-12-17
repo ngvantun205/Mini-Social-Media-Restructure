@@ -77,7 +77,7 @@ namespace Mini_Social_Media.AppService {
                 MediaUrl = x.MediaUrl,
                 MediaType = x.MediaType,
                 CreatedAt = x.CreatedAt,
-                StoryId = x.Id,
+                StoryArchiveId = x.Id,
                 Owner = new UserSummaryViewModel() {UserId = x.User.Id, AvatarUrl = x.User.AvatarUrl, FullName = x.User.FullName, UserName = x.User.UserName }
             }).ToList();
         }

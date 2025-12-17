@@ -54,7 +54,7 @@
                         <img src="@avatarUrl" alt="User">
                         <div class="dropdown-user-details">
                             <p class="dropdown-user-name">@fullName</p>
-                            <p class="dropdown-user-handle">@@@userName</p>
+                            <p class="dropdown-user-handle">@userName</p>
                         </div>
                     </div>
                 </div>
@@ -93,32 +93,27 @@
 <script src="~/js/topbar.js"></script>
 
 <script>
-    // 1. Lắng nghe sự kiện khi trang đã load
     document.addEventListener("DOMContentLoaded", function() {
         const searchInput = document.getElementById("globalSearchInput");
 
         if (searchInput) {
-            // 2. Bắt sự kiện phím Enter (Key Code 13)
             searchInput.addEventListener("keypress", function(event) {
                 if (event.key === "Enter") {
-                    event.preventDefault(); // Ngăn chặn hành vi mặc định (nếu có form)
+                    event.preventDefault(); 
                     performSearch();
                 }
             });
         }
     });
 
-    // 3. Hàm thực hiện tìm kiếm (Chuyển hướng)
     function performSearch() {
         const input = document.getElementById("globalSearchInput");
         const query = input.value.trim();
 
         if (query) {
-            // Chuyển hướng sang trang Search Controller kèm tham số
-            // encodeURIComponent để xử lý các ký tự đặc biệt như dấu cách, &, ?
             window.location.href = `/Search/Search?searchinfo=${encodeURIComponent(query)}`;
         } else {
-            input.focus(); // Nếu rỗng thì focus lại để nhập
+            input.focus(); 
         }
     }
 </script>

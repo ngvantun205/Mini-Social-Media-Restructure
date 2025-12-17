@@ -1,0 +1,13 @@
+﻿@{
+    Layout = "_AuthLayout";
+}
+@model Mini_Social_Media.Models.InputModel.VerifyOtpStepModel
+<h2>Xác thực Email</h2>
+<p class="text-muted">Chúng tôi đã gửi mã đến email của bạn.</p>
+<form asp-action="VerifyOtp" method="post">
+    <div class="mb-3">
+        <label>Nhập mã OTP (6 số)</label>
+        <input asp-for="OtpCode" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-success">Xác nhận</button>
+</form>

@@ -20,7 +20,10 @@
         Task UnLikePostAsync(int postId);
         Task<bool> AddCommentAsync(int postId);
         Task<bool> RemoveCommentAsync(int postId);
-        Task<IEnumerable<Post>> SearchPost(string searchinfo);   
+        Task<IEnumerable<Post>> SearchPost(string searchinfo);
+        Task<List<Post>> GetNewsFeedPosts(int userId);
+        Task<List<Post>> GetSuggestedPosts(int userId, int limit);
+        Task<IEnumerable<Post>> GetMemoriesAsync(int userId);
     }
     public interface ICommentRepository : IRepository<Comment> {  //Comment
         Task<IEnumerable<Comment>> GetCommentsByPostIdAsync(int postId);
@@ -74,5 +77,8 @@
         Task<IEnumerable<StoryArchive>> GetUserStoryArchive(int userId);
         Task DeleteAsync(int id);
         Task AddAsync(StoryArchive entity);
+    }
+    public interface IShareRepository : IRepository<Share> {
+        Task<IEnumerable<Share>> GetFriendsShare(int userId);
     }
 }

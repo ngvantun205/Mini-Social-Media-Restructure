@@ -1,4 +1,4 @@
-﻿@model List<Mini_Social_Media.Models.ViewModel.PostViewModel>
+﻿@model List<Mini_Social_Media.Models.ViewModel.FeedItemViewModel>
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Identity
 @inject UserManager<User> _userManager
@@ -79,5 +79,6 @@
             var userId = @(currentUserId ?? "0");
             initStoryModule(userId);
         });
+        window.FEED_SESSION_SEED = @ViewBag.SessionSeed;
     </script>
 }
