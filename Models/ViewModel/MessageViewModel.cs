@@ -8,5 +8,6 @@
         public bool IsRead { get; set; }
         public string SenderName { get; set; }
         public string SenderAvatar { get; set; }
+        public string MessageType { get; set; }
     }
 }

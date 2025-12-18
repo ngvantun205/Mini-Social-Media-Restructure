@@ -140,5 +140,29 @@ namespace Mini_Social_Media.AppService {
                 Owner = new UserSummaryViewModel() { UserId = createdreply.User.Id, UserName = createdreply.User.UserName, FullName = createdreply.User.FullName, AvatarUrl = createdreply.User.AvatarUrl }
             };
         }
+
+        public async Task<IEnumerable<CommentViewModel>> GetUserHistoryComment(int userId) {
+            var comments = await _commentRepository.GetUserHistoryComment(userId);
+            if (comments == null)
+                return new List<CommentViewModel>();
+
+            var result = await Task.WhenAll(
+                comments.Select(async c => new CommentViewModel {
+                    CommentId = c.CommentId,
+                    Content = c.Content,
+                    CreatedAt = c.CreatedAt,
+                    ParentCommentId = c.ParentCommentId,
+                    PostUsername = await _postRepository.GetOwnerUsername(c.PostId),
+                    Owner = new UserSummaryViewModel {
+                        UserId = c.UserId,
+                        FullName = c.User.FullName,
+                        UserName = c.User.UserName,
+                        AvatarUrl = c.User.AvatarUrl
+                    }
+                })
+            );
+
+            return result;
+        }
     }
 }

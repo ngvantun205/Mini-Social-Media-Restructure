@@ -24,7 +24,6 @@ namespace Mini_Social_Media.Repository {
         }
         public async Task<IEnumerable<Post>> GetPostsPagedAsync(int page, int pageSize) {
             return await _context.Posts
-                .Include(p => p.User)
                 .Include(p => p.Medias)
                 .Include(p => p.Likes)
                 .Include(p => p.PostHashtags)
@@ -112,7 +111,6 @@ namespace Mini_Social_Media.Repository {
             return posts;
         }
         public async Task<List<Post>> GetSuggestedPosts(int userId, int limit) {
-            // 1. Lấy danh sách ID người đang follow
             var followingIds = await _context.Follows
                 .Where(f => f.FollowerId == userId)
                 .Select(f => f.FolloweeId)
@@ -147,6 +145,13 @@ namespace Mini_Social_Media.Repository {
                             && p.CreatedAt.Year < today.Year) 
                 .OrderByDescending(p => p.CreatedAt) 
                 .ToListAsync();
+        }
+        public async Task<string> GetOwnerUsername(int postId) {
+            var post = await _context.Posts
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.PostId == postId);
+
+            return post?.User?.UserName;
         }
     }
 }

@@ -1,23 +1,21 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Security.Claims;
 
 namespace Mini_Social_Media.Controllers {
     [Authorize]
     public class ProfileController : Controller {
         private readonly IUserService _userService;
-        private readonly UserManager<User> _userManager;
-        public ProfileController(IUserService userService, UserManager<User> userManager) {
+        private readonly ICommentService _commentService;
+        private readonly ILikeService _likeService;
+        public ProfileController(IUserService userService, ICommentService commentService, ILikeService likeService) {
             _userService = userService;
-            _userManager = userManager;
+            _commentService = commentService;
+            _likeService = likeService;
         }
         private int GetCurrentUserId() {
-            string userIdString = _userManager.GetUserId(User);
-            if (userIdString == null) {
-                return 0;
-            }
-            return int.Parse(userIdString);
+            string userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return userIdString == null ? 0 : int.Parse(userIdString);
         }
         [HttpGet]
         public async Task<IActionResult> MyProfile() {
@@ -74,6 +72,21 @@ namespace Mini_Social_Media.Controllers {
                 userName = user.UserName,
                 avatarUrl = user.AvatarUrl ?? "/images/avatar.png"
             });
+        }
+        [HttpGet] 
+        public async Task<IActionResult> RecentActivity() {
+            int userId = GetCurrentUserId();
+            if (userId == 0)
+                return Unauthorized();
+            var likeHistory = (await _likeService.GetUserHistoryLike(userId)).ToList();
+            Console.WriteLine("======================================================================================================================================");
+            Console.WriteLine(likeHistory.Count());
+            var commentHistory = (await _commentService.GetUserHistoryComment(userId)).ToList();
+            Console.WriteLine("======================================================================================================================================");
+            Console.WriteLine(commentHistory.Count());
+            ViewBag.LikeHistory = likeHistory;
+            ViewBag.CommentHistory = commentHistory;
+            return View();
         }
     }
 }

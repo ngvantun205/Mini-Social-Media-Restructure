@@ -19,6 +19,7 @@ namespace Mini_Social_Media.IAppService {
     }
     public interface ILikeService {
         Task<LikeDto> ToggleLikeAsync(LikeInputModel inputModel, int userId);
+        Task<IEnumerable<LikeViewModel>> GetUserHistoryLike(int userId);
     }
     public interface ICommentService {
         Task<CommentViewModel>? AddCommentAsync(CommentInputModel model, int userId);
@@ -27,6 +28,7 @@ namespace Mini_Social_Media.IAppService {
         Task<IEnumerable<CommentViewModel>> GetCommentsByPostIdAsync(int postId);
         Task<IEnumerable<CommentViewModel>> GetRepliesByCommentIdAsync(int commentId);
         Task<CommentViewModel?> AddReplyAsync(ReplyCommentInputModel model, int userId);
+        Task<IEnumerable<CommentViewModel>> GetUserHistoryComment(int userId);
     }
     public interface IUserService {
         Task<UserProfileViewModel?> GetUserProfileAsync(int userId, int requesterId);
@@ -49,6 +51,7 @@ namespace Mini_Social_Media.IAppService {
         Task<IEnumerable<MessageViewModel>> GetMessageHistoryAsync(int currentUserId, int partnerId);
         Task<ConversationViewModel>? GetOrCreateConversationAsync(int userId, int receiverId);
         Task MarkConversationAsReadAsync(int userId, int partnerId);
+        Task<MessageViewModel> SendImgOrVoiceAsync(int senderId, SendImgOrVoiceInputModel model);
     }
     public interface IHashtagService {
         Task<IEnumerable<Hashtag>> GetTopHashtag();

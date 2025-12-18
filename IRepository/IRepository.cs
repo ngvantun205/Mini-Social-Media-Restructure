@@ -24,16 +24,19 @@
         Task<List<Post>> GetNewsFeedPosts(int userId);
         Task<List<Post>> GetSuggestedPosts(int userId, int limit);
         Task<IEnumerable<Post>> GetMemoriesAsync(int userId);
+        Task<string> GetOwnerUsername(int postId);
     }
     public interface ICommentRepository : IRepository<Comment> {  //Comment
         Task<IEnumerable<Comment>> GetCommentsByPostIdAsync(int postId);
         Task<bool> AddReplyAsync(int commentId);    
         Task<bool> RemoveReplyAsync(int commentId);
         Task<IEnumerable<Comment>> GetRepliesByCommentIdAsync(int commentId);
+        Task<IEnumerable<Comment>> GetUserHistoryComment(int userId);
     }
     public interface ILikeRepository : IRepository<Like> {  //Like
         Task DeleteByPostIdAndUserIdAsync(int postId, int userId);
         Task<bool> IsLikedByCurrentUser(int postId, int userId); 
+        Task<IEnumerable<Like>> GetUserHistoryLike(int userId);
     }
     public interface IFollowRepository : IRepository<Follow> {   //Follow
         Task<Follow?> GetFollowByUserAsync(int followeeId, int followerId);

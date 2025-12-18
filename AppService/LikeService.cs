@@ -12,6 +12,19 @@ namespace Mini_Social_Media.AppService {
             _hubContext = hubContext;
             _notificationsRepository = notificationsRepository;
         }
+
+        public async Task<IEnumerable<LikeViewModel>> GetUserHistoryLike(int userId) {
+            var likes = await _likeRepository.GetUserHistoryLike(userId);
+            if(likes == null) return new List<LikeViewModel>();
+            var result = await Task.WhenAll(likes.Select(async l => new LikeViewModel {
+                Owner = new UserSummaryViewModel { UserId = l.UserId, AvatarUrl = l.User.AvatarUrl, UserName = l.User.UserName, FullName = l.User.FullName },
+                PostId = l.PostId,
+                CreatedAt = l.CreatedAt,
+                PostUsername = await _postRepository.GetOwnerUsername(l.PostId),
+            }));
+                return result;
+        }
+
         public async Task<LikeDto> ToggleLikeAsync(LikeInputModel likeInputModel, int userId) {
             var post = await _postRepository.GetByIdAsync(likeInputModel.PostId);
             if (post != null) {
@@ -53,5 +66,6 @@ namespace Mini_Social_Media.AppService {
             else
                 return new LikeDto() { ErrorMessage = "Post was deleted or doesn't exist" };
         }
+        
     }
 }

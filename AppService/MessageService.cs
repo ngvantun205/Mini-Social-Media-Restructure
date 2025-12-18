@@ -1,15 +1,18 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using System.Net.Mime;
 
 namespace Mini_Social_Media.AppService {
     public class MessageService : IMessageService {
         private readonly IMessageRepository _messageRepo;
         private readonly IUserRepository _userRepo;
         private readonly IHubContext<ChatHub> _hub;
+        private readonly IUploadService _uploadService;
 
-        public MessageService(IMessageRepository msgRepo, IUserRepository userRepo, IHubContext<ChatHub> hub) {
+        public MessageService(IMessageRepository msgRepo, IUserRepository userRepo, IHubContext<ChatHub> hub, IUploadService uploadService) {
             _messageRepo = msgRepo;
             _userRepo = userRepo;
             _hub = hub;
+            _uploadService = uploadService;
         }
 
         public async Task<MessageViewModel> SendMessageAsync(int senderId, int receiverId, string content) {
@@ -136,6 +139,7 @@ namespace Mini_Social_Media.AppService {
                 Content = m.Content,
                 CreatedAt = m.CreatedAt,
                 IsRead = true,
+                MessageType = m.MessageType,
                 SenderName = m.Sender.UserName,
                 SenderAvatar = m.Sender.AvatarUrl ?? "/images/default-avatar.png"
             });
@@ -144,5 +148,64 @@ namespace Mini_Social_Media.AppService {
             await _messageRepo.MarkAsRead(userId, partnerId);
         }
 
+        public async Task<MessageViewModel> SendImgOrVoiceAsync(int senderId, SendImgOrVoiceInputModel model) {
+            string msgType = "image";
+            var contentType = model.MessageFile.ContentType;
+
+            if (contentType.StartsWith("audio")) {
+                msgType = "voice";
+            }
+            else if (contentType.StartsWith("video")) {
+                msgType = "video";
+            }
+
+            var url = await _uploadService.UploadAsync(model.MessageFile);
+            if (string.IsNullOrEmpty(url))
+                throw new Exception("Upload failed");
+
+            var conversation = await _messageRepo.GetConversationAsync(senderId, model.ReceiverId);
+            if (conversation == null) {
+                conversation = new Conversations {
+                    User1Id = Math.Min(senderId, model.ReceiverId),
+                    User2Id = Math.Max(senderId, model.ReceiverId),
+                    UpdatedAt = DateTime.UtcNow
+                };
+                await _messageRepo.CreateConversationAsync(conversation);
+            }
+
+            var message = new Messages {
+                SenderId = senderId,
+                ReceiverId = model.ReceiverId,
+                Content = url,
+                MessageType = msgType, 
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false,
+                ConversationId = conversation.Id
+            };
+
+            await _messageRepo.AddMessageAsync(message);
+
+            conversation.UpdatedAt = DateTime.UtcNow;
+            conversation.LatestMessageId = message.Id;
+            await _messageRepo.UpdateConversationAsync(conversation);
+
+            var sender = await _userRepo.GetByIdAsync(senderId);
+
+            var dto = new MessageViewModel {
+                Id = message.Id,
+                SenderId = senderId,
+                ReceiverId = model.ReceiverId,
+                Content = url,
+                MessageType = msgType,
+                CreatedAt = message.CreatedAt,
+                IsRead = false,
+                SenderName = sender?.UserName ?? "Unknown",
+                SenderAvatar = sender?.AvatarUrl ?? "/images/default-avatar.png"
+            };
+
+            await _hub.Clients.User(model.ReceiverId.ToString()).SendAsync("ReceiveMessage", dto);
+
+            return dto;
+        }
     }
 }

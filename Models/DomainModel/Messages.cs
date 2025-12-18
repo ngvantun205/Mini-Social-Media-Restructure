@@ -15,6 +15,7 @@ namespace Mini_Social_Media.Models.DomainModel {
         [ForeignKey("ReceiverId")]
         public User Receiver { get; set; }
         public string? Content { get; set; }
+        public string MessageType { get; set; } = "Text";
         public DateTime CreatedAt { get; set; }
         public bool IsRead { get; set; }
     }

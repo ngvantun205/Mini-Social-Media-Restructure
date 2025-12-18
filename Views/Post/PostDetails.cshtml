@@ -15,12 +15,15 @@
         var indentClass = isReply ? "reply-comment" : "";
 
         <div class="comment-item @indentClass" id="@divId">
+        @if(currentUserId != null){
+                var profileLink = (currentUserId == comment.Owner.UserId) ? "/Profile/MyProfile" : $"/Profile/UserProfile/{comment.Owner.UserId}";
             <div class="d-flex gap-2">
-                <img src="@comment.Owner.AvatarUrl" class="comment-avatar" alt="@comment.Owner.UserName">
-
+                <a href="@profileLink">
+                    <img src="@comment.Owner.AvatarUrl" class="comment-avatar" alt="@comment.Owner.UserName">
+                </a>
                 <div class="flex-grow-1">
                     <div class="comment-bubble">
-                        <strong class="comment-username">@comment.Owner.UserName</strong>
+                        <a href="@profileLink" class="comment-username">@comment.Owner.UserName</a>
                         <p class="comment-text mb-0" id="@textId">@comment.Content</p>
                     </div>
 
@@ -50,6 +53,7 @@
                             </div>
                         </div>
                     </div>
+                    
 
                     @if (comment.ReplyCount > 0) {
                         <div class="mt-1">
@@ -63,6 +67,7 @@
                     }
                 </div>
             </div>
+            }
         </div>
     }
 }

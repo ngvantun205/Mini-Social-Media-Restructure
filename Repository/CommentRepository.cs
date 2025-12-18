@@ -68,5 +68,9 @@ namespace Mini_Social_Media.Repository {
             await UpdateAsync(comment);
             return true;
         }
+
+        public async Task<IEnumerable<Comment>> GetUserHistoryComment(int userId) {
+            return await _context.Comments.Where(c => c.UserId == userId).Include(c => c.User).Include(c => c.Post).ToListAsync();  
+        }
     }
 }

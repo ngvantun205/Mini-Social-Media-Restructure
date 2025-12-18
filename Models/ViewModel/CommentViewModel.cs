@@ -6,7 +6,8 @@
         public string? Content { get; set; }
         public DateTime CreatedAt { get; set; }
         public int ReplyCount { get; set; }
-        public int? ParentCommentId { get; set; }    
+        public int? ParentCommentId { get; set; }
+        public string PostUsername { get; set; }     
         public ICollection<LikeViewModel> Likes { get; set; } = new List<LikeViewModel>();
         public ICollection<CommentViewModel> Replies { get; set; } = new List<CommentViewModel>();
     }

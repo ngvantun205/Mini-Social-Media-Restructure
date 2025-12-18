@@ -8,7 +8,6 @@
 
 @foreach (var item in Model) {
     var post = item.OriginalPost;
-
     var isOwner = item.Author.UserId == currentUserId;
 
     <div class="post-card" data-post-id="@item.ItemId">
@@ -27,16 +26,9 @@
 
             <div class="post-user-details">
                 <div class="d-flex align-items-center flex-wrap">
-                    @if (currentUserId != item.Author.UserId) {
-                        <a asp-controller="Profile" asp-action="UserProfile" asp-route-id="@item.Author.UserId" class="post-username-link">
-                            <h5 class="post-username mb-0">@item.Author.UserName</h5>
-                        </a>
-                    }
-                    else {
-                        <a asp-controller="Profile" asp-action="MyProfile" class="post-username-link">
-                            <h5 class="post-username mb-0">@item.Author.UserName</h5>
-                        </a>
-                    }
+                    <a href="@(currentUserId == item.Author.UserId ? "/Profile/MyProfile" : $"/Profile/UserProfile/{item.Author.UserId}")" class="post-username-link">
+                        <h5 class="post-username mb-0">@item.Author.UserName</h5>
+                    </a>
 
                     @if (item.Type == "Share") {
                         <span class="text-muted small ms-1" style="font-weight: normal;">shared a post <i class="bi bi-share-fill" style="font-size: 10px;"></i></span>
@@ -44,9 +36,7 @@
                 </div>
 
                 @if (!string.IsNullOrEmpty(post.Location) && item.Type == "Post") {
-                    <p class="post-location">
-                        <i class="bi bi-geo-alt-fill"></i> @post.Location
-                    </p>
+                    <p class="post-location"><i class="bi bi-geo-alt-fill"></i> @post.Location</p>
                 }
             </div>
 
@@ -57,12 +47,10 @@
                         <span> • Shared</span>
                     }
                 </div>
-
                 <div class="post-dropdown">
                     <button class="post-menu-btn" onclick="togglePostMenu(this, @item.ItemId, @isOwner.ToString().ToLower())">
                         <i class="bi bi-three-dots"></i>
                     </button>
-
                     <div class="post-dropdown-menu">
                         @if (isOwner) {
                             <button class="dropdown-item-custom danger" onclick="confirmDeletePost(@item.ItemId)">
@@ -96,28 +84,15 @@
                 }
 
                 <div class="share-container" style="border: 1px solid #dbdbdb; border-radius: 8px; overflow: hidden;">
-
                     @if (post.Owner != null) {
-                        var profileLink = (currentUserId == post.Owner.UserId)
-                        ? "/Profile/MyProfile"
-                        : $"/Profile/UserProfile/{post.Owner.UserId}";
-
-                        <a href="@profileLink" class="share-header text-decoration-none"
-                           style="background-color: #f8f9fa; padding: 8px 12px; display: flex; align-items: center; border-bottom: 1px solid #efefef; color: inherit;">
-
-                            <img src="@(post.Owner.AvatarUrl ?? "/images/default-avatar.png")"
-                                 class="rounded-circle me-2" width="24" height="24" style="object-fit: cover;">
-
+                        var profileLink = (currentUserId == post.Owner.UserId) ? "/Profile/MyProfile" : $"/Profile/UserProfile/{post.Owner.UserId}";
+                        <a href="@profileLink" class="share-header text-decoration-none" style="background-color: #f8f9fa; padding: 8px 12px; display: flex; align-items: center; border-bottom: 1px solid #efefef; color: inherit;">
+                            <img src="@(post.Owner.AvatarUrl ?? "/images/default-avatar.png")" class="rounded-circle me-2" width="24" height="24" style="object-fit: cover;">
                             <div>
                                 <span class="fw-bold small text-dark">@post.Owner.UserName</span>
                                 <span class="text-muted small ms-1" style="font-weight: normal;">• @GetTimeAgo(post.CreatedAt)</span>
                             </div>
                         </a>
-                    }
-                    else {
-                        <div class="share-header" style="background-color: #f8f9fa; padding: 8px 12px; border-bottom: 1px solid #efefef;">
-                            <span class="fw-bold small text-muted">Unknown User</span>
-                        </div>
                     }
 
                     @if (!string.IsNullOrEmpty(post.Caption)) {
@@ -128,9 +103,7 @@
                         if (post.Medias.Count == 1) {
                             var media = post.Medias.First();
                             if (media.MediaType == "video") {
-                                <video controls class="w-100 d-block" style="max-height: 400px; background: black;">
-                                    <source src="@media.Url" type="video/mp4">
-                                </video>
+                                <video controls class="w-100 d-block" style="max-height: 400px; background: black;"><source src="@media.Url" type="video/mp4"></video>
                             }
                             else {
                                 <img src="@media.Url" class="w-100 d-block" style="max-height: 400px; object-fit: cover;">
@@ -138,20 +111,10 @@
                         }
                         else {
                             <div id="carousel-share-@item.ItemId" class="carousel slide" data-bs-ride="false">
-                                <div class="carousel-indicators">
-                                    @for (int i = 0; i < post.Medias.Count; i++) {
-                                        <button type="button" data-bs-target="#carousel-share-@item.ItemId" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")"></button>
-                                    }
-                                </div>
                                 <div class="carousel-inner">
                                     @for (int i = 0; i < post.Medias.Count; i++) {
                                         <div class="carousel-item @(i == 0 ? "active" : "")">
-                                            @if (post.Medias[i].MediaType == "video") {
-                                                <video controls class="d-block w-100" style="max-height: 400px;"><source src="@post.Medias[i].Url"></video>
-                                            }
-                                            else {
-                                                <img src="@post.Medias[i].Url" class="d-block w-100" style="max-height: 400px; object-fit: cover;">
-                                            }
+                                            <img src="@post.Medias[i].Url" class="d-block w-100" style="max-height: 400px; object-fit: cover;">
                                         </div>
                                     }
                                 </div>
@@ -163,52 +126,11 @@
                 </div>
             </div>
         }
-
         else {
             @if (post.Medias != null && post.Medias.Any()) {
                 <div class="post-media-section">
                     @if (post.Medias.Count == 1) {
-                        var media = post.Medias.First();
-                        if (media.MediaType == "video") {
-                            <video controls class="post-single-media">
-                                <source src="@media.Url" type="video/mp4" />
-                            </video>
-                        }
-                        else {
-                            <img src="@media.Url" alt="Post media" class="post-single-media" />
-                        }
-                    }
-                    else {
-                        <div id="carousel-@post.PostId" class="carousel slide" data-bs-ride="false">
-                            <div class="carousel-indicators">
-                                @for (int i = 0; i < post.Medias.Count; i++) {
-                                    <button type="button" data-bs-target="#carousel-@post.PostId" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")"></button>
-                                }
-                            </div>
-
-                            <div class="carousel-inner">
-                                @for (int i = 0; i < post.Medias.Count; i++) {
-                                    var media = post.Medias[i];
-                                    <div class="carousel-item @(i == 0 ? "active" : "")">
-                                        @if (media.MediaType == "video") {
-                                            <video controls class="d-block w-100 carousel-media">
-                                                <source src="@media.Url" type="video/mp4" />
-                                            </video>
-                                        }
-                                        else {
-                                            <img src="@media.Url" class="d-block w-100 carousel-media" alt="Post media @(i + 1)">
-                                        }
-                                    </div>
-                                }
-                            </div>
-
-                            <button class="carousel-control-prev" type="button" data-bs-target="#carousel-@post.PostId" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon"></span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#carousel-@post.PostId" data-bs-slide="next">
-                                <span class="carousel-control-next-icon"></span>
-                            </button>
-                        </div>
+                        <img src="@post.Medias.First().Url" class="post-single-media" />
                     }
                 </div>
             }
@@ -216,11 +138,11 @@
 
         <div class="post-actions-section">
             <div class="post-action-buttons">
-                <button class="action-btn @(post.IsLiked ? "liked" : "")" onclick="toggleLike(this, @post.PostId)" title="@(post.IsLiked ? "Unlike" : "Like")">
+                <button class="action-btn @(post.IsLiked ? "liked" : "")" onclick="toggleLike(this, @post.PostId)">
                     <i class="bi @(post.IsLiked ? "bi-heart-fill" : "bi-heart")"></i>
                 </button>
 
-                <a class="action-btn" asp-controller="Post" asp-action="PostDetails" asp-route-id="@post.PostId" title="Comment">
+                <a class="action-btn" asp-controller="Post" asp-action="PostDetails" asp-route-id="@post.PostId">
                     <i class="bi bi-chat"></i>
                 </a>
 
@@ -228,39 +150,29 @@
                     <i class="bi bi-send"></i>
                 </button>
 
-                <button class="action-btn action-btn-save ml-auto" title="Save">
-                    <i class="bi bi-bookmark"></i>
-                </button>
+                <button class="action-btn action-btn-save ml-auto"><i class="bi bi-bookmark"></i></button>
             </div>
 
-            <div class="post-stats">
-                <p class="likes-count">
-                    <span class="like-number">@post.LikeCount</span> @(post.LikeCount == 1 ? "like" : "likes")
+            <div class="post-stats" style="padding-left: 12px;">
+                <p class="likes-count mb-1">
+                    <span class="like-number fw-bold">@post.LikeCount</span> likes
                 </p>
+
+                @if (post.CommentCount > 0) {
+                    <div class="post-comments-link">
+                        <a asp-controller="Post" asp-action="PostDetails" asp-route-id="@post.PostId"
+                           class="text-muted text-decoration-none" style="font-size: 14px;">
+                            View all @post.CommentCount comments
+                        </a>
+                    </div>
+                }
             </div>
         </div>
 
         @if (item.Type == "Post" && !string.IsNullOrEmpty(post.Caption)) {
-            <div class="post-caption">
+            <div class="post-caption pt-1">
                 <span class="caption-username">@post.Owner.UserName</span>
                 <span class="caption-text">@post.Caption</span>
-            </div>
-        }
-
-        @if (post.CommentCount > 0) {
-            <div class="post-comments-preview">
-                <a asp-controller="Post" asp-action="PostDetails" asp-route-id="@post.PostId" class="view-comments-link">
-                    View all @post.CommentCount @(post.CommentCount == 1 ? "comment" : "comments")
-                </a>
-            </div>
-        }
-
-        @if (item.Type == "Post" && !string.IsNullOrEmpty(post.Hashtags)) {
-            <div class="post-hashtags">
-                @foreach (var tag in post.Hashtags.Split(' ', StringSplitOptions.RemoveEmptyEntries)) {
-                    var displayTag = tag.StartsWith("#") ? tag : "#" + tag;
-                    <a href="#" class="hashtag-tag" onclick="searchHashtag('@displayTag'); return false;">@displayTag</a>
-                }
             </div>
         }
 
@@ -274,6 +186,62 @@
         </div>
     </div>
 }
+
+<div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 overflow-hidden shadow-lg">
+            <div class="modal-header border-bottom py-3">
+                <h5 class="modal-title w-100 text-center fw-bold fs-6">Share to your feed</h5>
+                <button type="button" class="btn-close position-absolute end-0 me-3" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="shareForm">
+                    <input type="hidden" id="sharePostId" name="PostId" />
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="share-info text-muted small">
+                            Sharing <strong id="sharePostOwner" class="text-dark">user</strong>'s post
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <textarea class="form-control border-0 p-0 fs-6" id="shareCaption" name="Caption" rows="3" placeholder="Write a caption... (optional)" style="resize: none; box-shadow: none;"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-top-0 p-3">
+                <button type="button" class="btn btn-primary w-100 rounded-3 fw-bold py-2" onclick="submitShare()">Share Now</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openShareModal(postId, ownerName) {
+        document.getElementById('sharePostId').value = postId;
+        document.getElementById('sharePostOwner').innerText = ownerName;
+        document.getElementById('shareCaption').value = '';
+        var myModal = new bootstrap.Modal(document.getElementById('shareModal'));
+        myModal.show();
+    }
+    async function submitShare() {
+        const postId = document.getElementById('sharePostId').value;
+        const caption = document.getElementById('shareCaption').value;
+        const submitBtn = document.querySelector('#shareModal .btn-primary');
+        const formData = new FormData();
+        formData.append('PostId', postId);
+        formData.append('Caption', caption);
+        try {
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Sharing...";
+            const response = await fetch('/Share/Share', { method: 'POST', body: formData });
+            if (response.ok) {
+                bootstrap.Modal.getInstance(document.getElementById('shareModal')).hide();
+                alert("Shared successfully!");
+                location.reload();
+            } else { alert("Failed to share."); }
+        } catch (error) { console.error(error); alert("Error."); }
+        finally { submitBtn.disabled = false; submitBtn.innerText = "Share Now"; }
+    }
+</script>
 
 @functions {
     string GetTimeAgo(DateTime date) {

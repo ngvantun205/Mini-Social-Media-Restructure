@@ -12,7 +12,6 @@
     <div class="messages-wrapper">
         <div class="messages-grid">
 
-            <!-- LEFT SIDEBAR -->
             <div class="sidebar">
                 <div class="sidebar-header">
                     <h5 class="sidebar-title">Chats</h5>
@@ -37,7 +36,6 @@
                 </div>
             </div>
 
-            <!-- MAIN CHAT -->
             <div class="chat-main">
 
                 <div id="emptyState" class="empty-state">
@@ -49,6 +47,7 @@
                 </div>
 
                 <div id="chatContainer" class="chat-container hidden">
+
                     <div class="chat-header">
                         <div class="header-user">
                             <img id="headerAvatar" src="/images/avatar.png" class="user-avatar" alt="Avatar">
@@ -72,19 +71,45 @@
 
                     <div id="messageBox" class="message-box"></div>
 
-                    <div class="message-input-wrapper">
+                    <div class="message-input-wrapper position-relative">
+
+                        <input type="file" id="imageInput" accept="image/*,video/*,audio/*" style="display: none;" onchange="handleFileUpload(this)">
+
                         <div class="input-actions-left">
                             <button class="icon-btn" title="Add photo">
                                 <i class="bi bi-plus-circle-fill"></i>
                             </button>
-                            <button class="icon-btn" title="Attach file">
+
+                            <button class="icon-btn" title="Attach file" onclick="document.getElementById('imageInput').click()">
                                 <i class="bi bi-image-fill"></i>
                             </button>
+
                             <button class="icon-btn" title="Sticker">
                                 <i class="bi bi-sticky-fill"></i>
                             </button>
+
+                            <button class="icon-btn" id="btnMic" title="Voice Message" onclick="startRecording()">
+                                <i class="bi bi-mic-fill"></i>
+                            </button>
                         </div>
+
+                        <div id="recordingState" style="display: none;">
+                            <div class="d-flex align-items-center w-100">
+                                <i class="bi bi-record-circle-fill animate-pulse text-danger me-2"></i>
+                                <span class="fw-bold text-danger me-auto">Recording... <span id="recordTimer">00:00</span></span>
+
+                                <button class="btn btn-light text-secondary rounded-circle me-2 border-0" onclick="cancelRecording()" title="Cancel">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+
+                                <button class="btn btn-primary rounded-circle" onclick="finishAndSendVoice()" title="Send Voice">
+                                    <i class="bi bi-send-fill"></i>
+                                </button>
+                            </div>
+                        </div>
+
                         <input type="text" id="messageInput" class="message-input" placeholder="Aa" autocomplete="off">
+
                         <button id="sendBtn" class="send-btn" disabled>
                             <i class="bi bi-send-fill"></i>
                         </button>
@@ -99,4 +124,40 @@
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script src="~/js/messages.js"></script>
+
+    <style>
+        /* CSS cho hiệu ứng ghi âm */
+        .animate-pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        @@keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+        /* Style cho thanh ghi âm đè lên input */
+        #recordingState {
+            flex-grow: 1;
+            background: #fff;
+            z-index: 10;
+            padding: 0 10px;
+            border-radius: 20px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
 }

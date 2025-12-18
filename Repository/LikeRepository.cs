@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Mini_Social_Media.IRepository;
-using Mini_Social_Media.Models.DomainModel;
 
 namespace Mini_Social_Media.Repository {
     public class LikeRepository : ILikeRepository {
@@ -33,7 +31,7 @@ namespace Mini_Social_Media.Repository {
             }
         }
         public async Task DeleteByPostIdAndUserIdAsync(int postId, int userId) {
-            var like =  await _context.Likes.FirstOrDefaultAsync(l => l.UserId == userId && l.PostId == postId);
+            var like = await _context.Likes.FirstOrDefaultAsync(l => l.UserId == userId && l.PostId == postId);
             if (like != null) {
                 _context.Likes.Remove(like);
                 await _context.SaveChangesAsync();
@@ -41,6 +39,10 @@ namespace Mini_Social_Media.Repository {
         }
         public async Task<bool> IsLikedByCurrentUser(int postId, int userId) {
             return await _context.Likes.AnyAsync(l => l.UserId == userId && l.PostId == postId);
+        }
+
+        public async Task<IEnumerable<Like>> GetUserHistoryLike(int userId) {
+            return await _context.Likes.Where(l => l.UserId != userId).Include(l => l.User).Include(l => l.Post).ToListAsync();
         }
     }
 }

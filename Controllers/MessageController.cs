@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.Security.Claims;
 
 namespace Mini_Social_Media.Controllers {
@@ -58,7 +59,18 @@ namespace Mini_Social_Media.Controllers {
 
             return Ok(result);
         }
+        [HttpPost]
+        public async Task<IActionResult> SendFile([FromForm] SendImgOrVoiceInputModel inputModel) {
+            var userId = GetCurrentUserId();
+            if (userId == 0)
+                return Unauthorized();
 
+            if (inputModel.MessageFile == null || inputModel.MessageFile.Length == 0)
+                return BadRequest("File is empty");
+
+            var result = await _messageService.SendImgOrVoiceAsync(userId, inputModel);
+            return Ok(result);
+        }
         [HttpGet]
         public async Task<IActionResult> StartChat(int partnerId) {
             var userId = GetCurrentUserId();
