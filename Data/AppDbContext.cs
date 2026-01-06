@@ -20,7 +20,9 @@ namespace Mini_Social_Media.Data {
         public DbSet<Report> Reports { get; set; }
         public DbSet<Story> Stories { get; set; }
         public DbSet<StoryArchive> StoryArchives { get; set; }
-        public DbSet<Share> Shares { get; set; } 
+        public DbSet<Share> Shares { get; set; }
+        public DbSet<Advertisement> Advertisements { get; set; }
+        public DbSet<AdStat> AdStats { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) {
@@ -185,6 +187,16 @@ namespace Mini_Social_Media.Data {
                 .HasOne(s => s.Post)
                 .WithMany()
                 .HasForeignKey(s => s.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<Advertisement>()
+                .HasOne(a => a.User)
+                .WithMany()
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<AdStat>()
+                .HasOne(a => a.Advertisement)
+                .WithMany()
+                .HasForeignKey(a => a.AdvertisementId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

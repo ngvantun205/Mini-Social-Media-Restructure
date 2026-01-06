@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Mini_Social_Media.Data;
 
@@ -10,9 +11,11 @@ using Mini_Social_Media.Data;
 namespace Mini_Social_Media.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251230075048_init7")]
+    partial class init7
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -152,9 +155,6 @@ namespace Mini_Social_Media.Migrations
                     b.Property<int>("AdvertisementId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AdvertisementId1")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("Clicks")
                         .HasColumnType("INTEGER");
 
@@ -167,8 +167,6 @@ namespace Mini_Social_Media.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AdvertisementId");
-
-                    b.HasIndex("AdvertisementId1");
 
                     b.ToTable("AdStats");
                 });
@@ -226,20 +224,12 @@ namespace Mini_Social_Media.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("UpdateAt")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("UserId1")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("Advertisements");
                 });
@@ -847,14 +837,10 @@ namespace Mini_Social_Media.Migrations
             modelBuilder.Entity("Mini_Social_Media.Models.AdStat", b =>
                 {
                     b.HasOne("Mini_Social_Media.Models.Advertisement", "Advertisement")
-                        .WithMany()
+                        .WithMany("AdStats")
                         .HasForeignKey("AdvertisementId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Mini_Social_Media.Models.Advertisement", null)
-                        .WithMany("AdStats")
-                        .HasForeignKey("AdvertisementId1");
 
                     b.Navigation("Advertisement");
                 });
@@ -862,14 +848,10 @@ namespace Mini_Social_Media.Migrations
             modelBuilder.Entity("Mini_Social_Media.Models.Advertisement", b =>
                 {
                     b.HasOne("Mini_Social_Media.Models.DomainModel.User", "User")
-                        .WithMany()
+                        .WithMany("Advertisements")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Mini_Social_Media.Models.DomainModel.User", null)
-                        .WithMany("Advertisements")
-                        .HasForeignKey("UserId1");
 
                     b.Navigation("User");
                 });

@@ -84,4 +84,12 @@
     public interface IShareRepository : IRepository<Share> {
         Task<IEnumerable<Share>> GetFriendsShare(int userId);
     }
+    public interface IAdRepository : IRepository<Advertisement> {
+        Task<bool> ApproveAd(int adId);
+        Task<bool> DeclineAd(int adId);
+        Task<bool> DisableAd(int adId);
+        Task<bool> CancelRequestAd(int adId);
+        Task<IEnumerable<Advertisement>> GetUserAd(int userId);
+        Task<IEnumerable<Advertisement>> GetAdsByStatusAsync(AdStatus status);
+    }
 }

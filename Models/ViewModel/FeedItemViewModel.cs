@@ -6,6 +6,7 @@
         public UserSummaryViewModel Author { get; set; }
         public string? ShareCaption { get; set; }
         public PostViewModel OriginalPost { get; set; }
+        public AdViewModel Advertisement { get; set; }
         public int Score { get; set; }
     }
 }

@@ -1,0 +1,180 @@
+﻿@model Mini_Social_Media.Models.InputModel.AdInputModel
+@{
+    ViewData["Title"] = "Tạo Quảng Cáo Mới";
+    Layout = "_Layout";
+}
+
+<div class="container py-4">
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-megaphone-fill text-primary me-2"></i>Thiết lập Quảng Cáo</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="RequestAd" method="post" enctype="multipart/form-data" id="adForm">
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Loại hiển thị</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check border rounded p-3 flex-grow-1">
+                                    <input class="form-check-input" type="radio" asp-for="Type" value="1" checked id="typePost">
+                                    <label class="form-check-label fw-bold" for="typePost">
+                                        Bài viết tài trợ (NewsFeed)
+                                    </label>
+                                    <div class="small text-muted">Hiển thị xen kẽ giữa các bài viết của bạn bè.</div>
+                                </div>
+                                <div class="form-check border rounded p-3 flex-grow-1">
+                                    <input class="form-check-input" type="radio" asp-for="Type" value="0" id="typeBanner">
+                                    <label class="form-check-label fw-bold" for="typeBanner">
+                                        Banner (Sidebar)
+                                    </label>
+                                    <div class="small text-muted">Hiển thị cố định bên cột phải trang web.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label fw-bold">Tên chiến dịch (Tiêu đề)</label>
+                            <input asp-for="Title" class="form-control" placeholder="Ví dụ: Siêu sale 12.12" id="inpTitle">
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Content" class="form-label fw-bold">Nội dung bài viết</label>
+                            <textarea asp-for="Content" class="form-control" rows="3" placeholder="Nhập nội dung quảng cáo..." id="inpContent"></textarea>
+                            <span asp-validation-for="Content" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AdMedia" class="form-label fw-bold">Hình ảnh quảng cáo</label>
+                            <input asp-for="AdMedia" class="form-control" type="file" accept="image/*" id="inpFile">
+                            <span asp-validation-for="AdMedia" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label asp-for="TargetUrl" class="form-label fw-bold">Link đích (Khi click vào)</label>
+                                <input asp-for="TargetUrl" class="form-control" placeholder="https://website-cua-ban.com">
+                                <span asp-validation-for="TargetUrl" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="CtaText" class="form-label fw-bold">Nút bấm</label>
+                                <select asp-for="CtaText" class="form-select" id="inpCta">
+                                    <option value="Xem thêm">Xem thêm</option>
+                                    <option value="Mua ngay">Mua ngay</option>
+                                    <option value="Đăng ký">Đăng ký</option>
+                                    <option value="Liên hệ">Liên hệ</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h6 class="fw-bold mb-3"><i class="bi bi-cash-coin me-2"></i>Ngân sách & Lịch chạy</h6>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="Budget" class="form-label fw-bold">Ngân sách dự kiến (VNĐ)</label>
+                                <input asp-for="Budget" class="form-control" type="number" placeholder="1000000">
+                                <span asp-validation-for="Budget" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="StartDate" class="form-label">Ngày bắt đầu</label>
+                                <input asp-for="StartDate" class="form-control" type="date">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="EndDate" class="form-label">Ngày kết thúc</label>
+                                <input asp-for="EndDate" class="form-control" type="date">
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold">
+                                <i class="bi bi-send-check-fill me-2"></i>Gửi Yêu Cầu Duyệt
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="sticky-top" style="top: 80px; z-index: 1;">
+                <h6 class="text-muted text-uppercase small fw-bold mb-3">Xem trước hiển thị</h6>
+
+                <div class="card shadow-sm border rounded-3" style="overflow: hidden;">
+                    <div class="p-3 d-flex align-items-center">
+                        <img src="@(User.FindFirst("AvatarUrl")?.Value ?? "/images/default-avatar.png")"
+                             class="rounded-circle border border-warning" width="40" height="40" style="object-fit: cover;">
+                        <div class="ms-2">
+                            <h6 class="mb-0 fw-bold">@(User.Identity.Name ?? "Bạn")</h6>
+                            <div class="text-muted" style="font-size: 11px;">
+                                Được tài trợ <i class="bi bi-globe-americas"></i>
+                            </div>
+                        </div>
+                        <div class="ms-auto">
+                            <i class="bi bi-three-dots text-muted"></i>
+                        </div>
+                    </div>
+
+                    <div class="px-3 pb-2">
+                        <p class="mb-0" id="previewContent">Nội dung quảng cáo sẽ hiện ở đây...</p>
+                    </div>
+
+                    <div class="bg-light d-flex align-items-center justify-content-center position-relative" style="min-height: 250px;">
+                        <img id="previewImage" src="https://placehold.co/600x400/e9ecef/6c757d?text=Preview+Image" class="img-fluid w-100" style="object-fit: cover;">
+
+                        <div class="position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75 d-flex justify-content-between align-items-center">
+                            <span class="text-white small fw-bold ps-2 text-uppercase" id="previewTitle" style="font-size: 11px;">TÊN CHIẾN DỊCH</span>
+                            <button class="btn btn-sm btn-light fw-bold px-3" id="previewCta">Xem thêm</button>
+                        </div>
+                    </div>
+
+                    <div class="p-2 border-top d-flex justify-content-around">
+                        <button class="btn btn-light btn-sm flex-grow-1 text-muted"><i class="bi bi-hand-thumbs-up me-1"></i> Thích</button>
+                        <button class="btn btn-light btn-sm flex-grow-1 text-muted"><i class="bi bi-chat-square me-1"></i> Bình luận</button>
+                        <button class="btn btn-light btn-sm flex-grow-1 text-muted"><i class="bi bi-share me-1"></i> Chia sẻ</button>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-3 small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Đây là hình ảnh mô phỏng. Giao diện thực tế có thể thay đổi tùy thuộc vào thiết bị người dùng.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // SCRIPT LIVE PREVIEW
+        document.addEventListener('DOMContentLoaded', function() {
+            const inpTitle = document.getElementById('inpTitle');
+            const inpContent = document.getElementById('inpContent');
+            const inpFile = document.getElementById('inpFile');
+            const inpCta = document.getElementById('inpCta');
+
+            const previewTitle = document.getElementById('previewTitle');
+            const previewContent = document.getElementById('previewContent');
+            const previewImage = document.getElementById('previewImage');
+            const previewCta = document.getElementById('previewCta');
+
+            // Cập nhật Text
+            inpTitle.addEventListener('input', () => previewTitle.textContent = inpTitle.value || 'TÊN CHIẾN DỊCH');
+            inpContent.addEventListener('input', () => previewContent.textContent = inpContent.value || 'Nội dung quảng cáo sẽ hiện ở đây...');
+            inpCta.addEventListener('change', () => previewCta.textContent = inpCta.value);
+
+            // Cập nhật Ảnh
+            inpFile.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const url = URL.createObjectURL(file);
+                    previewImage.src = url;
+                }
+            });
+        });
+    </script>
+}

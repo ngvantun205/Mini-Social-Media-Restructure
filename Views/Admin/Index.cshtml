@@ -2,18 +2,18 @@
     ViewData["Title"] = "Admin Dashboard";
     Layout = "_Layout1";
 }
-
 <link rel="stylesheet" href="~/css/admin-dashboard.css" />
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
 <div class="dashboard-container">
     @await Html.PartialAsync("_Topbar")
 
     <div class="dashboard-header">
         <h1>Admin Dashboard</h1>
-        <p class="subtitle">Manage users, posts, and reports</p>
+        <p class="subtitle">Manage users, posts, reports, and advertisements</p>
     </div>
 
-    <!-- Tab Navigation -->
     <div class="tab-navigation">
         <button class="tab-btn active" onclick="showTab('usersTab')" data-tab="users">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -40,88 +40,54 @@
             </svg>
             Reports
         </button>
+        <button class="tab-btn" onclick="showTab('adsTab')" data-tab="ads">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a10 10 0 0 1 10 10v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6a10 10 0 0 1 10-10z"></path>
+                <path d="M12 12v6"></path>
+                <path d="M8 18h8"></path>
+            </svg>
+            Ads Management
+        </button>
     </div>
 
-    <!-- ================= USERS TAB ================= -->
     <div id="usersTab" class="tab-content active">
         <div class="tab-header">
             <h2>User Management</h2>
             <div class="search-bar">
                 <input id="searchUserInput" type="text" placeholder="Search by name or username..." />
-                <button class="btn btn-primary" onclick="searchUser()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.35-4.35"></path>
-                    </svg>
-                    Search
-                </button>
-                <button class="btn btn-secondary" onclick="loadUsers()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="23 4 23 10 17 10"></polyline>
-                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                    </svg>
-                    Reload
-                </button>
+                <button class="btn btn-primary" onclick="searchUser()">Search</button>
+                <button class="btn btn-secondary" onclick="loadUsers()">Reload</button>
             </div>
         </div>
-
         <div class="table-container">
             <table class="data-table" id="usersTable">
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Avatar</th>
-                        <th>Full Name</th>
-                        <th>Username</th>
-                        <th>Actions</th>
-                    </tr>
+                    <tr><th>ID</th><th>Avatar</th><th>Full Name</th><th>Username</th><th>Actions</th></tr>
                 </thead>
                 <tbody></tbody>
             </table>
         </div>
     </div>
 
-    <!-- ================= POSTS TAB ================= -->
     <div id="postsTab" class="tab-content">
         <div class="tab-header">
             <h2>Post Management</h2>
             <div class="search-bar">
                 <input id="searchPostInput" type="text" placeholder="Search posts..." />
-                <button class="btn btn-primary" onclick="searchPost()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.35-4.35"></path>
-                    </svg>
-                    Search
-                </button>
-                <button class="btn btn-secondary" onclick="loadPosts()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="23 4 23 10 17 10"></polyline>
-                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                    </svg>
-                    Reload
-                </button>
+                <button class="btn btn-primary" onclick="searchPost()">Search</button>
+                <button class="btn btn-secondary" onclick="loadPosts()">Reload</button>
             </div>
         </div>
-
         <div class="table-container">
             <table class="data-table" id="postsTable">
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>User ID</th>
-                        <th>Likes</th>
-                        <th>Comments</th>
-                        <th>Media</th>
-                        <th>Actions</th>
-                    </tr>
+                    <tr><th>ID</th><th>User ID</th><th>Likes</th><th>Comments</th><th>Media</th><th>Actions</th></tr>
                 </thead>
                 <tbody></tbody>
             </table>
         </div>
     </div>
 
-    <!-- ================= REPORTS TAB ================= -->
     <div id="reportsTab" class="tab-content">
         <div class="tab-header">
             <h2>Report Management</h2>
@@ -130,45 +96,62 @@
                     <option value="Pending">Pending</option>
                     <option value="Executed">Executed</option>
                 </select>
-                <button class="btn btn-secondary" onclick="loadReports()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="23 4 23 10 17 10"></polyline>
-                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                    </svg>
-                    Reload
-                </button>
+                <button class="btn btn-secondary" onclick="loadReports()">Reload</button>
             </div>
         </div>
-
         <div class="table-container">
             <table class="data-table" id="reportsTable">
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Reporter</th>
-                        <th>Type</th>
-                        <th>Entity ID</th>
-                        <th>Content</th>
-                        <th>Created At</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
+                    <tr><th>ID</th><th>Reporter</th><th>Type</th><th>Entity ID</th><th>Content</th><th>Created At</th><th>Status</th><th>Actions</th></tr>
                 </thead>
                 <tbody></tbody>
             </table>
         </div>
     </div>
+
+    <div id="adsTab" class="tab-content">
+        <div class="tab-header">
+            <h2>Ads Management</h2>
+            <div class="search-bar">
+                <select id="adStatusFilter" class="filter-select" onchange="loadAds()">
+                    <option value="Pending">Pending Approval</option>
+                    <option value="Running">Running</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Ended">Ended</option>
+                </select>
+                <button class="btn btn-secondary" onclick="loadAds()">
+                    <i class="bi bi-arrow-clockwise"></i> Reload
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table" id="adsTable">
+                <thead>
+                    <tr>
+                        <th style="width: 5%">ID</th>
+                        <th style="width: 20%">Advertiser</th>
+                        <th style="width: 25%">Campaign Title</th>
+                        <th style="width: 15%">Budget</th>
+                        <th style="width: 10%">Type</th>
+                        <th style="width: 10%">Status</th>
+                        <th style="width: 15%">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="adsTableBody">
+                    <tr><td colspan="7" class="text-center">Loading ads...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 
-<!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">
-            <h3>Confirm Delete</h3>
-        </div>
-        <div class="modal-body">
-            <p id="deleteMessage">Are you sure you want to delete this item?</p>
-        </div>
+        <div class="modal-header"><h3>Confirm Delete</h3></div>
+        <div class="modal-body"><p id="deleteMessage">Are you sure you want to delete this item?</p></div>
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
             <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
@@ -176,4 +159,198 @@
     </div>
 </div>
 
+<div id="adReviewModal" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header border-bottom pb-3">
+            <h3 class="mb-0">Review Advertisement</h3>
+            <button type="button" class="btn-close" onclick="closeAdModal()" style="float: right; border: none; background: none; font-size: 20px;">&times;</button>
+        </div>
+        <div class="modal-body pt-3">
+            <input type="hidden" id="reviewAdId">
+
+            <div class="d-flex align-items-center mb-3">
+                <img id="reviewAdAvatar" src="" class="rounded-circle me-2" width="40" height="40" style="object-fit:cover;">
+                <div>
+                    <h5 id="reviewAdUser" class="mb-0 fw-bold">User Name</h5>
+                    <small class="text-muted">Advertiser</small>
+                </div>
+            </div>
+
+            <div class="card border rounded-3 overflow-hidden mb-3 p-3" style="background: #f8f9fa;">
+                <h6 id="reviewAdTitle" class="fw-bold mb-2">Campaign Title</h6>
+                <p id="reviewAdContent" class="mb-2">Content goes here...</p>
+
+                <img id="reviewAdImage" src="" class="img-fluid rounded mb-2 w-100" style="max-height: 300px; object-fit: cover; display: none;">
+
+                <div class="d-grid mt-2">
+                    <a href="#" id="reviewAdLink" target="_blank" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-box-arrow-up-right me-1"></i> <span id="reviewAdCta">Learn More</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="row small text-muted">
+                <div class="col-6">Start: <span id="reviewAdStart" class="fw-bold text-dark"></span></div>
+                <div class="col-6">End: <span id="reviewAdEnd" class="fw-bold text-dark"></span></div>
+                <div class="col-12 mt-1">Budget: <span id="reviewAdBudget" class="text-success fw-bold"></span></div>
+            </div>
+        </div>
+
+        <div class="modal-footer border-top pt-3" id="reviewModalActions">
+        </div>
+    </div>
+</div>
+
 <script src="~/js/admin-dashboard.js"></script>
+
+<script>
+    // --- LOAD ADS FUNCTION ---
+    function loadAds() {
+        const status = document.getElementById('adStatusFilter').value;
+        const tbody = document.getElementById('adsTableBody');
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">Loading...</td></tr>';
+
+        // Call your single endpoint ManageAds
+        fetch(`/Ad/ManageAds?status=${status}`)
+            .then(response => {
+                if (!response.ok) throw new Error("Failed to load ads");
+                return response.json();
+            })
+            .then(data => {
+                renderAdsTable(data);
+            })
+            .catch(error => {
+                console.error(error);
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading data. Check console.</td></tr>';
+            });
+    }
+
+    function renderAdsTable(ads) {
+        const tbody = document.getElementById('adsTableBody');
+        tbody.innerHTML = '';
+
+        if (!ads || ads.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No ads found for this status.</td></tr>';
+            return;
+        }
+
+        ads.forEach(ad => {
+            // Map Status (0: Pending, 1: Approved, 2: Running, 3: Paused, 4: Rejected, 5: Ended)
+            let statusBadge = '';
+            switch(ad.status) {
+                case 0: statusBadge = '<span class="badge bg-warning text-dark">Pending</span>'; break;
+                case 1: statusBadge = '<span class="badge bg-info text-dark">Approved</span>'; break;
+                case 2: statusBadge = '<span class="badge bg-success">Running</span>'; break;
+                case 3: statusBadge = '<span class="badge bg-secondary">Paused</span>'; break;
+                case 4: statusBadge = '<span class="badge bg-danger">Rejected</span>'; break;
+                case 5: statusBadge = '<span class="badge bg-dark">Ended</span>'; break;
+                default: statusBadge = '<span class="badge bg-light text-dark">Unknown</span>';
+            }
+
+            // Map Type (0: Banner, 1: Post)
+            let typeBadge = ad.type === 0
+                ? '<span class="text-primary"><i class="bi bi-layout-sidebar"></i> Banner</span>'
+                : '<span class="text-info"><i class="bi bi-card-text"></i> Post</span>';
+
+            // Safe navigation for brand info
+            const brandName = ad.brand ? ad.brand.userName : 'Unknown';
+            const brandAvatar = ad.brand && ad.brand.avatarUrl ? ad.brand.avatarUrl : '/images/default-avatar.png';
+
+            const row = `
+                <tr>
+                    <td>#${ad.id}</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <img src="${brandAvatar}" class="rounded-circle me-2" width="30" height="30" style="object-fit:cover;">
+                            <span class="fw-bold text-dark">${brandName}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fw-bold text-truncate" style="max-width: 200px;" title="${ad.title}">${ad.title}</div>
+                    </td>
+                    <td class="text-success fw-bold">${ad.budget.toLocaleString()} VND</td>
+                    <td>${typeBadge}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick='openAdReview(${JSON.stringify(ad)})'>
+                            <i class="bi bi-eye-fill"></i> Review
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    // --- MODAL ACTIONS ---
+    function openAdReview(ad) {
+        document.getElementById('reviewAdId').value = ad.id;
+
+        // Populate Data
+        document.getElementById('reviewAdUser').innerText = ad.brand ? ad.brand.userName : 'Unknown';
+        document.getElementById('reviewAdAvatar').src = ad.brand && ad.brand.avatarUrl ? ad.brand.avatarUrl : '/images/default-avatar.png';
+        document.getElementById('reviewAdTitle').innerText = ad.title;
+        document.getElementById('reviewAdContent').innerText = ad.content || 'No text content.';
+
+        const imgEl = document.getElementById('reviewAdImage');
+        if(ad.imageUrl) {
+            imgEl.src = ad.imageUrl;
+            imgEl.style.display = 'block';
+        } else {
+            imgEl.style.display = 'none';
+        }
+
+        document.getElementById('reviewAdBudget').innerText = ad.budget.toLocaleString() + " VND";
+        document.getElementById('reviewAdStart').innerText = new Date(ad.startDate).toLocaleDateString();
+        document.getElementById('reviewAdEnd').innerText = new Date(ad.endDate).toLocaleDateString();
+        document.getElementById('reviewAdCta').innerText = ad.ctaText || 'Learn More';
+        document.getElementById('reviewAdLink').href = ad.targetUrl || '#';
+
+        // Setup Buttons based on Status
+        const footer = document.getElementById('reviewModalActions');
+        footer.innerHTML = `<button class="btn btn-secondary" onclick="closeAdModal()">Close</button>`;
+
+        // If Pending (0), show Approve/Reject
+        if (ad.status === 0) {
+            footer.innerHTML += `
+                <button class="btn btn-danger ms-2" onclick="performAdAction('/Ad/DeclineAd', ${ad.id})">Reject</button>
+                <button class="btn btn-success ms-2" onclick="performAdAction('/Ad/ApproveAd', ${ad.id})">Approve & Run</button>
+            `;
+        }
+        // If Running (2), show Disable
+        else if (ad.status === 2) {
+            footer.innerHTML += `
+                <button class="btn btn-warning ms-2 text-dark" onclick="performAdAction('/Ad/DisableAd', ${ad.id})">Disable (End)</button>
+            `;
+        }
+
+        document.getElementById('adReviewModal').style.display = 'block';
+    }
+
+    function closeAdModal() {
+        document.getElementById('adReviewModal').style.display = 'none';
+    }
+
+    // Generic function to handle Approve/Decline/Disable
+    function performAdAction(url, id) {
+        if(!confirm('Are you sure you want to perform this action?')) return;
+
+        const formData = new FormData();
+        formData.append('adId', id);
+
+        fetch(url, {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => {
+            if(res.ok) {
+                alert('Action completed successfully.');
+                closeAdModal();
+                loadAds(); // Refresh table
+            } else {
+                alert('Failed to perform action.');
+            }
+        })
+        .catch(err => console.error(err));
+    }
+</script>

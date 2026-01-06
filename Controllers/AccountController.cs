@@ -1,21 +1,17 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Mini_Social_Media.IAppService;
+using System.Security.Claims;
 
 namespace Mini_Social_Media.Controllers {
     public class AccountController : Controller {
-        private readonly UserManager<User> _userManager;
         private readonly IUserService _userService;
-        public AccountController(UserManager<User> userManager, IUserService userService) {
-            _userManager = userManager;
+        public AccountController(IUserService userService) {
             _userService = userService;
         }
         private int GetCurrentUserId() {
-            string userIdstr = _userManager.GetUserId(User);
-            if (userIdstr == null)
-                return 0;
-            else
-                return int.Parse(userIdstr);
+           var userIdstr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return userIdstr == null ? 0 : int.Parse(userIdstr);
         }
         [HttpGet]
         public async Task<IActionResult> Edit() {

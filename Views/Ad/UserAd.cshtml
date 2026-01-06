@@ -1,0 +1,262 @@
+﻿@using Mini_Social_Media.Models.ViewModel
+@using Mini_Social_Media.Models
+@model List<AdViewModel>
+
+@{
+    ViewData["Title"] = "Ad Management";
+    Layout = "_Layout";
+
+    // Helper to get status badge class
+    string GetStatusBadge(AdStatus status) {
+        return status switch {
+            AdStatus.Pending => "bg-warning text-dark",
+            AdStatus.Approved => "bg-info text-white",
+            AdStatus.Running => "bg-success",
+            AdStatus.Rejected => "bg-danger",
+            AdStatus.Ended => "bg-dark",
+            _ => "bg-light text-dark"
+        };
+    }
+
+    // Helper to get status name in English
+    string GetStatusName(AdStatus status) {
+        return status switch {
+            AdStatus.Pending => "Pending Approval",
+            AdStatus.Approved => "Approved",
+            AdStatus.Running => "Running",
+            AdStatus.Rejected => "Rejected",
+            AdStatus.Ended => "Ended",
+            _ => "Unknown"
+        };
+    }
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">My Campaigns</h3>
+            <p class="text-muted mb-0">Manage and track your advertising performance.</p>
+        </div>
+        <a asp-controller="Ad" asp-action="RequestAd" class="btn btn-primary rounded-pill px-4 fw-bold">
+            <i class="bi bi-plus-lg me-1"></i> Create New Ad
+        </a>
+    </div>
+
+    <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active rounded-pill" id="pills-all-tab" data-bs-toggle="pill" data-bs-target="#pills-all" type="button">
+                All (@Model.Count)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill" id="pills-running-tab" data-bs-toggle="pill" data-bs-target="#pills-running" type="button">
+                Running <span class="badge bg-white text-primary ms-1">@Model.Count(x => x.Status == AdStatus.Running)</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill" id="pills-pending-tab" data-bs-toggle="pill" data-bs-target="#pills-pending" type="button">
+                Pending <span class="badge bg-white text-warning ms-1">@Model.Count(x => x.Status == AdStatus.Pending)</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill" id="pills-ended-tab" data-bs-toggle="pill" data-bs-target="#pills-ended" type="button">
+                History
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="pills-tabContent">
+
+        <div class="tab-pane fade show active" id="pills-all" role="tabpanel">
+            @{
+                await RenderAdTable(Model);
+            }
+        </div>
+
+        <div class="tab-pane fade" id="pills-running" role="tabpanel">
+            @{
+                await RenderAdTable(Model.Where(x => x.Status == AdStatus.Running));
+            }
+        </div>
+
+        <div class="tab-pane fade" id="pills-pending" role="tabpanel">
+            @{
+                await RenderAdTable(Model.Where(x => x.Status == AdStatus.Pending));
+            }
+        </div>
+
+        <div class="tab-pane fade" id="pills-ended" role="tabpanel">
+            @{
+                await RenderAdTable(Model.Where(x => x.Status != AdStatus.Running && x.Status != AdStatus.Pending));
+            }
+        </div>
+    </div>
+</div>
+
+@{
+    async Task RenderAdTable(IEnumerable<AdViewModel> ads) {
+        if (!ads.Any()) {
+            <div class="text-center py-5 bg-light rounded-3 border border-dashed">
+                <i class="bi bi-inbox display-4 text-muted opacity-50"></i>
+                <p class="mt-3 text-muted">No ads found in this list.</p>
+            </div>
+            return;
+        }
+
+        <div class="card shadow-sm border-0 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4" style="width: 35%;">Campaign</th>
+                            <th style="width: 15%;">Status</th>
+                            <th style="width: 20%;">Duration</th>
+                            <th style="width: 15%;" class="text-center">Performance</th>
+                            <th style="width: 15%;" class="text-end pe-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in ads) {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="position-relative me-3">
+                                            <img src="@item.ImageUrl" class="rounded" width="60" height="60" style="object-fit: cover;">
+                                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark" style="font-size: 8px;">
+                                                @(item.Type == AdType.Banner ? "Banner" : "Post")
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1 fw-bold text-truncate" style="max-width: 200px;">@item.Title</h6>
+                                            <a href="@item.TargetUrl" target="_blank" class="small text-muted text-decoration-none">
+                                                <i class="bi bi-link-45deg"></i> Target Link
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill @GetStatusBadge(item.Status)">
+                                        @GetStatusName(item.Status)
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="small">
+                                        <div class="text-muted">Start: <span class="text-dark fw-bold">@item.StartDate.ToString("dd/MM/yyyy")</span></div>
+                                        <div class="text-muted">End: <span class="text-dark">@item.EndDate.ToString("dd/MM/yyyy")</span></div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Status == AdStatus.Running || item.Status == AdStatus.Ended) {
+                                        <div class="d-flex justify-content-center gap-3">
+                                            <div class="text-center">
+                                                <div class="fw-bold text-primary">@item.TotalImpressions</div>
+                                                <div class="small text-muted" style="font-size: 10px;">Views</div>
+                                            </div>
+                                            <div class="border-end"></div>
+                                            <div class="text-center">
+                                                <div class="fw-bold text-success">@item.TotalClicks</div>
+                                                <div class="small text-muted" style="font-size: 10px;">Clicks</div>
+                                            </div>
+                                        </div>
+                                    }
+                                    else {
+                                        <span class="text-muted small">-</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    @if (item.Status == AdStatus.Pending) {
+                                        <div class="btn-group">
+                                            <a asp-action="EditAd" asp-route-adId="@item.Id" class="btn btn-outline-primary btn-sm" title="Edit">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    onclick="confirmCancel(@item.Id)" title="Cancel Request">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    }
+                                    else if (item.Status == AdStatus.Approved || item.Status == AdStatus.Running || item.Status == AdStatus.Ended) {
+                                        <button type="button" class="btn btn-light btn-sm text-primary fw-bold"
+                                                onclick="showDetail(@item.Id, '@item.Title', @item.TotalImpressions, @item.TotalClicks, '@item.Status')">
+                                            <i class="bi bi-bar-chart-line-fill me-1"></i> Details
+                                        </button>
+                                    }
+                                    else if (item.Status == AdStatus.Rejected) {
+                                        <button class="btn btn-sm btn-outline-secondary" disabled>Rejected</button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
+
+<div class="modal fade" id="statModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="statModalTitle">Campaign Statistics</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center pb-4">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="p-3 border rounded bg-light">
+                            <h3 class="fw-bold text-primary mb-0" id="statViews">0</h3>
+                            <span class="text-muted small">Impressions</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 border rounded bg-light">
+                            <h3 class="fw-bold text-success mb-0" id="statClicks">0</h3>
+                            <span class="text-muted small">Clicks</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-info" id="statCtrBar" style="width: 0%"></div>
+                    </div>
+                    <p class="mt-2 small text-muted">CTR (Click-Through Rate): <span id="statCtr" class="fw-bold text-dark">0%</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="cancelForm" asp-action="CancelRequest" method="post">
+    <input type="hidden" name="adId" id="cancelAdId" />
+</form>
+
+@section Scripts {
+    <script>
+        // Handle Cancel Button
+        function confirmCancel(id) {
+            if (confirm('Are you sure you want to cancel this ad request? This action cannot be undone.')) {
+                document.getElementById('cancelAdId').value = id;
+                document.getElementById('cancelForm').submit();
+            }
+        }
+
+        // Handle View Detail Button
+        function showDetail(id, title, views, clicks, status) {
+            document.getElementById('statModalTitle').innerText = title;
+            document.getElementById('statViews').innerText = views.toLocaleString();
+            document.getElementById('statClicks').innerText = clicks.toLocaleString();
+
+            // Calculate CTR
+            let ctr = 0;
+            if (views > 0) {
+                ctr = (clicks / views) * 100;
+            }
+            document.getElementById('statCtr').innerText = ctr.toFixed(2) + "%";
+            document.getElementById('statCtrBar').style.width = Math.min(ctr * 10, 100) + "%"; // Scale bar
+
+            var myModal = new bootstrap.Modal(document.getElementById('statModal'));
+            myModal.show();
+        }
+    </script>
+}

@@ -89,4 +89,15 @@ namespace Mini_Social_Media.IAppService {
         Task DeleteShare(int shareId);
         Task EditShare(EditShareInputModel inputModel, int userId);
     }
+    public interface IAdService {
+        Task RequestAd(AdInputModel inputModel, int userId);
+        Task<bool> DisableAd(int  adId, int userId );
+        Task<bool> ApprovedAd(int adId, int userId);
+        Task<bool> DeclineAd(int adId, int userId);
+        Task<AdViewModel> GetById(int adId);
+        Task<bool> UpdateAd(EditAdInputModel inputModel, int userId);
+        Task<IEnumerable<AdViewModel>> GetUserAd(int userId);
+        Task<bool> CancelRequest(int adId, int userId);
+        Task<IEnumerable<AdViewModel>> GetAdsByStatusForAdmin(int userId, string statusStr);
+    }
 }

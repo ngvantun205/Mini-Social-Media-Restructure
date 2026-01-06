@@ -33,6 +33,7 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<IStoryRepository, StoryRepository>();
             builder.Services.AddScoped<IStoryArchiveRepository, StoryArchiveRepository>();
             builder.Services.AddScoped<IShareRepository, ShareRepository>();
+            builder.Services.AddScoped<IAdRepository, AdRepository>();
 
             builder.Services.AddScoped<IPostService, PostService>();
             builder.Services.AddScoped<IUploadService, UploadService>();
@@ -47,6 +48,8 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<IReportService, ReportService>();
             builder.Services.AddScoped<IStoryService, StoryService>();
             builder.Services.AddScoped<IShareService, ShareService>();
+            builder.Services.AddScoped<IAdService, AdService>();
+
             builder.Services.AddTransient<IEmailService, EmailService>();
 
             builder.Services.AddHostedService<StoryArchiverService>();
