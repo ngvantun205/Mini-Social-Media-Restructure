@@ -161,5 +161,21 @@ namespace Mini_Social_Media.AppService {
                 Status = ad.Status
             }).ToList();
         }
+
+        public async Task<AdViewModel> GetRandomBanner() {
+            var ad = await _adRepository.GetRandomBanner();
+            if (ad == null) return new AdViewModel { };
+            return new AdViewModel {
+                Id = ad.Id,
+                Brand = new UserSummaryViewModel { UserName = ad.User.UserName, AvatarUrl = ad.User.AvatarUrl },
+                Title = ad.Title,
+                Content = ad.Content,
+                ImageUrl = ad.ImageUrl,
+                Budget = ad.Budget,
+                StartDate = ad.StartDate,
+                EndDate = ad.EndDate,
+                Status = ad.Status
+            };
+        }
     }
 }

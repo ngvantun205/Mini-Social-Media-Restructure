@@ -76,5 +76,10 @@ namespace Mini_Social_Media.Controllers {
 
             return Ok(ads);
         }
+        [HttpGet]
+        public async Task<IActionResult> GetRandomBanner() {
+            var ad = await _adService.GetRandomBanner();
+            return Ok(ad);
+        }
     }
 }

@@ -91,5 +91,6 @@
         Task<bool> CancelRequestAd(int adId);
         Task<IEnumerable<Advertisement>> GetUserAd(int userId);
         Task<IEnumerable<Advertisement>> GetAdsByStatusAsync(AdStatus status);
+        Task<Advertisement> GetRandomBanner();
     }
 }

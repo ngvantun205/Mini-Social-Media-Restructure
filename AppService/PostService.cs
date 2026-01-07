@@ -6,18 +6,18 @@ namespace Mini_Social_Media.AppService {
         private readonly IUploadService _uploadService;
         private readonly IHashtagRepository _hashtagRepository;
         private readonly IPostMediaRepository _postMediaRepository;
-        private readonly ILikeRepository _likeRepository;
         private readonly ICommentRepository _commentRepository;
         private readonly IShareRepository _shareRepository;
+        private readonly IAdRepository _adRepository;
 
-        public PostService(IPostRepository postRepository, IUploadService uploadService, IHashtagRepository hashtagRepository, IPostMediaRepository postMediaRepository, ILikeRepository likeRepository, ICommentRepository commentRepository, IShareRepository shareRepository) {
+        public PostService(IPostRepository postRepository, IUploadService uploadService, IHashtagRepository hashtagRepository, IPostMediaRepository postMediaRepository, ICommentRepository commentRepository, IShareRepository shareRepository, IAdRepository adRepository) {
             _postRepository = postRepository;
             _uploadService = uploadService;
             _hashtagRepository = hashtagRepository;
             _postMediaRepository = postMediaRepository;
-            _likeRepository = likeRepository;
             _commentRepository = commentRepository;
             _shareRepository = shareRepository;
+            _adRepository = adRepository;
         }
 
         public async Task<PostViewModel> CreatePost(PostInputModel model, int userId) {
@@ -284,67 +284,127 @@ namespace Mini_Social_Media.AppService {
             return score;
         }
 
+        // AppService/PostService.cs
+
         public async Task<IEnumerable<FeedItemViewModel>> GetNewsFeed(int userId, int page, int pageSize, int seed) {
+            // 1. Lấy Posts và Shares (Logic cũ)
             var posts = await _postRepository.GetNewsFeedPosts(userId);
             var shares = await _shareRepository.GetFriendsShare(userId);
             var suggested = await _postRepository.GetSuggestedPosts(userId, 100);
+            Console.WriteLine("=========================================================================================================================");
+            Console.WriteLine(suggested.Count);
 
             posts.AddRange(suggested);
-            Console.WriteLine("=======================================================================================================================================================================================");
-            Console.WriteLine(shares.Count());
+
+            var runningAds = await _adRepository.GetAdsByStatusAsync(AdStatus.Running);
+            var validAds = runningAds.Where(a => a.Type == AdType.SponsoredPost).ToList();
 
             var postItems = posts.Select(p => new FeedItemViewModel {
                 Type = "Post",
                 ItemId = p.PostId,
                 DisplayTime = p.CreatedAt,
-                Author = new UserSummaryViewModel { UserName = p.User?.UserName, FullName = p.User?.FullName, AvatarUrl = p.User?.AvatarUrl, UserId = p.UserId },
+                Author = new UserSummaryViewModel {
+                    UserName = p.User?.UserName,
+                    FullName = p.User?.FullName,
+                    AvatarUrl = p.User?.AvatarUrl,
+                    UserId = p.UserId
+                },
                 OriginalPost = new PostViewModel {
                     PostId = p.PostId,
-                    Owner = new UserSummaryViewModel() { UserName = p.User?.UserName, FullName = p.User?.FullName, AvatarUrl = p.User?.AvatarUrl, UserId = p.UserId },
                     Caption = p.Caption,
-                    CreatedAt = p.CreatedAt,
-                    Medias = p.Medias.Select(m => new PostMediaViewModel() { Url = m.Url, MediaType = m.MediaType }).ToList(),
+                    Medias = p.Medias.Select(m => new PostMediaViewModel { Url = m.Url, MediaType = m.MediaType }).ToList(),
                     LikeCount = p.LikeCount,
                     CommentCount = p.CommentCount,
                     IsLiked = p.Likes.Any(l => l.UserId == userId),
-                    Hashtags = string.Join(" ", p.PostHashtags.Select(ph => ph.Hashtag.HashtagName))
-                },
-                ShareCaption = null
+                    Owner = new UserSummaryViewModel { UserName = p.User?.UserName, AvatarUrl = p.User?.AvatarUrl, UserId = p.UserId }
+                }
             });
 
+            // 4. Map Share sang ViewModel
             var shareItems = shares.Select(s => new FeedItemViewModel {
                 Type = "Share",
                 ItemId = s.Id,
                 DisplayTime = s.SharedAt,
-                Author = new UserSummaryViewModel { UserName = s.User?.UserName, FullName = s.User?.FullName, AvatarUrl = s.User?.AvatarUrl, UserId = s.UserId },
+                Author = new UserSummaryViewModel {
+                    UserName = s.User?.UserName,
+                    FullName = s.User?.FullName,
+                    AvatarUrl = s.User?.AvatarUrl,
+                    UserId = s.UserId
+                },
+                ShareCaption = s.Caption,
                 OriginalPost = new PostViewModel {
                     PostId = s.PostId,
-                    Owner = new UserSummaryViewModel() { UserName = s.Post.User?.UserName, FullName = s.Post.User?.FullName, AvatarUrl = s.Post.User?.AvatarUrl, UserId = s.Post.UserId },
                     Caption = s.Post.Caption,
-                    CreatedAt = s.Post.CreatedAt,
-                    Medias = s.Post.Medias.Select(m => new PostMediaViewModel() { Url = m.Url, MediaType = m.MediaType }).ToList(),
+                    Medias = s.Post.Medias.Select(m => new PostMediaViewModel { Url = m.Url, MediaType = m.MediaType }).ToList(),
                     LikeCount = s.Post.LikeCount,
                     CommentCount = s.Post.CommentCount,
                     IsLiked = s.Post.Likes.Any(l => l.UserId == userId),
-                    Hashtags = string.Join(" ", s.Post.PostHashtags.Select(ph => ph.Hashtag.HashtagName))
-                },
-                ShareCaption = s.Caption
+                    Owner = new UserSummaryViewModel { UserName = s.Post.User?.UserName, AvatarUrl = s.Post.User?.AvatarUrl, UserId = s.Post.UserId }
+                }
             });
-            var allFeed = postItems.Concat(shareItems).ToList();
+
+            // 5. Gộp và Tính điểm (Score)
+            var allContent = postItems.Concat(shareItems).ToList();
             var random = new Random(seed);
 
-            var sortedFeed = allFeed
-                .Select(item => new {
-                    Item = item,
-                    Score = CalculateFeedScore(item, userId, random)
+            // Sort bài viết trước
+            var sortedFeed = allContent
+                .Select(item => {
+                    item.Score = CalculateFeedScore(item, userId, random); // Hàm tính điểm của bạn
+                    return item;
                 })
                 .OrderByDescending(x => x.Score)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(x => x.Item)
                 .ToList();
 
-            return sortedFeed;
+            // 6. TRỘN QUẢNG CÁO (Logic chèn mỗi 5 bài 1 quảng cáo)
+            var finalFeed = new List<FeedItemViewModel>();
+            int adFrequency = 5;
+            int adIndex = 0;
+
+            for (int i = 0; i < sortedFeed.Count; i++) {
+                finalFeed.Add(sortedFeed[i]);
+
+                // Kiểm tra điều kiện chèn (sau bài thứ 5, 10, 15... và phải có quảng cáo để chèn)
+                if ((i + 1) % adFrequency == 0 && validAds.Any()) {
+
+                    // Lấy quảng cáo xoay vòng (Round Robin)
+                    var adEntity = validAds[adIndex % validAds.Count];
+
+                    // Map sang AdViewModel
+                    var adViewModel = new AdViewModel {
+                        Id = adEntity.Id,
+                        Title = adEntity.Title,
+                        Content = adEntity.Content,
+                        ImageUrl = adEntity.ImageUrl,
+                        TargetUrl = adEntity.TargetUrl,
+                        CtaText = adEntity.CtaText,
+                        Brand = new UserSummaryViewModel {
+                            UserId = adEntity.UserId,
+                            UserName = adEntity.User.UserName,
+                            AvatarUrl = adEntity.User.AvatarUrl,
+                            FullName = adEntity.User.FullName
+                        },
+                        Type = adEntity.Type,
+                        Status = adEntity.Status
+                    };
+
+                    // Tạo FeedItemViewModel loại "Ad"
+                    var adFeedItem = new FeedItemViewModel {
+                        Type = "Ad",
+                        ItemId = adEntity.Id,
+                        DisplayTime = DateTime.UtcNow, // Luôn mới nhất
+                        Author = adViewModel.Brand,    // Để hiển thị avatar brand ở header
+                        Advertisement = adViewModel,   // <--- Gán vào property bạn vừa tạo
+                        OriginalPost = null            // Post thường thì null
+                    };
+
+                    finalFeed.Add(adFeedItem);
+                    adIndex++;
+                }
+            }
+
+            // 7. Phân trang trên danh sách đã trộn
+            return finalFeed.Skip((page - 1) * pageSize).Take(pageSize);
         }
     }
 }

@@ -122,7 +122,7 @@ namespace Mini_Social_Media.Repository {
                 .Include(p => p.Likes)
                 .Include(p => p.Comments)
                 .Where(p => !followingIds.Contains(p.UserId) && 
-                            p.CreatedAt >= DateTime.UtcNow.AddDays(-15))
+                            p.CreatedAt >= DateTime.UtcNow.AddDays(-100))
                 .OrderByDescending(p => p.Likes.Count) 
                 .ThenByDescending(p => p.CreatedAt)
                 .Take(limit)

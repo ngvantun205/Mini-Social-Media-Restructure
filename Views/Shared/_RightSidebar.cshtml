@@ -10,8 +10,8 @@
     var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     var topHashtag = await _hashtagService.GetTopHashtag();
 }
+
 <div class="right-sidebar">
-    <!-- Current User Card -->
     <div class="sidebar-section">
         <div class="current-user-card">
             <img src="@currentUser.AvatarUrl" alt="User">
@@ -21,51 +21,42 @@
         </div>
     </div>
 
-    <!-- Suggested Users -->
     <div class="sidebar-section">
         <div class="sidebar-section-header">
             <h3 class="sidebar-section-title">Suggested for you</h3>
             <a href="/suggestions" class="see-all">See All</a>
         </div>
-
         <div class="suggested-user">
-            <img src="/images/user1.jpg" alt="Sarah Connor" class="suggested-user-avatar" data-username="sarahconnor">
+            <img src="/images/user1.jpg" class="suggested-user-avatar">
             <div class="suggested-user-info">
-                <p class="suggested-user-name" data-username="sarahconnor">Sarah Connor</p>
+                <p class="suggested-user-name">Sarah Connor</p>
                 <p class="suggested-user-mutual">5 mutual friends</p>
             </div>
-            <button class="follow-btn" data-user-id="123">Follow</button>
-        </div>
-
-        <div class="suggested-user">
-            <img src="/images/user2.jpg" alt="Mike Johnson" class="suggested-user-avatar" data-username="mikej">
-            <div class="suggested-user-info">
-                <p class="suggested-user-name" data-username="mikej">Mike Johnson</p>
-                <p class="suggested-user-mutual">12 mutual friends</p>
-            </div>
-            <button class="follow-btn" data-user-id="124">Follow</button>
-        </div>
-
-        <div class="suggested-user">
-            <img src="/images/user3.jpg" alt="Emma Wilson" class="suggested-user-avatar" data-username="emmaw">
-            <div class="suggested-user-info">
-                <p class="suggested-user-name" data-username="emmaw">Emma Wilson</p>
-                <p class="suggested-user-mutual">8 mutual friends</p>
-            </div>
-            <button class="follow-btn" data-user-id="125">Follow</button>
-        </div>
-
-        <div class="suggested-user">
-            <img src="/images/user4.jpg" alt="David Lee" class="suggested-user-avatar" data-username="davidlee">
-            <div class="suggested-user-info">
-                <p class="suggested-user-name" data-username="davidlee">David Lee</p>
-                <p class="suggested-user-mutual">3 mutual friends</p>
-            </div>
-            <button class="follow-btn" data-user-id="126">Follow</button>
+            <button class="follow-btn">Follow</button>
         </div>
     </div>
 
-    <!-- Trending Hashtags -->
+    <div id="sidebar-ad-container" class="sidebar-section" style="display: none;">
+        <div class="sidebar-section-header mb-2">
+            <h3 class="sidebar-section-title text-muted" style="font-size: 11px; letter-spacing: 1px;">SPONSORED</h3>
+        </div>
+
+        <div class="ad-card position-relative rounded overflow-hidden shadow-sm border">
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-1 bg-white p-1" style="width: 6px; height: 6px; z-index: 10;" onclick="this.closest('.sidebar-section').remove()" aria-label="Close"></button>
+
+            <a href="#" id="ad-target-link" target="_blank" class="text-decoration-none">
+                <img id="ad-image" src="" alt="Advertisement" class="w-100 d-block" style="min-height: 250px; object-fit: cover;">
+
+                <div class="p-3 bg-white">
+                    <h6 id="ad-title" class="fw-bold text-dark mb-1" style="font-size: 14px;">Ad Title</h6>
+                    <p id="ad-content" class="text-muted small mb-2 text-truncate" style="font-size: 12px;">Ad Content goes here...</p>
+                    <div class="d-grid">
+                        <button class="btn btn-primary btn-sm fw-bold" id="ad-cta">Learn More</button>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
     <div class="sidebar-section">
         <div class="sidebar-section-header">
             <h3 class="sidebar-section-title">Trending Now</h3>
@@ -74,46 +65,63 @@
         @foreach (var hashtag in topHashtag) {
             <div class="hashtag-item">
                 <p class="hashtag-name">@hashtag.HashtagName</p>
-            <p class="hashtag-count">@hashtag.UsageCount posts</p>
-        </div>
+                <p class="hashtag-count">@hashtag.UsageCount posts</p>
+            </div>
         }
     </div>
 
-    <!-- Trending Reels -->
     <div class="sidebar-section">
         <div class="sidebar-section-header">
             <h3 class="sidebar-section-title">Hot Reels</h3>
             <a href="/reels" class="see-all">See All</a>
         </div>
-
-        <div class="trending-reel" data-reel-id="1">
-            <img src="/images/reel1.jpg" alt="Reel">
-            <div class="trending-reel-overlay">
-                <div class="trending-reel-views">
-                    <i class="fas fa-play"></i>
-                    <span>2.3M</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="trending-reel" data-reel-id="2">
-            <img src="/images/reel2.jpg" alt="Reel">
-            <div class="trending-reel-overlay">
-                <div class="trending-reel-views">
-                    <i class="fas fa-play"></i>
-                    <span>1.8M</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="trending-reel" data-reel-id="3">
-            <img src="/images/reel3.jpg" alt="Reel">
-            <div class="trending-reel-overlay">
-                <div class="trending-reel-views">
-                    <i class="fas fa-play"></i>
-                    <span>1.5M</span>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        loadRandomBanner();
+    });
+
+    async function loadRandomBanner() {
+        try {
+            // Gọi API
+            const response = await fetch('/Ad/GetRandomBanner');
+
+            if (response.ok) {
+                // Kiểm tra xem response có body không (tránh lỗi JSON parse empty)
+                const text = await response.text();
+                if (!text) return;
+
+                const ad = JSON.parse(text);
+
+                // Nếu có object Ad hợp lệ
+                if (ad && ad.id) {
+                    const container = document.getElementById('sidebar-ad-container');
+                    const img = document.getElementById('ad-image');
+                    const link = document.getElementById('ad-target-link');
+                    const title = document.getElementById('ad-title');
+                    const content = document.getElementById('ad-content');
+                    const cta = document.getElementById('ad-cta');
+
+                    // Gán dữ liệu vào HTML (CamelCase vì API trả về JSON)
+                    img.src = ad.imageUrl;
+                    link.href = ad.targetUrl;
+                    title.innerText = ad.title;
+                    content.innerText = ad.content || '';
+                    cta.innerText = ad.ctaText || 'View';
+
+                    // Hiển thị khung quảng cáo
+                    container.style.display = 'block';
+
+                    // Tracking Click (Gắn sự kiện)
+                    link.onclick = function() {
+                        // fetch(`/Ad/TrackClick?adId=${ad.id}`, { method: 'POST' });
+                    };
+                }
+            }
+        } catch (error) {
+            console.error("Failed to load banner ad:", error);
+        }
+    }
+</script>

@@ -99,5 +99,6 @@ namespace Mini_Social_Media.IAppService {
         Task<IEnumerable<AdViewModel>> GetUserAd(int userId);
         Task<bool> CancelRequest(int adId, int userId);
         Task<IEnumerable<AdViewModel>> GetAdsByStatusForAdmin(int userId, string statusStr);
+        Task<AdViewModel> GetRandomBanner();
     }
 }

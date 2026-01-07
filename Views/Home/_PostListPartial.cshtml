@@ -7,184 +7,217 @@
 }
 
 @foreach (var item in Model) {
-    var post = item.OriginalPost;
-    var isOwner = item.Author.UserId == currentUserId;
+    if (item.Type == "Ad" && item.Advertisement != null) {
+        // --- RENDER QUẢNG CÁO ---
+        var ad = item.Advertisement;
 
-    <div class="post-card" data-post-id="@item.ItemId">
-
-        <div class="post-card-header">
-            @if (currentUserId != item.Author.UserId) {
-                <a asp-controller="Profile" asp-action="UserProfile" asp-route-id="@item.Author.UserId" class="post-avatar-link">
-                    <img src="@(item.Author.AvatarUrl ?? "/images/default-avatar.png")" class="post-user-avatar" alt="@item.Author.UserName" />
+        <div class="post-card ad-card bg-light border mb-4" data-ad-id="@ad.Id">
+            <div class="post-card-header">
+                <a href="#" class="post-avatar-link">
+                    <img src="@(ad.Brand.AvatarUrl ?? "/images/default-avatar.png")" class="post-user-avatar border border-warning">
                 </a>
-            }
-            else {
-                <a asp-controller="Profile" asp-action="MyProfile" class="post-avatar-link">
-                    <img src="@(item.Author.AvatarUrl ?? "/images/default-avatar.png")" class="post-user-avatar" alt="@item.Author.UserName" />
-                </a>
-            }
-
-            <div class="post-user-details">
-                <div class="d-flex align-items-center flex-wrap">
-                    <a href="@(currentUserId == item.Author.UserId ? "/Profile/MyProfile" : $"/Profile/UserProfile/{item.Author.UserId}")" class="post-username-link">
-                        <h5 class="post-username mb-0">@item.Author.UserName</h5>
-                    </a>
-
-                    @if (item.Type == "Share") {
-                        <span class="text-muted small ms-1" style="font-weight: normal;">shared a post <i class="bi bi-share-fill" style="font-size: 10px;"></i></span>
-                    }
+                <div class="post-user-details">
+                    <h5 class="post-username mb-0">@ad.Brand.UserName</h5>
+                    <span class="badge bg-white text-secondary border" style="font-size: 10px;">Sponsored</span>
                 </div>
-
-                @if (!string.IsNullOrEmpty(post.Location) && item.Type == "Post") {
-                    <p class="post-location"><i class="bi bi-geo-alt-fill"></i> @post.Location</p>
-                }
             </div>
 
-            <div class="post-header-right">
-                <div class="post-timestamp">
-                    @GetTimeAgo(item.DisplayTime)
-                    @if (item.Type == "Share") {
-                        <span> • Shared</span>
-                    }
-                </div>
-                <div class="post-dropdown">
-                    <button class="post-menu-btn" onclick="togglePostMenu(this, @item.ItemId, @isOwner.ToString().ToLower())">
-                        <i class="bi bi-three-dots"></i>
-                    </button>
-                    <div class="post-dropdown-menu">
-                        @if (isOwner) {
-                            <button class="dropdown-item-custom danger" onclick="confirmDeletePost(@item.ItemId)">
-                                <i class="bi bi-trash"></i> Delete
-                            </button>
-                            @if (item.Type == "Post") {
-                                <button class="dropdown-item-custom" onclick="goToEditPost(@item.ItemId)">
-                                    <i class="bi bi-pencil"></i> Edit Post
-                                </button>
-                            }
-                        }
-                        else {
-                            <a class="dropdown-item-custom" asp-controller="Post" asp-action="PostDetails" asp-route-id="@post.PostId">
-                                <i class="bi bi-eye"></i> View Original
-                            </a>
-                            <button class="dropdown-item-custom danger" onclick="openReportModal(@item.ItemId)">
-                                <i class="bi bi-flag me-2"></i> Report
-                            </button>
-                        }
-                    </div>
+            <div class="px-3 pb-2">
+                <p class="mb-2">@ad.Content</p>
+            </div>
+
+            <div class="position-relative">
+                <img src="@ad.ImageUrl" class="w-100 d-block" style="max-height: 500px; object-fit: cover;">
+
+                <div class="d-flex justify-content-between align-items-center p-2 bg-light border-top">
+                    <span class="small text-muted ms-2 text-uppercase fw-bold">@ad.Title</span>
+                    <a href="@ad.TargetUrl" target="_blank" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold">
+                        @ad.CtaText
+                    </a>
                 </div>
             </div>
         </div>
+    }
+    else {
+        var post = item.OriginalPost;
+        var isOwner = item.Author.UserId == currentUserId;
 
-        @if (item.Type == "Share") {
-            <div class="px-3 pb-2">
-                @if (!string.IsNullOrEmpty(item.ShareCaption)) {
-                    <div class="post-caption mb-2" style="padding: 0;">
-                        <span class="caption-text" style="font-size: 14px;">@item.ShareCaption</span>
-                    </div>
+        <div class="post-card" data-post-id="@item.ItemId">
+
+            <div class="post-card-header">
+                @if (currentUserId != item.Author.UserId) {
+                    <a asp-controller="Profile" asp-action="UserProfile" asp-route-id="@item.Author.UserId" class="post-avatar-link">
+                        <img src="@(item.Author.AvatarUrl ?? "/images/default-avatar.png")" class="post-user-avatar" alt="@item.Author.UserName" />
+                    </a>
+                }
+                else {
+                    <a asp-controller="Profile" asp-action="MyProfile" class="post-avatar-link">
+                        <img src="@(item.Author.AvatarUrl ?? "/images/default-avatar.png")" class="post-user-avatar" alt="@item.Author.UserName" />
+                    </a>
                 }
 
-                <div class="share-container" style="border: 1px solid #dbdbdb; border-radius: 8px; overflow: hidden;">
-                    @if (post.Owner != null) {
-                        var profileLink = (currentUserId == post.Owner.UserId) ? "/Profile/MyProfile" : $"/Profile/UserProfile/{post.Owner.UserId}";
-                        <a href="@profileLink" class="share-header text-decoration-none" style="background-color: #f8f9fa; padding: 8px 12px; display: flex; align-items: center; border-bottom: 1px solid #efefef; color: inherit;">
-                            <img src="@(post.Owner.AvatarUrl ?? "/images/default-avatar.png")" class="rounded-circle me-2" width="24" height="24" style="object-fit: cover;">
-                            <div>
-                                <span class="fw-bold small text-dark">@post.Owner.UserName</span>
-                                <span class="text-muted small ms-1" style="font-weight: normal;">• @GetTimeAgo(post.CreatedAt)</span>
-                            </div>
+                <div class="post-user-details">
+                    <div class="d-flex align-items-center flex-wrap">
+                        <a href="@(currentUserId == item.Author.UserId ? "/Profile/MyProfile" : $"/Profile/UserProfile/{item.Author.UserId}")" class="post-username-link">
+                            <h5 class="post-username mb-0">@item.Author.UserName</h5>
                         </a>
-                    }
 
-                    @if (!string.IsNullOrEmpty(post.Caption)) {
-                        <div class="p-2 small text-muted border-bottom bg-white">@post.Caption</div>
-                    }
+                        @if (item.Type == "Share") {
+                            <span class="text-muted small ms-1" style="font-weight: normal;">shared a post <i class="bi bi-share-fill" style="font-size: 10px;"></i></span>
+                        }
+                    </div>
 
-                    @if (post.Medias != null && post.Medias.Any()) {
-                        if (post.Medias.Count == 1) {
-                            var media = post.Medias.First();
-                            if (media.MediaType == "video") {
-                                <video controls class="w-100 d-block" style="max-height: 400px; background: black;"><source src="@media.Url" type="video/mp4"></video>
+                    @if (!string.IsNullOrEmpty(post.Location) && item.Type == "Post") {
+                        <p class="post-location"><i class="bi bi-geo-alt-fill"></i> @post.Location</p>
+                    }
+                </div>
+
+                <div class="post-header-right">
+                    <div class="post-timestamp">
+                        @GetTimeAgo(item.DisplayTime)
+                        @if (item.Type == "Share") {
+                            <span> • Shared</span>
+                        }
+                    </div>
+                    <div class="post-dropdown">
+                        <button class="post-menu-btn" onclick="togglePostMenu(this, @item.ItemId, @isOwner.ToString().ToLower())">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <div class="post-dropdown-menu">
+                            @if (isOwner) {
+                                <button class="dropdown-item-custom danger" onclick="confirmDeletePost(@item.ItemId)">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                                @if (item.Type == "Post") {
+                                    <button class="dropdown-item-custom" onclick="goToEditPost(@item.ItemId)">
+                                        <i class="bi bi-pencil"></i> Edit Post
+                                    </button>
+                                }
                             }
                             else {
-                                <img src="@media.Url" class="w-100 d-block" style="max-height: 400px; object-fit: cover;">
+                                <a class="dropdown-item-custom" asp-controller="Post" asp-action="PostDetails" asp-route-id="@post.PostId">
+                                    <i class="bi bi-eye"></i> View Original
+                                </a>
+                                <button class="dropdown-item-custom danger" onclick="openReportModal(@item.ItemId)">
+                                    <i class="bi bi-flag me-2"></i> Report
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (item.Type == "Share") {
+                <div class="px-3 pb-2">
+                    @if (!string.IsNullOrEmpty(item.ShareCaption)) {
+                        <div class="post-caption mb-2" style="padding: 0;">
+                            <span class="caption-text" style="font-size: 14px;">@item.ShareCaption</span>
+                        </div>
+                    }
+
+                    <div class="share-container" style="border: 1px solid #dbdbdb; border-radius: 8px; overflow: hidden;">
+                        @if (post.Owner != null) {
+                            var profileLink = (currentUserId == post.Owner.UserId) ? "/Profile/MyProfile" : $"/Profile/UserProfile/{post.Owner.UserId}";
+                            <a href="@profileLink" class="share-header text-decoration-none" style="background-color: #f8f9fa; padding: 8px 12px; display: flex; align-items: center; border-bottom: 1px solid #efefef; color: inherit;">
+                                <img src="@(post.Owner.AvatarUrl ?? "/images/default-avatar.png")" class="rounded-circle me-2" width="24" height="24" style="object-fit: cover;">
+                                <div>
+                                    <span class="fw-bold small text-dark">@post.Owner.UserName</span>
+                                    <span class="text-muted small ms-1" style="font-weight: normal;">• @GetTimeAgo(post.CreatedAt)</span>
+                                </div>
+                            </a>
+                        }
+
+                        @if (!string.IsNullOrEmpty(post.Caption)) {
+                            <div class="p-2 small text-muted border-bottom bg-white">@post.Caption</div>
+                        }
+
+                        @if (post.Medias != null && post.Medias.Any()) {
+                            if (post.Medias.Count == 1) {
+                                var media = post.Medias.First();
+                                if (media.MediaType == "video") {
+                                    <video controls class="w-100 d-block" style="max-height: 400px; background: black;"><source src="@media.Url" type="video/mp4"></video>
+                                }
+                                else {
+                                    <img src="@media.Url" class="w-100 d-block" style="max-height: 400px; object-fit: cover;">
+                                }
+                            }
+                            else {
+                                <div id="carousel-share-@item.ItemId" class="carousel slide" data-bs-ride="false">
+                                    <div class="carousel-inner">
+                                        @for (int i = 0; i < post.Medias.Count; i++) {
+                                            <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                <img src="@post.Medias[i].Url" class="d-block w-100" style="max-height: 400px; object-fit: cover;">
+                                            </div>
+                                        }
+                                    </div>
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-share-@item.ItemId" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-share-@item.ItemId" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+                                </div>
                             }
                         }
-                        else {
-                            <div id="carousel-share-@item.ItemId" class="carousel slide" data-bs-ride="false">
-                                <div class="carousel-inner">
-                                    @for (int i = 0; i < post.Medias.Count; i++) {
-                                        <div class="carousel-item @(i == 0 ? "active" : "")">
-                                            <img src="@post.Medias[i].Url" class="d-block w-100" style="max-height: 400px; object-fit: cover;">
-                                        </div>
-                                    }
-                                </div>
-                                <button class="carousel-control-prev" type="button" data-bs-target="#carousel-share-@item.ItemId" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#carousel-share-@item.ItemId" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
-                            </div>
-                        }
-                    }
-                </div>
-            </div>
-        }
-        else {
-            @if (post.Medias != null && post.Medias.Any()) {
-                <div class="post-media-section">
-                    @if (post.Medias.Count == 1) {
-                        <img src="@post.Medias.First().Url" class="post-single-media" />
-                    }
+                    </div>
                 </div>
             }
-        }
-
-        <div class="post-actions-section">
-            <div class="post-action-buttons">
-                <button class="action-btn @(post.IsLiked ? "liked" : "")" onclick="toggleLike(this, @post.PostId)">
-                    <i class="bi @(post.IsLiked ? "bi-heart-fill" : "bi-heart")"></i>
-                </button>
-
-                <a class="action-btn" asp-controller="Post" asp-action="PostDetails" asp-route-id="@post.PostId">
-                    <i class="bi bi-chat"></i>
-                </a>
-
-                <button class="action-btn" title="Share" onclick="openShareModal(@post.PostId, '@post.Owner.UserName')">
-                    <i class="bi bi-send"></i>
-                </button>
-
-                <button class="action-btn action-btn-save ml-auto"><i class="bi bi-bookmark"></i></button>
-            </div>
-
-            <div class="post-stats" style="padding-left: 12px;">
-                <p class="likes-count mb-1">
-                    <span class="like-number fw-bold">@post.LikeCount</span> likes
-                </p>
-
-                @if (post.CommentCount > 0) {
-                    <div class="post-comments-link">
-                        <a asp-controller="Post" asp-action="PostDetails" asp-route-id="@post.PostId"
-                           class="text-muted text-decoration-none" style="font-size: 14px;">
-                            View all @post.CommentCount comments
-                        </a>
+            else {
+                @if (post.Medias != null && post.Medias.Any()) {
+                    <div class="post-media-section">
+                        @if (post.Medias.Count == 1) {
+                            <img src="@post.Medias.First().Url" class="post-single-media" />
+                        }
                     </div>
                 }
+            }
+
+            <div class="post-actions-section">
+                <div class="post-action-buttons">
+                    <button class="action-btn @(post.IsLiked ? "liked" : "")" onclick="toggleLike(this, @post.PostId)">
+                        <i class="bi @(post.IsLiked ? "bi-heart-fill" : "bi-heart")"></i>
+                    </button>
+
+                    <a class="action-btn" asp-controller="Post" asp-action="PostDetails" asp-route-id="@post.PostId">
+                        <i class="bi bi-chat"></i>
+                    </a>
+
+                    <button class="action-btn" title="Share" onclick="openShareModal(@post.PostId, '@post.Owner.UserName')">
+                        <i class="bi bi-send"></i>
+                    </button>
+
+                    <button class="action-btn action-btn-save ml-auto"><i class="bi bi-bookmark"></i></button>
+                </div>
+
+                <div class="post-stats" style="padding-left: 12px;">
+                    <p class="likes-count mb-1">
+                        <span class="like-number fw-bold">@post.LikeCount</span> likes
+                    </p>
+
+                    @if (post.CommentCount > 0) {
+                        <div class="post-comments-link">
+                            <a asp-controller="Post" asp-action="PostDetails" asp-route-id="@post.PostId"
+                               class="text-muted text-decoration-none" style="font-size: 14px;">
+                                View all @post.CommentCount comments
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (item.Type == "Post" && !string.IsNullOrEmpty(post.Caption)) {
+                <div class="post-caption pt-1">
+                    <span class="caption-username">@post.Owner.UserName</span>
+                    <span class="caption-text">@post.Caption</span>
+                </div>
+            }
+
+            <div class="post-footer">
+                <div class="post-time-ago">
+                    @GetTimeAgo(item.DisplayTime)
+                    @if (item.Type == "Share") {
+                        <span>(Original: @GetTimeAgo(post.CreatedAt))</span>
+                    }
+                </div>
             </div>
         </div>
-
-        @if (item.Type == "Post" && !string.IsNullOrEmpty(post.Caption)) {
-            <div class="post-caption pt-1">
-                <span class="caption-username">@post.Owner.UserName</span>
-                <span class="caption-text">@post.Caption</span>
-            </div>
-        }
-
-        <div class="post-footer">
-            <div class="post-time-ago">
-                @GetTimeAgo(item.DisplayTime)
-                @if (item.Type == "Share") {
-                    <span>(Original: @GetTimeAgo(post.CreatedAt))</span>
-                }
-            </div>
-        </div>
-    </div>
+    }
 }
 
 <div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
@@ -212,6 +245,7 @@
             </div>
         </div>
     </div>
+
 </div>
 
 <script>

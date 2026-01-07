@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Mini_Social_Media.Repository {
     public class AdRepository : IAdRepository {
@@ -84,5 +85,26 @@ namespace Mini_Social_Media.Repository {
                 .OrderByDescending(a => a.CreatedAt)
                 .ToListAsync();
         }
+
+        public async Task<Advertisement?> GetRandomBanner() {
+            var activeAds = await _context.Advertisements
+                .Include(a => a.User) 
+                .Where(a => a.Status == AdStatus.Running
+                         && a.IsPaid == true
+                         && a.Type == AdType.Banner
+                         && a.StartDate <= DateTime.UtcNow
+                         && a.EndDate >= DateTime.UtcNow)
+                .ToListAsync();
+
+            if (activeAds == null || activeAds.Count == 0) {
+                return null;
+            }
+
+            var random = new Random();
+            int index = random.Next(activeAds.Count);
+
+            return activeAds[index];
+        }
+
     }
 }
