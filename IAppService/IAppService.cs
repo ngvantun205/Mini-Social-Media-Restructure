@@ -101,4 +101,7 @@ namespace Mini_Social_Media.IAppService {
         Task<IEnumerable<AdViewModel>> GetAdsByStatusForAdmin(int userId, string statusStr);
         Task<AdViewModel> GetRandomBanner();
     }
+    public interface IGeminiService {
+        Task<bool> CheckPost(string Caption);
+    }
 }

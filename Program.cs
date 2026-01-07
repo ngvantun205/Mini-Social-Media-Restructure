@@ -51,6 +51,7 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<IAdService, AdService>();
 
             builder.Services.AddTransient<IEmailService, EmailService>();
+            builder.Services.AddTransient<IGeminiService, GeminiService>();
 
             builder.Services.AddHostedService<StoryArchiverService>();
 

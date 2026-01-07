@@ -29,8 +29,10 @@ namespace Mini_Social_Media.Controllers {
             }
             int userId = int.Parse(_userManager.GetUserId(User));
             Console.WriteLine("User ID: " + userId);
-            var createPostDto = await _postService.CreatePost(model, userId);
-            return RedirectToAction("PostDetails", new { id = createPostDto.PostId });
+            var newpost = await _postService.CreatePost(model, userId);
+            if (newpost == null)
+                return RedirectToAction("Index", "Home"); 
+            return RedirectToAction("PostDetails", new { id = newpost.PostId });
 
         }
         [HttpGet]

@@ -1,4 +1,5 @@
-﻿using Mini_Social_Media.Models.DomainModel;
+﻿using Microsoft.AspNetCore.SignalR;
+using Mini_Social_Media.Models.DomainModel;
 
 namespace Mini_Social_Media.AppService {
     public class PostService : IPostService {
@@ -9,8 +10,11 @@ namespace Mini_Social_Media.AppService {
         private readonly ICommentRepository _commentRepository;
         private readonly IShareRepository _shareRepository;
         private readonly IAdRepository _adRepository;
+        private readonly IGeminiService _geminiService;
+        private readonly INotificationsRepository _notificationsRepository;
+        private readonly IHubContext<NotificationsHub> _hubContext;
 
-        public PostService(IPostRepository postRepository, IUploadService uploadService, IHashtagRepository hashtagRepository, IPostMediaRepository postMediaRepository, ICommentRepository commentRepository, IShareRepository shareRepository, IAdRepository adRepository) {
+        public PostService(IPostRepository postRepository, IUploadService uploadService, IHashtagRepository hashtagRepository, IPostMediaRepository postMediaRepository, ICommentRepository commentRepository, IShareRepository shareRepository, IAdRepository adRepository, IGeminiService geminiService, INotificationsRepository notificationsRepository, IHubContext<NotificationsHub> hubContext) {
             _postRepository = postRepository;
             _uploadService = uploadService;
             _hashtagRepository = hashtagRepository;
@@ -18,10 +22,34 @@ namespace Mini_Social_Media.AppService {
             _commentRepository = commentRepository;
             _shareRepository = shareRepository;
             _adRepository = adRepository;
+            _geminiService = geminiService;
+            _notificationsRepository = notificationsRepository;
+            _hubContext = hubContext;
         }
 
         public async Task<PostViewModel> CreatePost(PostInputModel model, int userId) {
+            var check = await _geminiService.CheckPost(model.Caption);
+            if (check == false) {
+                var noti = new Notifications() {
+                    ActorId = userId,
+                    ReceiverId = userId,
+                    EntityId = userId,
+                    Type = "Violation",
+                    Content = "Your post you want to upload violated out terms of services.",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow,
+                };
+                await _notificationsRepository.AddAsync(noti);
 
+                await _hubContext.Clients.User(userId.ToString())
+                .SendAsync("ReceiveNotification", new {
+                    content = noti.Content,
+                    type = noti.Type,
+                    postId = noti.EntityId,
+                    message = $"Some one has just liked post your post."
+                });
+                return null;
+            }
             var post = new Post {
                 UserId = userId,
                 Caption = model.Caption,
@@ -284,15 +312,11 @@ namespace Mini_Social_Media.AppService {
             return score;
         }
 
-        // AppService/PostService.cs
-
         public async Task<IEnumerable<FeedItemViewModel>> GetNewsFeed(int userId, int page, int pageSize, int seed) {
             // 1. Lấy Posts và Shares (Logic cũ)
             var posts = await _postRepository.GetNewsFeedPosts(userId);
             var shares = await _shareRepository.GetFriendsShare(userId);
             var suggested = await _postRepository.GetSuggestedPosts(userId, 100);
-            Console.WriteLine("=========================================================================================================================");
-            Console.WriteLine(suggested.Count);
 
             posts.AddRange(suggested);
 
@@ -392,10 +416,10 @@ namespace Mini_Social_Media.AppService {
                     var adFeedItem = new FeedItemViewModel {
                         Type = "Ad",
                         ItemId = adEntity.Id,
-                        DisplayTime = DateTime.UtcNow, // Luôn mới nhất
-                        Author = adViewModel.Brand,    // Để hiển thị avatar brand ở header
-                        Advertisement = adViewModel,   // <--- Gán vào property bạn vừa tạo
-                        OriginalPost = null            // Post thường thì null
+                        DisplayTime = DateTime.UtcNow,
+                        Author = adViewModel.Brand,   
+                        Advertisement = adViewModel,  
+                        OriginalPost = null          
                     };
 
                     finalFeed.Add(adFeedItem);
@@ -403,7 +427,6 @@ namespace Mini_Social_Media.AppService {
                 }
             }
 
-            // 7. Phân trang trên danh sách đã trộn
             return finalFeed.Skip((page - 1) * pageSize).Take(pageSize);
         }
     }
