@@ -14,8 +14,9 @@
             <i class="bi bi-compass"></i><span>Create story</span>
         </a>
 
-        <a class="ig-item" href="#" data-tooltip="Reels">
-            <i class="bi bi-play-btn"></i><span>Reels</span>
+        <a class="ig-item" asp-controller="LiveStream" asp-action="Create" data-tooltip="Live Stream">
+            <i class="bi bi-broadcast"></i>
+            <span>Go Live</span>
         </a>
 
         <a class="ig-item @(Model.CurrentController == "Message" ? "active" : "")" asp-controller="Message" asp-action="Index" data-tooltip="Messages">

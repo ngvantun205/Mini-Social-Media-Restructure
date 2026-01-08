@@ -34,6 +34,8 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<IStoryArchiveRepository, StoryArchiveRepository>();
             builder.Services.AddScoped<IShareRepository, ShareRepository>();
             builder.Services.AddScoped<IAdRepository, AdRepository>();
+            builder.Services.AddScoped<ILiveChatMessageRepository, LiveChatMessageRepository>();
+            builder.Services.AddScoped<ILiveStreamRepository, LiveStreamRepository>();
 
             builder.Services.AddScoped<IPostService, PostService>();
             builder.Services.AddScoped<IUploadService, UploadService>();
@@ -49,6 +51,8 @@ namespace Mini_Social_Media {
             builder.Services.AddScoped<IStoryService, StoryService>();
             builder.Services.AddScoped<IShareService, ShareService>();
             builder.Services.AddScoped<IAdService, AdService>();
+            builder.Services.AddScoped<ILiveStreamService, LiveStreamService>();
+            builder.Services.AddScoped<ILiveChatMessageService,  LiveChatMessageService>();
 
             builder.Services.AddTransient<IEmailService, EmailService>();
             builder.Services.AddTransient<IGeminiService, GeminiService>();
@@ -170,7 +174,8 @@ namespace Mini_Social_Media {
             app.UseAuthorization();
 
             app.MapHub<NotificationsHub>("/notificationsHub");
-            app.MapHub<Mini_Social_Media.Hubs.ChatHub>("/chatHub");
+            app.MapHub<ChatHub>("/chatHub");
+            app.MapHub<LiveStreamHub>("/hubs/livestream");
 
             app.MapStaticAssets();
 

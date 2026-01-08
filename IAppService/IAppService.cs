@@ -104,4 +104,13 @@ namespace Mini_Social_Media.IAppService {
     public interface IGeminiService {
         Task<bool> CheckPost(string Caption);
     }
+    public interface ILiveStreamService {
+        Task<(string Token, int RoomId, string RoomName)> StartLiveStreamAsync(int userId, string title);
+        Task<string> JoinLiveStreamAsync(int userId, int roomId);
+        Task EndLiveStreamAsync(int userId, int roomId);
+    }
+    public interface ILiveChatMessageService {
+        Task<LiveChatMessageViewModel?> SendMessageAsync(int userId, int liveStreamId, string content);
+        Task<IEnumerable<LiveChatMessageViewModel>> GetMessagesAsync(int liveStreamId);
+    }
 }

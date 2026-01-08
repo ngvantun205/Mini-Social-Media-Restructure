@@ -93,4 +93,12 @@
         Task<IEnumerable<Advertisement>> GetAdsByStatusAsync(AdStatus status);
         Task<Advertisement> GetRandomBanner();
     }
+    public interface ILiveStreamRepository : IRepository<LiveStream> {
+        Task<IEnumerable<LiveStream>> GetActiveStreamsAsync();
+        Task<LiveStream?> GetCurrentStreamByUserIdAsync(int userId);
+    }
+    public interface ILiveChatMessageRepository {
+        Task AddAsync(LiveChatMessage entity);
+        Task<IEnumerable<LiveChatMessage>> GetByLiveStreamId(int  liveStreamId);
+    }
 }

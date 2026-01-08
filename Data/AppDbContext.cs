@@ -23,6 +23,8 @@ namespace Mini_Social_Media.Data {
         public DbSet<Share> Shares { get; set; }
         public DbSet<Advertisement> Advertisements { get; set; }
         public DbSet<AdStat> AdStats { get; set; }
+        public DbSet<LiveStream> LiveStreams { get; set; }
+        public DbSet<LiveChatMessage> LiveChatMessages { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) {
@@ -197,6 +199,11 @@ namespace Mini_Social_Media.Data {
                 .HasOne(a => a.Advertisement)
                 .WithMany()
                 .HasForeignKey(a => a.AdvertisementId)
+                .OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<LiveStream>()
+                .HasMany(l => l.Messages)
+                .WithOne(m => m.LiveStream)
+                .HasForeignKey(m => m.LiveStreamId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
