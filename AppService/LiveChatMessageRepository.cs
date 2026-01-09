@@ -1,4 +1,10 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Mini_Social_Media.Data;
+using Mini_Social_Media.Hubs;
+using Mini_Social_Media.Models;
+using Mini_Social_Media.Models.ViewModel;
+using Mini_Social_Media.Repository;
+using Microsoft.EntityFrameworkCore;
 
 namespace Mini_Social_Media.AppService {
     public class LiveChatMessageService : ILiveChatMessageService {
@@ -8,7 +14,12 @@ namespace Mini_Social_Media.AppService {
         private readonly AppDbContext _context;
         private readonly IGeminiService _geminiService;
 
-        public LiveChatMessageService(ILiveChatMessageRepository chatRepo, ILiveStreamRepository streamRepo, IHubContext<LiveStreamHub> hubContext, AppDbContext context, IGeminiService geminiService) {
+        public LiveChatMessageService(
+            ILiveChatMessageRepository chatRepo,
+            ILiveStreamRepository streamRepo,
+            IHubContext<LiveStreamHub> hubContext,
+            AppDbContext context,
+            IGeminiService geminiService) {
             _chatRepo = chatRepo;
             _streamRepo = streamRepo;
             _hubContext = hubContext;
@@ -20,16 +31,21 @@ namespace Mini_Social_Media.AppService {
             if (string.IsNullOrWhiteSpace(content))
                 return null;
 
+            // 1. Kiểm tra Livestream có đang OnAir không
             var stream = await _streamRepo.GetByIdAsync(liveStreamId);
             if (stream == null || stream.Status != LiveStreamStatus.OnAir) {
-                return null;
+                return null; // Stream đã tắt, không cho chat
             }
 
+            // 2. KIỂM DUYỆT BẰNG GEMINI (Optional)
+            // Nếu nội dung vi phạm, chặn luôn
             bool isSafe = await _geminiService.CheckPost(content);
             if (!isSafe) {
+                // Có thể gửi thông báo riêng cho user bảo là "Chat vi phạm"
                 return null;
             }
 
+            // 3. Lưu vào DB
             var message = new LiveChatMessage {
                 LiveStreamId = liveStreamId,
                 UserId = userId,
@@ -38,6 +54,7 @@ namespace Mini_Social_Media.AppService {
             };
             await _chatRepo.AddAsync(message);
 
+            // 4. Lấy thông tin User để gửi kèm (Avatar, Tên)
             var user = await _context.Users.FindAsync(userId);
 
             var viewModel = new LiveChatMessageViewModel {
