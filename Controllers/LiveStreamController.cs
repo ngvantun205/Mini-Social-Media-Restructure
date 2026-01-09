@@ -7,17 +7,12 @@ namespace Mini_Social_Media.Controllers {
     [Authorize]
     public class LiveStreamController : Controller {
         private readonly ILiveStreamService _liveStreamService;
-        private readonly ILiveChatMessageService _chatService;
-        private readonly string _liveKitUrl; // URL Server
+        private readonly string _liveKitUrl;
 
-        public LiveStreamController(
-            ILiveStreamService liveStreamService,
-            ILiveChatMessageService chatService,
-            IConfiguration config) {
+        public LiveStreamController(ILiveStreamService liveStreamService, IConfiguration config) {
 
             _liveStreamService = liveStreamService;
-            _chatService = chatService;
-            _liveKitUrl = config["LiveKitSettings:Url"]; // Lấy URL từ appsettings
+            _liveKitUrl = config["LiveKitSettings:Url"];
         }
 
         private int GetCurrentUserId() {
@@ -86,7 +81,6 @@ namespace Mini_Social_Media.Controllers {
             }
         }
 
-        // 4. API TẮT LIVE
         [HttpPost]
         public async Task<IActionResult> EndLiveStream(int roomId) {
             var userId = GetCurrentUserId();
