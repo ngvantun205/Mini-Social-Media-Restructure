@@ -236,7 +236,6 @@
                 }
                 else
                 {
-                     // Nút Unmute thủ công cho Viewer
                     <button class="control-btn" id="btn-manual-unmute" onclick="enableAudioContext()" title="Unmute Audio">
                         <i class="bi bi-volume-mute-fill"></i>
                     </button>
@@ -335,27 +334,20 @@
             try {
                 console.log("Requesting Camera/Mic permissions...");
 
-                // Bước 1: Bật Cam/Mic (Không gán vào biến tracks nữa để tránh lỗi undefined)
                 await room.localParticipant.enableCameraAndMicrophone();
 
-                // Bước 2: Tìm track Video trong danh sách đã publish
-                // Lưu ý: videoTracks là một Map, ta cần lấy values() rồi chuyển thành Array
                 let videoTrack = null;
 
-                // Kiểm tra an toàn: Có localParticipant và có videoTracks
                 if (room.localParticipant && room.localParticipant.videoTracks) {
                     const publications = Array.from(room.localParticipant.videoTracks.values());
 
                     if (publications.length > 0) {
-                        // Lấy track từ publication đầu tiên
                         videoTrack = publications[0].track;
                     }
                 }
 
-                // Bước 3: Nếu chưa thấy track (do độ trễ), thử lấy trực tiếp từ Camera (fallback)
                 if (!videoTrack) {
                     console.warn("⚠️ Track not found in Map, trying generic create...");
-                    // Cách này ép tạo track mới nếu ở trên không tìm thấy
                     const tracks = await LivekitClient.createLocalTracks({ audio: true, video: true });
                     const vTrack = tracks.find(t => t.kind === 'video');
                     if (vTrack) {
@@ -364,11 +356,9 @@
                     }
                 }
 
-                // Bước 4: Hiển thị
                 if (videoTrack) {
                     attachVideoElement(videoTrack);
 
-                    // Lật ngược video gương (cho đẹp)
                     const videoEl = document.getElementById('video-grid').querySelector('video');
                     if(videoEl) videoEl.style.transform = "scaleX(-1)";
 
@@ -384,41 +374,33 @@
             }
         }
 
-        // Hàm xử lý chung khi nhận Track (Video hoặc Audio)
         function handleTrackAttached(track, participant) {
             if (track.kind === 'video') {
                 attachVideoElement(track);
             } 
             else if (track.kind === 'audio') {
-                // Nếu là Host thì KHÔNG nghe tiếng của chính mình
                 if (participant.identity === room.localParticipant.identity) return;
 
                 const audioElement = track.attach();
                 document.body.appendChild(audioElement);
 
-                // Cố gắng chạy Audio ngay lập tức
                 audioElement.play().catch(error => {
                     console.warn("⚠️ Autoplay blocked by browser. Showing unmute overlay.");
-                    // Nếu lỗi (do chưa tương tác), hiện overlay bắt người dùng click
                     document.getElementById('unmute-overlay').style.display = 'flex';
                 });
             }
         }
 
-        // Hàm gắn Video vào HTML
         function attachVideoElement(track) {
             const videoElement = track.attach();
             const grid = document.getElementById('video-grid');
-            grid.innerHTML = ''; // Xóa nội dung cũ (Waiting text)
+            grid.innerHTML = '';
             grid.appendChild(videoElement);
         }
 
-        // --- 2. AUDIO HANDLING (FIX LỖI MẤT TIẾNG) ---
-        // Hàm này được gọi khi bấm vào Overlay hoặc nút Unmute
         function enableAudioContext() {
             const audioElements = document.querySelectorAll('audio');
             
-            // Duyệt qua tất cả audio đang có và ép chạy
             audioElements.forEach(audio => {
                 audio.muted = false;
                 audio.play()
@@ -428,15 +410,12 @@
                     .catch(e => console.error("Audio play failed:", e));
             });
 
-            // Ẩn Overlay
             document.getElementById('unmute-overlay').style.display = 'none';
             
-            // Đổi icon nút manual unmute thành volume up
             const btn = document.getElementById('btn-manual-unmute');
             if(btn) btn.innerHTML = '<i class="bi bi-volume-up-fill"></i>';
         }
 
-        // --- 3. SIGNALR LOGIC (CHAT) ---
         async function startSignalR() {
             chatConnection = new signalR.HubConnectionBuilder()
                 .withUrl("/hubs/livestream")
@@ -507,7 +486,6 @@
             }
         }
 
-        // --- 4. HOST CONTROLS ---
         let isMicOn = true;
         let isCamOn = true;
 
@@ -530,15 +508,12 @@
         async function endStream() {
             if(!confirm("Are you sure you want to end this stream?")) return;
             
-            // Ngắt kết nối LiveKit
             if(room) room.disconnect();
 
-            // Gọi API báo server kết thúc
             await fetch(`/LiveStream/EndLiveStream?roomId=${ROOM_ID}`, { method: 'POST' });
             window.location.href = "/";
         }
 
-        // --- EVENTS ---
         document.getElementById('msgInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
         });

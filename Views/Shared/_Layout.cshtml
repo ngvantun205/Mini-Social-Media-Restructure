@@ -112,33 +112,25 @@
 
 
     <script>
-        // Kết nối SignalR Server
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/notificationsHub")
             .withAutomaticReconnect()
             .build();
 
-        // Lắng nghe sự kiện "ReceiveNotification" từ Server bắn về
         connection.on("ReceiveNotification", function (noti) {
             console.log("New Notification:", noti);
 
-            // A. HIỆN POPUP TOAST
             showGlobalToast(noti);
 
-            // B. BẬT CHẤM ĐỎ Ở SIDEBAR
-            // Tìm thẻ span badge trong _Sidebar.cshtml (dựa vào ID)
             const badge = document.getElementById("notiBadge");
             if (badge) {
                 badge.style.display = "block";
             }
 
-            // C. NẾU ĐANG MỞ DRAWER -> CHÈN VÀO LIST LUÔN
             const drawerList = document.getElementById("notiList");
             const drawer = document.getElementById("notiDrawer");
 
-            // Kiểm tra nếu Drawer đang mở (có class 'open' hoặc 'show')
             if (drawer && drawerList && (drawer.classList.contains("open") || drawer.classList.contains("show"))) {
-                // Xóa dòng 'No notifications' nếu có
                 if (drawerList.querySelector(".text-center")) drawerList.innerHTML = "";
 
                 const html = `
@@ -156,17 +148,13 @@
             }
         });
 
-        // Bắt đầu kết nối
         connection.start().catch(err => console.error("SignalR Error:", err.toString()));
 
-        // Hàm hiển thị Popup Toast
         function showGlobalToast(noti) {
             const container = document.getElementById("toast-container");
 
-            // Tạo thẻ HTML cho popup
             const toast = document.createElement("div");
             toast.className = "toast-notification";
-            // Click vào popup thì chuyển trang
 
           if (noti.type === "Follow") {
             toast.onclick = function () {
@@ -189,14 +177,12 @@
                 </div>
             `;
 
-            // Thêm vào màn hình
             container.appendChild(toast);
 
-            // Tự động biến mất sau 5 giây
             setTimeout(() => {
-                toast.style.opacity = "0"; // Mờ dần
-                toast.style.transform = "translateY(20px)"; // Trượt xuống
-                setTimeout(() => toast.remove(), 400); // Xóa hẳn khỏi DOM
+                toast.style.opacity = "0"; 
+                toast.style.transform = "translateY(20px)"; 
+                setTimeout(() => toast.remove(), 400); 
             }, 5000);
         }
 
@@ -204,16 +190,13 @@
             fetch('/Notifications/MarkAllRead', { method: 'POST' })
             .then(res => {
                 if (res.ok) {
-                    // 1. Tắt chấm đỏ ở thanh Sidebar
                     const badge = document.getElementById("notiBadge");
                     if (badge) badge.style.display = "none";
 
-                    // 2. Bỏ style 'unread' (nền xanh nhạt) của các item trong danh sách
                     const unreadItems = document.querySelectorAll('.noti-item.unread');
                     unreadItems.forEach(item => {
                         item.classList.remove('unread');
 
-                        // 3. Xóa chấm xanh (.unread-dot) bên trong item
                         const dot = item.querySelector('.unread-dot');
                         if (dot) dot.remove();
                     });

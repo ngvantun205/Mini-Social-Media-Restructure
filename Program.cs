@@ -66,12 +66,6 @@ namespace Mini_Social_Media {
                 options.Cookie.IsEssential = true;
             });
 
-
-            //builder.Services.Configure<SecurityStampValidatorOptions>(options =>
-            //{
-            //    options.ValidationInterval = TimeSpan.Zero;
-            //});
-
             builder.Services.AddSignalR();
 
             builder.Services.AddAuthentication("Bearer")
@@ -145,23 +139,6 @@ namespace Mini_Social_Media {
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
-
-            //app.Use(async (context, next) =>
-            //{
-            //    if (context.User.Identity != null && context.User.Identity.IsAuthenticated) {
-            //        var userManager = context.RequestServices.GetRequiredService<UserManager<User>>();
-            //        var user = await userManager.GetUserAsync(context.User);
-            //        if (user == null) {
-            //            var signInManager = context.RequestServices.GetRequiredService<SignInManager<User>>();
-            //            await signInManager.SignOutAsync();
-            //            context.Session.Clear();
-            //            context.Response.Redirect("/Auth/Login");
-            //            return; 
-            //        }
-            //    }
-
-            //    await next();
-            //});
 
             app.UseHttpsRedirection();
             app.UseRouting();

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Mini_Social_Media.AppService;
 using System.Security.Claims;
 
 namespace Mini_Social_Media.Controllers {

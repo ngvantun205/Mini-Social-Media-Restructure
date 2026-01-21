@@ -3,10 +3,7 @@
 namespace Mini_Social_Media.AppService {
     public class GeminiService : IGeminiService {
         private readonly GenerativeModel _model;
-        private readonly INotificationsRepository _notificationsRepository;
-        public GeminiService(INotificationsRepository notificationRepository) {
-            _notificationsRepository = notificationRepository;
-
+        public GeminiService( ) {
             var config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
